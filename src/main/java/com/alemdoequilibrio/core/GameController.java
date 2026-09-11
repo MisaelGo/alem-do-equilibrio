@@ -12,9 +12,11 @@ import javafx.stage.Stage;
 public class GameController {
     
     private final Stage stage;
+    private GameState currentState;
     
     public GameController(Stage stage){
         this.stage = stage;
+        this.currentState = GameState.MENU;
     }
     
     public void startGame(){
@@ -29,4 +31,7 @@ public class GameController {
         stage.show();
     }
     
+    public void changeState(GameState newState){
+        this.currentState = newState;
+    }
 }
