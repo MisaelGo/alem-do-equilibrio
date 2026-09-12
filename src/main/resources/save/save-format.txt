@@ -1,0 +1,10 @@
+# Formato inicial do save - Além do Equilíbrio
+# Versão 1
+
+saveVersion=1
+chapter=1
+checkpoint=START
+learnedTopics=
+abilities=
+bossDefeated=false
+fragmentObtained=false
