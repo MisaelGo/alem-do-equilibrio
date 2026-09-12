@@ -11,11 +11,11 @@ import javafx.stage.Stage;
 
 public class GameController {
     
-    private final Stage stage;
+    private final SceneRouter sceneRouter;
     private GameState currentState;
     
     public GameController(Stage stage){
-        this.stage = stage;
+        this.sceneRouter = new SceneRouter(stage);
         this.currentState = GameState.MENU;
     }
     
@@ -26,12 +26,12 @@ public class GameController {
 
         Scene scene = new Scene(root, 800, 600);
 
-        stage.setTitle("Além do Equilíbrio");
-        stage.setScene(scene);
-        stage.show();
+        sceneRouter.setTitle("Além do Equilíbrio");
+        sceneRouter.show(scene);
     }
     
     public void changeState(GameState newState){
         this.currentState = newState;
     }
+    
 }
