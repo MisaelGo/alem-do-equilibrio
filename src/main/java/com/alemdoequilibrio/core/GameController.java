@@ -4,30 +4,31 @@
  */
 package com.alemdoequilibrio.core;
 
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.layout.StackPane;
+import com.alemdoequilibrio.game.ExplorationController;
 import javafx.stage.Stage;
 
 public class GameController {
     
     private final SceneRouter sceneRouter;
     private GameState currentState;
+    private final ExplorationController explorationController;
     
     public GameController(Stage stage){
         this.sceneRouter = new SceneRouter(stage);
         this.currentState = GameState.MENU;
+        this.explorationController = new ExplorationController(800, 600);
     }
     
-    public void startGame(){
-        Label titulo = new Label("Além do Equilíbrio");
-
-        StackPane root = new StackPane(titulo);
-
-        Scene scene = new Scene(root, 800, 600);
+    public void startGame() {
+    
+        currentState = GameState.EXPLORATION;
 
         sceneRouter.setTitle("Além do Equilíbrio");
-        sceneRouter.show(scene);
+
+        sceneRouter.show(explorationController.getScene());
+
+        explorationController.start();
+        
     }
     
     public void changeState(GameState newState){
