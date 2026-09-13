@@ -45,25 +45,68 @@ public class GameController {
     }
 
     /**
-     * Inicia o jogo no estado de exploração.
+     * Inicia o jogo.
+     *
+     * Enquanto o menu principal ainda não estiver implementado,
+     * o jogo inicia diretamente no modo de exploração.
      */
     public void startGame() {
-        
-        changeState(GameState.EXPLORATION);
 
         sceneRouter.setTitle("Além do Equilíbrio");
+
+        changeState(GameState.EXPLORATION);
+    }
+
+    /**
+     * Altera o estado atual do jogo e executa
+     * o comportamento correspondente ao novo estado.
+     *
+     * @param newState novo estado que o jogo deverá assumir
+     */
+    public void changeState(GameState newState) {
+
+        this.currentState = newState;
+
+        switch (newState) {
+
+            case MENU -> {
+                // Futuramente: iniciar/exibir o menu principal.
+            }
+
+            case EXPLORATION -> {
+                startExploration();
+            }
+
+            case DIALOGUE -> {
+                // Futuramente: iniciar o sistema de diálogo.
+            }
+
+            case BATTLE -> {
+                // Futuramente: iniciar o sistema de combate.
+            }
+
+            case QUIZ -> {
+                // Futuramente: iniciar o sistema de quiz.
+            }
+
+            case PAUSED -> {
+                // Futuramente: pausar o jogo e exibir o menu de pausa.
+            }
+
+            case CHAPTER_COMPLETE -> {
+                // Futuramente: exibir a conclusão do capítulo.
+            }
+        }
+    }
+    
+    /**
+     * Inicia o modo de exploração.
+     */
+    private void startExploration() {
 
         sceneRouter.show(explorationController.getScene());
 
         explorationController.start();
     }
 
-    /**
-     * Altera o estado atual do jogo.
-     *
-     * @param newState novo estado que o jogo deverá assumir
-     */
-    public void changeState(GameState newState) {
-        this.currentState = newState;
-    }
 }
