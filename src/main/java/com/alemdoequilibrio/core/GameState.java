@@ -1,9 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Enum.java to edit this template
- */
 package com.alemdoequilibrio.core;
 
+/**
+ * Representa os possíveis estados gerais do jogo.
+ *
+ * O estado atual permite ao GameController identificar em qual
+ * modo a aplicação se encontra e controlar as transições entre
+ * menu, exploração, diálogo, batalha, quiz e outros estados.
+ */
 public enum GameState {
     MENU,
     EXPLORATION,
