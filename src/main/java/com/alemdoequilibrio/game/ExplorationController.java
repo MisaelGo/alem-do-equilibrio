@@ -20,6 +20,20 @@ import javafx.scene.shape.Rectangle;
 public class ExplorationController {
 
     /*
+     * Tamanho de referência do tile, usado apenas para o
+     * teste de câmera (C1-010 do guia do M5).
+     *
+     * 40px foi escolhido para bater com o tamanho atual do
+     * placeholder do Hero (heroView). Se a equipe decidir mudar
+     * o tamanho do tile, este valor deve ser atualizado aqui.
+     *
+     * IMPORTANTE: este grid é temporário, só para validar escala
+     * e legibilidade. Ele deve ser removido/substituído quando o
+     * tileset de verdade entrar no jogo (fora do escopo de agora).
+     */
+    private static final double TILE_SIZE = 40;
+
+    /*
      * Dimensões da área disponível para exploração.
      */
     private final double gameWidth;
@@ -101,6 +115,25 @@ public class ExplorationController {
         );
 
         this.root = new Pane();
+
+        /*
+         * Desenha a grade de debug ANTES do herói, para que
+         * ela fique visualmente atrás dele.
+         *
+         * Este é o único ponto de contato com o teste de câmera
+         * (C1-010). Quando o TileMapRenderer definitivo existir,
+         * esta chamada é o que deve ser trocada/removida.
+         */
+        DebugGridRenderer.render(root, gameWidth, gameHeight, TILE_SIZE);
+
+        /*
+         * Elementos exigidos pelo critério de aceite do C1-010:
+         * NPC, símbolo de carga (+/-) e uma UI simples.
+         * Assim como o grid, isso é temporário e some quando os
+         * sistemas reais entrarem no jogo.
+         */
+        CameraTestOverlay.render(root, TILE_SIZE);
+
         root.getChildren().add(heroView);
 
         this.scene = new Scene(
