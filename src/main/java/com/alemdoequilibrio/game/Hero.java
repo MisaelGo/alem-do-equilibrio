@@ -8,7 +8,11 @@ package com.alemdoequilibrio.game;
  *
  * A representação visual do personagem é tratada por outra classe.
  */
-public class Hero {
+/*
+ * POO 8 - Interface:
+ * Hero implementa Damageable porque pode receber dano durante o combate.
+ */
+public class Hero implements Damageable, Movable {
 
     /*
      * Posição horizontal atual do personagem.
@@ -25,6 +29,11 @@ public class Hero {
      */
     private double speed;
 
+    /*
+     * Quantidade atual de vida do personagem.
+     */
+    private float health;
+
     /**
      * Cria um Hero com posição inicial e velocidade definidas.
      *
@@ -33,9 +42,65 @@ public class Hero {
      * @param speed velocidade de movimento do personagem
      */
     public Hero(double x, double y, double speed) {
+        this(x, y, speed, 100.0f);
+    }
+
+    /**
+     * Cria um Hero com posicao, velocidade e vida inicial definidas.
+     *
+     * @param x posicao horizontal inicial
+     * @param y posicao vertical inicial
+     * @param speed velocidade de movimento do personagem
+     * @param health quantidade inicial de vida
+     */
+    public Hero(double x, double y, double speed, float health) {
+
+        if (!Float.isFinite(health) || health < 0.0f) {
+            throw new IllegalArgumentException(
+                    "A vida inicial deve ser um valor finito e nao negativo."
+            );
+        }
+
         this.x = x;
         this.y = y;
         this.speed = speed;
+        this.health = health;
+    }
+
+    /**
+     * Reduz a vida do Hero sem permitir que ela fique negativa.
+     *
+     * @param damage quantidade de dano recebida
+     */
+    @Override
+    public void takeDamage(float damage) {
+
+        if (!Float.isFinite(damage) || damage < 0.0f) {
+            throw new IllegalArgumentException(
+                    "O dano deve ser um valor finito e nao negativo."
+            );
+        }
+
+        health = Math.max(0.0f, health - damage);
+    }
+
+    /**
+     * Verifica se o Hero ainda possui vida.
+     *
+     * @return true quando a vida for maior que zero
+     */
+    @Override
+    public boolean isAlive() {
+        return health > 0.0f;
+    }
+
+    /**
+     * Retorna a quantidade atual de vida do Hero.
+     *
+     * @return vida atual
+     */
+    public float getHealth() {
+        return health;
     }
 
     /**
@@ -50,6 +115,7 @@ public class Hero {
      * @param maxX limite máximo permitido no eixo X
      * @param maxY limite máximo permitido no eixo Y
      */
+    @Override
     public void updateMovement(
             double directionX,
             double directionY,
