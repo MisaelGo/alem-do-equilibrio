@@ -41,7 +41,7 @@ public class GameController {
     public GameController(Stage stage) {
         this.sceneRouter = new SceneRouter(stage);
         this.currentState = GameState.MENU;
-        this.explorationController = new ExplorationController(800, 600);
+        this.explorationController = new ExplorationController();
     }
 
     /**
