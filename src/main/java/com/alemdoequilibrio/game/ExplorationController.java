@@ -1,74 +1,90 @@
 package com.alemdoequilibrio.game;
 
 import javafx.animation.AnimationTimer;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.NumberBinding;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 
 /**
  * Controla o modo de exploração do jogo.
  *
- * Esta classe é responsável por criar a cena de exploração,
- * receber as entradas do teclado, executar o loop de atualização
- * e manter a representação visual do Hero sincronizada com
- * sua posição lógica.
- *
- * O GameController apenas inicia ou interrompe a exploração,
- * enquanto os detalhes desse modo ficam concentrados nesta classe.
+ * Esta classe é responsável pela cena de exploração,
+ * entrada do teclado, atualização do Hero, câmera,
+ * mundo e resolução lógica.
  */
 public class ExplorationController {
 
     /*
-     * Tamanho de referência do tile, usado apenas para o
-     * teste de câmera (C1-010 do guia do M5).
+     * Resolução lógica do jogo.
      *
-     * 40px foi escolhido para bater com o tamanho atual do
-     * placeholder do Hero (heroView). Se a equipe decidir mudar
-     * o tamanho do tile, este valor deve ser atualizado aqui.
+     * Todo o conteúdo é desenvolvido considerando
+     * uma tela de 1280 × 720, independentemente
+     * da resolução física do monitor.
+     */
+    private static final double LOGICAL_WIDTH = 1280;
+    private static final double LOGICAL_HEIGHT = 720;
+
+    /*
+     * Dimensões do mundo explorável.
      *
-     * IMPORTANTE: este grid é temporário, só para validar escala
-     * e legibilidade. Ele deve ser removido/substituído quando o
-     * tileset de verdade entrar no jogo (fora do escopo de agora).
+     * O mundo é maior que a área visível pela câmera.
+     */
+    private static final double WORLD_WIDTH = 3200;
+    private static final double WORLD_HEIGHT = 1800;
+
+    /*
+     * Tamanho de referência dos tiles temporários.
      */
     private static final double TILE_SIZE = 40;
 
     /*
-     * Dimensões da área disponível para exploração.
-     */
-    private final double gameWidth;
-    private final double gameHeight;
-
-    /*
      * Personagem controlado pelo jogador.
-     *
-     * O Hero mantém o estado lógico do personagem,
-     * como posição e velocidade.
      */
     private final Hero hero;
 
     /*
-     * Representação visual provisória do Hero na cena.
-     *
-     * A posição deste Rectangle é atualizada a partir
-     * das coordenadas armazenadas no objeto Hero.
+     * Representação visual provisória do Hero.
      */
     private final Rectangle heroView;
 
     /*
-     * Contêiner dos elementos visuais da exploração.
+     * Camada que contém os elementos pertencentes
+     * ao mundo do jogo.
+     *
+     * Esta camada é movimentada pela câmera.
      */
-    private final Pane root;
+    private final Pane worldLayer;
 
     /*
-     * Cena exibida enquanto o jogador está explorando.
+     * Camada fixa da interface do jogador.
+     *
+     * Não acompanha a movimentação da câmera.
+     */
+    private final Pane hudLayer;
+
+    /*
+     * Contêiner da tela lógica completa.
+     */
+    private final Pane gameRoot;
+
+    /*
+     * Contêiner externo responsável por posicionar
+     * a tela lógica dentro da janela real.
+     */
+    private final StackPane screenRoot;
+
+    /*
+     * Cena da exploração.
      */
     private final Scene scene;
 
     /*
-     * Armazena o estado atual das teclas de movimento.
+     * Estado atual das teclas de movimento.
      *
-     * Índices:
      * 0 = cima
      * 1 = baixo
      * 2 = esquerda
@@ -77,80 +93,203 @@ public class ExplorationController {
     private final boolean[] keys;
 
     /*
-     * Loop responsável pelas atualizações contínuas
-     * durante a exploração.
+     * Loop principal da exploração.
      */
     private final AnimationTimer gameLoop;
 
     /*
-     * Instante do frame anterior, em nanossegundos.
-     *
-     * É utilizado para calcular o deltaTime entre
-     * duas atualizações consecutivas.
+     * Momento do frame anterior em nanossegundos.
      */
     private long lastTime;
 
-    /**
-     * Cria e configura o controlador da exploração.
-     *
-     * @param gameWidth largura da área de exploração
-     * @param gameHeight altura da área de exploração
+    /*
+     * Posição da câmera dentro do mundo.
      */
-    public ExplorationController(double gameWidth, double gameHeight) {
+    private double cameraX;
+    private double cameraY;
 
-        this.gameWidth = gameWidth;
-        this.gameHeight = gameHeight;
-
-        this.hero = new Hero(100, 100, 200);
-
-        this.heroView = new Rectangle(40, 40);
+    /**
+     * Cria e configura o modo de exploração.
+     */
+    public ExplorationController() {
 
         /*
-         * A representação visual deve começar na mesma
-         * posição armazenada pelo Hero.
+         * Criação do Hero lógico.
          */
+        this.hero =
+                new Hero(100, WORLD_HEIGHT - 100, 200);
+
+        /*
+         * Representação visual temporária.
+         */
+        this.heroView =
+                new Rectangle(
+                        TILE_SIZE,
+                        TILE_SIZE
+                );
+
         heroView.relocate(
                 hero.getX(),
                 hero.getY()
         );
 
-        this.root = new Pane();
-
         /*
-         * Desenha a grade de debug ANTES do herói, para que
-         * ela fique visualmente atrás dele.
-         *
-         * Este é o único ponto de contato com o teste de câmera
-         * (C1-010). Quando o TileMapRenderer definitivo existir,
-         * esta chamada é o que deve ser trocada/removida.
+         * ==========================
+         * CAMADA DO MUNDO
+         * ==========================
          */
-        DebugGridRenderer.render(root, gameWidth, gameHeight, TILE_SIZE);
 
-        /*
-         * Elementos exigidos pelo critério de aceite do C1-010:
-         * NPC, símbolo de carga (+/-) e uma UI simples.
-         * Assim como o grid, isso é temporário e some quando os
-         * sistemas reais entrarem no jogo.
-         */
-        CameraTestOverlay.render(root, TILE_SIZE);
+        this.worldLayer = new Pane();
 
-        root.getChildren().add(heroView);
-
-        this.scene = new Scene(
-                root,
-                gameWidth,
-                gameHeight
+        worldLayer.setPrefSize(
+                WORLD_WIDTH,
+                WORLD_HEIGHT
         );
 
         /*
-         * Cada posição do vetor representa uma direção
-         * que pode estar pressionada ou liberada.
+         * Grade temporária usada para visualizar
+         * o tamanho completo do mundo.
          */
+        DebugGridRenderer.render(
+                worldLayer,
+                WORLD_WIDTH,
+                WORLD_HEIGHT,
+                TILE_SIZE
+        );
+
+        /*
+         * Elementos temporários que pertencem
+         * ao mundo e acompanham a câmera.
+         */
+        CameraTestOverlay.renderWorld(
+                worldLayer,
+                TILE_SIZE
+        );
+
+        /*
+         * O Hero também pertence ao mundo.
+         */
+        worldLayer.getChildren().add(
+                heroView
+        );
+
+        /*
+         * ==========================
+         * CAMADA DO HUD
+         * ==========================
+         */
+
+        this.hudLayer = new Pane();
+
+        hudLayer.setPrefSize(
+                LOGICAL_WIDTH,
+                LOGICAL_HEIGHT
+        );
+
+        /*
+         * Elementos da interface permanecem
+         * fixos mesmo quando a câmera se move.
+         */
+        CameraTestOverlay.renderHud(
+                hudLayer
+        );
+
+        /*
+         * ==========================
+         * TELA LÓGICA
+         * ==========================
+         */
+
+        this.gameRoot = new Pane();
+
+        /*
+         * A tela lógica deve permanecer
+         * exatamente em 1280 × 720.
+         */
+        gameRoot.setPrefSize(
+                LOGICAL_WIDTH,
+                LOGICAL_HEIGHT
+        );
+
+        gameRoot.setMinSize(
+                LOGICAL_WIDTH,
+                LOGICAL_HEIGHT
+        );
+
+        gameRoot.setMaxSize(
+                LOGICAL_WIDTH,
+                LOGICAL_HEIGHT
+        );
+
+        /*
+         * Define a ordem das camadas.
+         *
+         * O HUD é colocado depois do mundo
+         * para ser desenhado sobre ele.
+         */
+        gameRoot.getChildren().addAll(
+                worldLayer,
+                hudLayer
+        );
+
+        /*
+         * Recorta tudo que estiver fora
+         * da região visível da câmera.
+         */
+        Rectangle viewportClip =
+                new Rectangle(
+                        LOGICAL_WIDTH,
+                        LOGICAL_HEIGHT
+                );
+
+        gameRoot.setClip(viewportClip);
+
+        /*
+         * ==========================
+         * ESCALA DA TELA
+         * ==========================
+         */
+
+        this.screenRoot =
+                new StackPane(gameRoot);
+
+        this.scene =
+                new Scene(
+                        screenRoot,
+                        LOGICAL_WIDTH,
+                        LOGICAL_HEIGHT
+                );
+
+        /*
+         * Calcula a escala necessária para manter
+         * a proporção 16:9 da resolução lógica.
+         *
+         * Utilizamos a menor escala entre largura
+         * e altura para impedir deformações.
+         */
+        NumberBinding scale = Bindings.min(
+                scene.widthProperty()
+                        .divide(LOGICAL_WIDTH),
+
+                scene.heightProperty()
+                        .divide(LOGICAL_HEIGHT)
+        );
+
+        gameRoot.scaleXProperty().bind(scale);
+        gameRoot.scaleYProperty().bind(scale);
+
+        /*
+         * ==========================
+         * INPUT E GAME LOOP
+         * ==========================
+         */
+
         this.keys = new boolean[4];
 
         configureInput();
 
-        this.gameLoop = createGameLoop();
+        this.gameLoop =
+                createGameLoop();
     }
 
     /**
@@ -163,11 +302,11 @@ public class ExplorationController {
     }
 
     /*
-     * Configura os eventos de pressionar e soltar
-     * as teclas usadas para movimentação.
+     * Configura os eventos de teclado.
      *
-     * Os eventos apenas registram o estado das teclas.
-     * O movimento propriamente dito é realizado no game loop.
+     * Os eventos apenas registram quais teclas
+     * estão pressionadas. A movimentação acontece
+     * dentro do game loop.
      */
     private void configureInput() {
 
@@ -175,21 +314,25 @@ public class ExplorationController {
 
             if (event.getCode() == KeyCode.W
                     || event.getCode() == KeyCode.UP) {
+
                 keys[0] = true;
             }
 
             if (event.getCode() == KeyCode.S
                     || event.getCode() == KeyCode.DOWN) {
+
                 keys[1] = true;
             }
 
             if (event.getCode() == KeyCode.A
                     || event.getCode() == KeyCode.LEFT) {
+
                 keys[2] = true;
             }
 
             if (event.getCode() == KeyCode.D
                     || event.getCode() == KeyCode.RIGHT) {
+
                 keys[3] = true;
             }
         });
@@ -198,21 +341,25 @@ public class ExplorationController {
 
             if (event.getCode() == KeyCode.W
                     || event.getCode() == KeyCode.UP) {
+
                 keys[0] = false;
             }
 
             if (event.getCode() == KeyCode.S
                     || event.getCode() == KeyCode.DOWN) {
+
                 keys[1] = false;
             }
 
             if (event.getCode() == KeyCode.A
                     || event.getCode() == KeyCode.LEFT) {
+
                 keys[2] = false;
             }
 
             if (event.getCode() == KeyCode.D
                     || event.getCode() == KeyCode.RIGHT) {
+
                 keys[3] = false;
             }
         });
@@ -220,10 +367,6 @@ public class ExplorationController {
 
     /*
      * Cria o loop de atualização da exploração.
-     *
-     * A cada frame, o loop interpreta as teclas pressionadas,
-     * calcula o tempo decorrido e solicita ao Hero que atualize
-     * sua posição.
      */
     private AnimationTimer createGameLoop() {
 
@@ -233,20 +376,26 @@ public class ExplorationController {
             public void handle(long now) {
 
                 /*
-                 * No primeiro frame não existe um frame anterior.
-                 * Portanto, ainda não é possível calcular o deltaTime.
+                 * No primeiro frame ainda não existe
+                 * um frame anterior para calcular
+                 * o deltaTime.
                  */
                 if (lastTime == 0) {
+
                     lastTime = now;
+
                     return;
                 }
 
                 /*
-                 * AnimationTimer fornece o tempo em nanossegundos.
-                 * A divisão converte o intervalo para segundos.
+                 * AnimationTimer utiliza nanossegundos.
+                 *
+                 * A divisão transforma o intervalo
+                 * em segundos.
                  */
-                double deltaTime
-                        = (now - lastTime) / 1_000_000_000.0;
+                double deltaTime =
+                        (now - lastTime)
+                        / 1_000_000_000.0;
 
                 lastTime = now;
 
@@ -254,8 +403,8 @@ public class ExplorationController {
                 double directionY = 0;
 
                 /*
-                 * As teclas pressionadas são convertidas
-                 * em um vetor de direção para o Hero.
+                 * Converte as teclas pressionadas
+                 * em um vetor de direção.
                  */
                 if (keys[0]) {
                     directionY -= 1;
@@ -274,40 +423,113 @@ public class ExplorationController {
                 }
 
                 /*
-                 * Atualiza a posição lógica do personagem.
-                 *
-                 * As dimensões do Rectangle são descontadas para
-                 * impedir que o Hero ultrapasse os limites da cena.
+                 * O Hero agora é limitado pelo tamanho
+                 * do MUNDO, e não mais pelo tamanho
+                 * da janela.
                  */
                 hero.updateMovement(
                         directionX,
                         directionY,
                         deltaTime,
-                        gameWidth - heroView.getWidth(),
-                        gameHeight - heroView.getHeight()
+                        WORLD_WIDTH
+                        - heroView.getWidth(),
+                        WORLD_HEIGHT
+                        - heroView.getHeight()
                 );
 
                 /*
-                 * Sincroniza a representação visual com
-                 * a nova posição lógica do Hero.
+                 * Sincroniza a representação visual
+                 * com a posição lógica do Hero.
                  */
                 heroView.relocate(
                         hero.getX(),
                         hero.getY()
                 );
+
+                /*
+                 * Atualiza a câmera após a movimentação.
+                 */
+                updateCamera();
             }
         };
     }
 
     /**
-     * Inicia o loop de atualização da exploração.
+     * Atualiza a posição da câmera para acompanhar o Hero.
      *
-     * O tempo anterior é zerado para impedir que o período
-     * em que a exploração esteve parada seja considerado
-     * no próximo cálculo de deltaTime.
+     * A câmera tenta manter o personagem centralizado,
+     * mas nunca pode mostrar uma região fora dos limites
+     * do mundo.
+     */
+    private void updateCamera() {
+
+        /*
+         * Posição desejada da câmera caso o Hero
+         * estivesse exatamente no centro da tela.
+         */
+        double targetX =
+                hero.getX()
+                + heroView.getWidth() / 2
+                - LOGICAL_WIDTH / 2;
+
+        double targetY =
+                hero.getY()
+                + heroView.getHeight() / 2
+                - LOGICAL_HEIGHT / 2;
+
+        /*
+         * Impede a câmera de ultrapassar
+         * os limites horizontais do mundo.
+         */
+        cameraX = Math.max(
+                0,
+                Math.min(
+                        targetX,
+                        WORLD_WIDTH
+                        - LOGICAL_WIDTH
+                )
+        );
+
+        /*
+         * Impede a câmera de ultrapassar
+         * os limites verticais do mundo.
+         */
+        cameraY = Math.max(
+                0,
+                Math.min(
+                        targetY,
+                        WORLD_HEIGHT
+                        - LOGICAL_HEIGHT
+                )
+        );
+
+        /*
+         * A câmera anda em uma direção,
+         * então o mundo é deslocado visualmente
+         * na direção contrária.
+         */
+        worldLayer.setTranslateX(
+                -cameraX
+        );
+
+        worldLayer.setTranslateY(
+                -cameraY
+        );
+    }
+
+    /**
+     * Inicia o loop de atualização da exploração.
      */
     public void start() {
+
+        /*
+         * Reinicia a referência temporal para impedir
+         * um deltaTime muito grande após uma pausa.
+         */
         lastTime = 0;
+
+        updateCamera();
+
         gameLoop.start();
     }
 
@@ -315,6 +537,7 @@ public class ExplorationController {
      * Interrompe o loop de atualização da exploração.
      */
     public void stop() {
+
         gameLoop.stop();
     }
 }
