@@ -12,7 +12,7 @@ package com.alemdoequilibrio.game;
  * POO 8 - Interface:
  * Hero implementa Damageable porque pode receber dano durante o combate.
  */
-public class Hero implements Damageable, Movable {
+public class Hero extends GameCharacter implements Damageable, Movable {
 
     /*
      * Posição horizontal atual do personagem.
@@ -65,6 +65,10 @@ public class Hero implements Damageable, Movable {
         this.y = y;
         this.speed = speed;
         this.health = health;
+
+        if (!isAlive()) {
+            deactivate();
+        }
     }
 
     /**
@@ -82,6 +86,8 @@ public class Hero implements Damageable, Movable {
         }
 
         health = Math.max(0.0f, health - damage);
+
+        updateState();
     }
 
     /**
@@ -101,6 +107,19 @@ public class Hero implements Damageable, Movable {
      */
     public float getHealth() {
         return health;
+    }
+
+    /**
+     * Atualiza o estado do Hero de acordo com sua vida atual.
+     *
+     * Quando a vida chega a zero, o personagem deixa de estar ativo.
+     */
+    @Override
+    public void updateState() {
+
+        if (!isAlive()) {
+            deactivate();
+        }
     }
 
     /**
