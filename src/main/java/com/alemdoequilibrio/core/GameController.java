@@ -21,6 +21,15 @@ public class GameController {
     private final SceneRouter sceneRouter;
 
     /*
+     * Responsável por carregar e reutilizar Image, AudioClip e CSS.
+     *
+     * Uma única instância é criada aqui e compartilhada com os
+     * controladores que precisarem de recursos, para que o cache
+     * do ResourceManager realmente sirva ao jogo inteiro.
+     */
+    private final ResourceManager resourceManager;
+
+    /*
      * POO 1.3 - Enum:
      * utiliza o enum GameState para restringir o estado atual do jogo
      * aos estados definidos pela aplicação.
@@ -40,8 +49,9 @@ public class GameController {
      */
     public GameController(Stage stage) {
         this.sceneRouter = new SceneRouter(stage);
+        this.resourceManager = new ResourceManager();
         this.currentState = GameState.MENU;
-        this.explorationController = new ExplorationController();
+        this.explorationController = new ExplorationController(resourceManager);
     }
 
     /**
@@ -98,7 +108,7 @@ public class GameController {
             }
         }
     }
-    
+
     /**
      * Inicia o modo de exploração.
      */
