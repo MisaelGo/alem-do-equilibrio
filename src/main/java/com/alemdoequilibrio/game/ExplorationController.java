@@ -1,9 +1,12 @@
 package com.alemdoequilibrio.game;
 
+import com.alemdoequilibrio.core.ResourceManager;
 import javafx.animation.AnimationTimer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -42,14 +45,32 @@ public class ExplorationController {
     private static final double TILE_SIZE = 40;
 
     /*
+     * Caminho do sprite do herói dentro de resources.
+     *
+     * Segue a convenção do Art Bible: snake_case + ação + frame.
+     * Por enquanto é apenas um frame parado (idle), sem animação.
+     */
+    private static final String HERO_SPRITE_PATH = "/images/hero_idle_01.png";
+
+    /*
+     * Responsável por carregar e reutilizar imagens, evitando
+     * que o sprite do Hero (ou de qualquer outra entidade) seja
+     * lido do disco mais de uma vez.
+     */
+    private final ResourceManager resourceManager;
+
+    /*
      * Personagem controlado pelo jogador.
      */
     private final Hero hero;
 
     /*
-     * Representação visual provisória do Hero.
+     * Representação visual do Hero.
+     *
+     * Antes era um Rectangle de placeholder; agora usa o sprite
+     * carregado pelo ResourceManager.
      */
-    private final Rectangle heroView;
+    private final ImageView heroView;
 
     /*
      * Camada que contém os elementos pertencentes
@@ -110,8 +131,13 @@ public class ExplorationController {
 
     /**
      * Cria e configura o modo de exploração.
+     *
+     * @param resourceManager responsável por carregar e reutilizar
+     *                        as imagens usadas na exploração
      */
-    public ExplorationController() {
+    public ExplorationController(ResourceManager resourceManager) {
+
+        this.resourceManager = resourceManager;
 
         /*
          * Criação do Hero lógico.
@@ -120,13 +146,19 @@ public class ExplorationController {
                 new Hero(100, WORLD_HEIGHT - 100, 200);
 
         /*
-         * Representação visual temporária.
+         * Representação visual do Hero, carregada via ResourceManager
+         * para reaproveitar a mesma Image caso outra parte do jogo
+         * precise do mesmo sprite.
          */
+        Image heroSprite =
+                resourceManager.getImage(HERO_SPRITE_PATH);
+
         this.heroView =
-                new Rectangle(
-                        TILE_SIZE,
-                        TILE_SIZE
-                );
+                new ImageView(heroSprite);
+
+        heroView.setFitWidth(TILE_SIZE);
+        heroView.setFitHeight(TILE_SIZE);
+        heroView.setPreserveRatio(false);
 
         heroView.relocate(
                 hero.getX(),
@@ -432,9 +464,9 @@ public class ExplorationController {
                         directionY,
                         deltaTime,
                         WORLD_WIDTH
-                        - heroView.getWidth(),
+                        - TILE_SIZE,
                         WORLD_HEIGHT
-                        - heroView.getHeight()
+                        - TILE_SIZE
                 );
 
                 /*
@@ -469,12 +501,12 @@ public class ExplorationController {
          */
         double targetX =
                 hero.getX()
-                + heroView.getWidth() / 2
+                + TILE_SIZE / 2
                 - LOGICAL_WIDTH / 2;
 
         double targetY =
                 hero.getY()
-                + heroView.getHeight() / 2
+                + TILE_SIZE / 2
                 - LOGICAL_HEIGHT / 2;
 
         /*
