@@ -200,4 +200,24 @@ public class Hero extends GameCharacter implements Damageable, Movable {
     public double getY() {
         return y;
     }
+    
+    /**
+     * verifica se o heroi esta proximo o suficiente de um NPC para interagir
+     * @param npc O NPPC a ser checado
+     * @param interactionRange Distancia maxima em pixels
+     */
+    public boolean isCloseTo(NPC npc, double interactionRange){
+        //Calcula o centro do heroi e NPC
+        double heroCenterX = this.getX() + (40 / 2.0);
+        double heroCenterY = this.getY() + (40 / 2.0);
+        
+        double npcCenterX = npc.getX() + (npc.getWidth() / 2.0);
+        double npcCenterY = npc.getY() + (npc.getHeight()/ 2.0);
+        
+        //distancia euclidiana entre os dois
+        double distance = Math.hypot(heroCenterX - npcCenterX, heroCenterY - npcCenterY);
+        
+        return distance <= interactionRange;
+    
+    }
 }

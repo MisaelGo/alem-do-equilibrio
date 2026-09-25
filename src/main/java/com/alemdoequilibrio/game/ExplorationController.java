@@ -11,6 +11,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.paint.Color;
 
 /**
  * Controla o modo de exploração do jogo.
@@ -128,6 +129,21 @@ public class ExplorationController {
      */
     private double cameraX;
     private double cameraY;
+    
+    /*
+     *Atributos do NPC
+     */
+    private NPC villageNPC;
+    private Rectangle npcView;
+    
+    /**
+     * Componenetes temporarios de interface para caixa de dialogo
+     */
+    
+    private javafx.scene.control.Label dialogueLabel;
+    private javafx.scene.layout.StackPane dialogueBox;
+            
+    
 
     /**
      * Cria e configura o modo de exploração.
@@ -138,6 +154,14 @@ public class ExplorationController {
     public ExplorationController(ResourceManager resourceManager) {
 
         this.resourceManager = resourceManager;
+        
+        /*
+         * ==========================
+         * TELA LÓGICA
+         * ==========================
+         */
+
+        this.gameRoot = new Pane();
 
         /*
          * Criação do Hero lógico.
@@ -164,6 +188,15 @@ public class ExplorationController {
                 hero.getX(),
                 hero.getY()
         );
+        
+        /*
+         *Representacao visual e logica no NPC
+         */
+        this.villageNPC = new NPC("A", 100, WORLD_HEIGHT - 100, 30, 50, "Hello World!");
+        this.npcView = new Rectangle(villageNPC.getWidth(), villageNPC.getHeight());
+        this.npcView.setFill(Color.GOLD);
+        this.npcView.relocate(villageNPC.getX(), villageNPC.getY());
+        
 
         /*
          * ==========================
@@ -204,6 +237,14 @@ public class ExplorationController {
         worldLayer.getChildren().add(
                 heroView
         );
+        
+        /*
+         * O NPC também pertence ao mundo.
+         */
+        worldLayer.getChildren().add(
+                npcView
+        );
+        
 
         /*
          * ==========================
@@ -217,7 +258,42 @@ public class ExplorationController {
                 LOGICAL_WIDTH,
                 LOGICAL_HEIGHT
         );
-
+        
+        this.dialogueLabel = new javafx.scene.control.Label("");
+        this.dialogueLabel.setTextFill(Color.BLACK);
+        
+        //fonte
+        this.dialogueLabel.setStyle(
+                "-fx-font-family: 'Courier New', monospace" + 
+                "-fx-font-size: 20px; " +
+                "-fx-font-weight: bold;"        
+        );
+        
+        javafx.scene.control.Label arrowIndicator = new javafx.scene.control.Label("▼");
+        arrowIndicator.setTextFill(Color.BLACK);
+        arrowIndicator.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+        StackPane.setAlignment(arrowIndicator, javafx.geometry.Pos.BOTTOM_RIGHT);
+        
+        //Conteudo do balao principal
+        this.dialogueBox = new javafx.scene.layout.StackPane(dialogueLabel, arrowIndicator);
+        this.dialogueBox.setPrefWidth(900);
+        this.dialogueBox.setPrefHeight(140);
+        this.dialogueBox.setPadding(new javafx.geometry.Insets(15, 25, 15, 25));
+        StackPane.setAlignment(dialogueLabel, javafx.geometry.Pos.TOP_LEFT);
+        
+        //Estilizacao retro
+        this.dialogueBox.setStyle(
+                "-fx-background-color: #F8F8F8; " +
+                " -fx-border-color: black #000000 ; " +
+                " -fx-border-width: 6px; " +
+                " -fx-border-style: solid; " +
+                "-fx-background-insets: 0; " +
+                "-fx-effect: innershadow(three-pass-box, #000000, 0, 0, 0, 0);"
+        );        
+        this.dialogueBox.relocate((LOGICAL_WIDTH - 900) / 2, LOGICAL_HEIGHT - 170);
+        this.dialogueBox.setVisible(false);
+        
+        this.hudLayer.getChildren().add(this.dialogueBox);
         /*
          * Elementos da interface permanecem
          * fixos mesmo quando a câmera se move.
@@ -225,14 +301,6 @@ public class ExplorationController {
         CameraTestOverlay.renderHud(
                 hudLayer
         );
-
-        /*
-         * ==========================
-         * TELA LÓGICA
-         * ==========================
-         */
-
-        this.gameRoot = new Pane();
 
         /*
          * A tela lógica deve permanecer
@@ -320,8 +388,7 @@ public class ExplorationController {
 
         configureInput();
 
-        this.gameLoop =
-                createGameLoop();
+        this.gameLoop = createGameLoop();
     }
 
     /**
@@ -366,6 +433,17 @@ public class ExplorationController {
                     || event.getCode() == KeyCode.RIGHT) {
 
                 keys[3] = true;
+            }
+            
+            if (event.getCode() == KeyCode.E) {
+                if(dialogueBox.isVisible()){
+                    dialogueBox.setVisible(false);
+                }
+                else if (hero.isCloseTo(villageNPC, 80.0)) {
+                    String fala = villageNPC.interact();
+                    dialogueLabel.setText(villageNPC.getName() + ": " + fala);
+                    dialogueBox.setVisible(true);
+                }
             }
         });
 
@@ -477,6 +555,10 @@ public class ExplorationController {
                         hero.getX(),
                         hero.getY()
                 );
+                
+                if (dialogueBox.isVisible() && !hero.isCloseTo(villageNPC, 80.0)) {
+                    dialogueBox.setVisible(false);
+                }
 
                 /*
                  * Atualiza a câmera após a movimentação.
