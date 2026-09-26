@@ -4,25 +4,25 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Representa um personagem não controlável do mundo.
+ * Representa um objeto simples do cenário que pode ser inspecionado.
  */
-public class NPC extends GameCharacter implements Interactable {
+public class WorldObject implements Interactable {
 
     private final String name;
-    private final List<String> dialogues;
+    private final List<String> interactionTexts;
 
     private final double x;
     private final double y;
     private final double width;
     private final double height;
 
-    public NPC(
+    public WorldObject(
             String name,
             double x,
             double y,
             double width,
             double height,
-            String... dialogues) {
+            String... interactionTexts) {
 
         this.name = name;
         this.x = x;
@@ -30,13 +30,8 @@ public class NPC extends GameCharacter implements Interactable {
         this.width = width;
         this.height = height;
 
-        this.dialogues =
-                List.copyOf(Arrays.asList(dialogues));
-    }
-
-    @Override
-    public void updateState() {
-        // O NPC não possui atualização dinâmica por enquanto.
+        this.interactionTexts =
+                List.copyOf(Arrays.asList(interactionTexts));
     }
 
     @Override
@@ -46,7 +41,7 @@ public class NPC extends GameCharacter implements Interactable {
 
     @Override
     public List<String> getInteractionTexts() {
-        return dialogues;
+        return interactionTexts;
     }
 
     @Override
