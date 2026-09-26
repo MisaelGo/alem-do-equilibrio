@@ -76,19 +76,48 @@ public class Enemy extends GameCharacter implements Damageable {
      */
     public void performTurn(Hero hero) {
 
+        validateTurnTarget(hero);
+
+        if (!canPerformTurn(hero)) {
+            return;
+        }
+
+        hero.takeDamage(calculateTurnDamage());
+    }
+
+    /**
+     * Valida o alvo antes da execucao de um turno.
+     *
+     * O acesso protegido permite que subclasses reutilizem a mesma regra.
+     *
+     * @param hero personagem escolhido como alvo
+     */
+    protected void validateTurnTarget(Hero hero) {
+
         if (hero == null) {
             throw new IllegalArgumentException(
                     "O alvo do turno nao pode ser nulo."
             );
         }
+    }
 
-        if (!isActive() || !isAlive() || !hero.isAlive()) {
-            return;
-        }
+    /**
+     * Verifica se este inimigo pode atacar o alvo informado.
+     *
+     * @param hero personagem escolhido como alvo
+     * @return true quando o inimigo e o alvo estao aptos para o turno
+     */
+    protected boolean canPerformTurn(Hero hero) {
+        return isActive() && isAlive() && hero.isAlive();
+    }
 
-        float damage = 5.0f + level * 2.0f;
-
-        hero.takeDamage(damage);
+    /**
+     * Calcula o dano do ataque padrao deste inimigo.
+     *
+     * @return dano calculado a partir do nivel
+     */
+    protected float calculateTurnDamage() {
+        return 5.0f + level * 2.0f;
     }
 
     /**
