@@ -264,7 +264,7 @@ public class ExplorationController {
         
         //fonte
         this.dialogueLabel.setStyle(
-                "-fx-font-family: 'Courier New', monospace" + 
+                "-fx-font-family: 'Courier New', monospace;" + 
                 "-fx-font-size: 20px; " +
                 "-fx-font-weight: bold;"        
         );
