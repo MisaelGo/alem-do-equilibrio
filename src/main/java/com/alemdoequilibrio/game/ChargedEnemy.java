@@ -19,7 +19,7 @@ public class ChargedEnemy extends Enemy {
      * POO 1.3 - Atributo enum:
      * define a polaridade eletrica deste inimigo.
      */
-    private final ChargeType chargeType;
+    private ChargeType chargeType;
 
     /**
      * Cria um inimigo com uma polaridade eletrica definida.
@@ -39,13 +39,7 @@ public class ChargedEnemy extends Enemy {
 
         super(enemyId, name, level, health);
 
-        if (chargeType == null) {
-            throw new IllegalArgumentException(
-                    "O tipo de carga do inimigo nao pode ser nulo."
-            );
-        }
-
-        this.chargeType = chargeType;
+        this.chargeType = requireChargeType(chargeType);
     }
 
     /**
@@ -77,6 +71,39 @@ public class ChargedEnemy extends Enemy {
      * @return tipo de carga eletrica
      */
     public ChargeType getChargeType() {
+        return chargeType;
+    }
+
+    /**
+     * Altera a polaridade do inimigo em subclasses que possuem essa mecanica.
+     *
+     * @param chargeType nova polaridade eletrica
+     */
+    protected final void changeChargeType(ChargeType chargeType) {
+        this.chargeType = requireChargeType(chargeType);
+    }
+
+    protected static ChargeType requireNonNeutralCharge(
+            ChargeType chargeType) {
+
+        ChargeType validatedCharge = requireChargeType(chargeType);
+
+        if (validatedCharge == ChargeType.NEUTRAL) {
+            throw new IllegalArgumentException(
+                    "A carga deve ser positiva ou negativa."
+            );
+        }
+
+        return validatedCharge;
+    }
+
+    private static ChargeType requireChargeType(ChargeType chargeType) {
+        if (chargeType == null) {
+            throw new IllegalArgumentException(
+                    "O tipo de carga do inimigo nao pode ser nulo."
+            );
+        }
+
         return chargeType;
     }
 }
