@@ -158,11 +158,15 @@ public class ExplorationController {
                 hudLayer
         );
 
+        DialogueRepository dialogueRepository =
+        new DialogueRepository();
+
         dialogueController =
-                new DialogueController(
-                        hudLayer,
-                        this::completeInteraction
-                );
+        new DialogueController(
+                hudLayer,
+                dialogueRepository,
+                this::completeInteraction
+        );
 
         gameRoot =
                 new Pane();

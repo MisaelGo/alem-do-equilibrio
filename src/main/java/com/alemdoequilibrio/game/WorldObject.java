@@ -1,18 +1,18 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Representa um objeto simples do cenário que pode ser inspecionado.
+ * Representa um objeto interativo do cenário.
  */
-public class WorldObject implements Interactable {
+public class WorldObject
+        implements Interactable {
 
     private final String name;
-    private final List<String> interactionTexts;
+
+    private final String dialogueId;
 
     private final double x;
     private final double y;
+
     private final double width;
     private final double height;
 
@@ -22,16 +22,18 @@ public class WorldObject implements Interactable {
             double y,
             double width,
             double height,
-            String... interactionTexts) {
+            String dialogueId) {
 
         this.name = name;
+
         this.x = x;
         this.y = y;
+
         this.width = width;
         this.height = height;
 
-        this.interactionTexts =
-                List.copyOf(Arrays.asList(interactionTexts));
+        this.dialogueId =
+                dialogueId;
     }
 
     @Override
@@ -40,8 +42,8 @@ public class WorldObject implements Interactable {
     }
 
     @Override
-    public List<String> getInteractionTexts() {
-        return interactionTexts;
+    public String getDialogueId() {
+        return dialogueId;
     }
 
     @Override

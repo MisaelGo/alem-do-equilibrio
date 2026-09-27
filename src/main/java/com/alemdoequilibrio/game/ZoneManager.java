@@ -13,6 +13,10 @@ import javafx.scene.shape.Rectangle;
  * Monta e controla o conteúdo das regiões de exploração.
  *
  * Cada região possui um mundo maior que a janela do jogo.
+ *
+ * Os textos dos diálogos não ficam nesta classe.
+ * Aqui são armazenados apenas os IDs dos diálogos,
+ * que posteriormente são carregados pelo DialogueRepository.
  */
 public class ZoneManager {
 
@@ -40,6 +44,10 @@ public class ZoneManager {
                 new ArrayList<>();
     }
 
+    /**
+     * Carrega uma região e remove o conteúdo
+     * visual da região anterior.
+     */
     public void loadZone(
             ExplorationZone zone) {
 
@@ -66,8 +74,8 @@ public class ZoneManager {
         );
 
         /*
-         * Placeholder visual enquanto os mapas
-         * definitivos ainda não foram produzidos.
+         * Placeholder enquanto o mapa definitivo
+         * ainda não foi implementado.
          */
         DebugGridRenderer.render(
                 worldLayer,
@@ -89,12 +97,19 @@ public class ZoneManager {
         }
     }
 
+    /**
+     * Zona 1 - Fronteira Neutra.
+     */
     private void buildNeutralBorder() {
 
         addZoneTitle(
                 "FRONTEIRA NEUTRA"
         );
 
+        /*
+         * O conteúdo da conversa está no arquivo
+         * dialogues.csv com o ID NILO_CHARGE_SIGNS.
+         */
         NPC nilo =
                 new NPC(
                         "Nilo",
@@ -108,22 +123,7 @@ public class ZoneManager {
                         KnowledgeTopic
                                 .KNOW_CHARGE_SIGNS,
 
-                        "Aqui todos estão olhando "
-                        + "para o símbolo no peito "
-                        + "do outro e chamando isso "
-                        + "de culpa.",
-
-                        "Quando duas cargas possuem "
-                        + "o mesmo sinal, elas tendem "
-                        + "a se repelir.",
-
-                        "Quando possuem sinais "
-                        + "opostos, elas tendem "
-                        + "a se atrair.",
-
-                        "Positivo e negativo são "
-                        + "sinais de uma propriedade "
-                        + "física, não julgamentos."
+                        "NILO_CHARGE_SIGNS"
                 );
 
         addNpc(
@@ -141,22 +141,27 @@ public class ZoneManager {
                         50,
                         50,
 
-                        "Fronteira Neutra. "
-                        + "Pressione E próximo "
-                        + "a elementos interativos."
+                        "FRONTIER_SIGN"
                 );
 
-        addWorldObject(sign);
+        addWorldObject(
+                sign
+        );
 
         createExitArea(
                 "Trilha dos Isolantes",
+
                 3000,
                 1450,
+
                 140,
                 300
         );
     }
 
+    /**
+     * Zona 2 - Trilha dos Isolantes.
+     */
     private void buildInsulatorTrail() {
 
         addZoneTitle(
@@ -176,22 +181,7 @@ public class ZoneManager {
                         KnowledgeTopic
                                 .KNOW_ELECTRIZATION,
 
-                        "Nestes condutores, "
-                        + "as cargas conseguem "
-                        + "se rearranjar com "
-                        + "mais facilidade.",
-
-                        "Em materiais comuns, "
-                        + "esse rearranjo costuma "
-                        + "envolver elétrons.",
-
-                        "Nos isolantes, as cargas "
-                        + "ficam muito menos livres.",
-
-                        "Uma carga próxima também "
-                        + "pode induzir uma separação "
-                        + "de cargas sem precisar "
-                        + "encostar no condutor."
+                        "ELIA_ELECTRIZATION"
                 );
 
         addNpc(
@@ -209,10 +199,7 @@ public class ZoneManager {
                         70,
                         70,
 
-                        "Uma parte da estrutura "
-                        + "conduz cargas facilmente, "
-                        + "enquanto outra atua "
-                        + "como isolante."
+                        "INSULATOR_STRUCTURE"
                 );
 
         addWorldObject(
@@ -221,13 +208,18 @@ public class ZoneManager {
 
         createExitArea(
                 "Encruzilhada das Facções",
+
                 3000,
                 1450,
+
                 140,
                 300
         );
     }
 
+    /**
+     * Zona 3 - Encruzilhada das Facções.
+     */
     private void buildFactionCrossroads() {
 
         addZoneTitle(
@@ -244,15 +236,7 @@ public class ZoneManager {
                         40,
                         50,
 
-                        "Os Prótons acreditam que "
-                        + "os Elétrons sabem mais "
-                        + "sobre estas anomalias "
-                        + "do que dizem.",
-
-                        "As descargas começaram "
-                        + "a atingir nossa região "
-                        + "e precisamos descobrir "
-                        + "o que está causando isso."
+                        "MARA_CROSSROADS"
                 );
 
         NPC elia =
@@ -265,14 +249,7 @@ public class ZoneManager {
                         40,
                         50,
 
-                        "Os Elétrons também "
-                        + "registraram as anomalias "
-                        + "no mesmo período.",
-
-                        "Se os dois lados observaram "
-                        + "o mesmo padrão, precisamos "
-                        + "investigar antes de culpar "
-                        + "uma das facções."
+                        "ELIA_CROSSROADS"
                 );
 
         addNpc(
@@ -286,11 +263,16 @@ public class ZoneManager {
         );
 
         /*
-         * A saída para o Vale de Coulomb será
-         * adicionada quando a Zona 4 for criada.
+         * A saída para o Vale de Coulomb
+         * será adicionada quando a Zona 4
+         * for implementada.
          */
     }
 
+    /**
+     * Adiciona o nome provisório da região
+     * dentro do mundo.
+     */
     private void addZoneTitle(
             String text) {
 
@@ -302,10 +284,6 @@ public class ZoneManager {
                 + "-fx-font-weight: bold;"
         );
 
-        /*
-         * Colocado próximo à região onde
-         * o jogador começa.
-         */
         title.relocate(
                 80,
                 1200
@@ -316,11 +294,17 @@ public class ZoneManager {
                 .add(title);
     }
 
+    /**
+     * Adiciona um NPC ao mundo e ao sistema
+     * genérico de interação.
+     */
     private void addNpc(
             NPC npc,
             Color color) {
 
-        interactables.add(npc);
+        interactables.add(
+                npc
+        );
 
         Rectangle npcView =
                 new Rectangle(
@@ -328,7 +312,9 @@ public class ZoneManager {
                         npc.getHeight()
                 );
 
-        npcView.setFill(color);
+        npcView.setFill(
+                color
+        );
 
         npcView.relocate(
                 npc.getX(),
@@ -353,10 +339,15 @@ public class ZoneManager {
                 );
     }
 
+    /**
+     * Adiciona um objeto interativo ao mundo.
+     */
     private void addWorldObject(
             WorldObject object) {
 
-        interactables.add(object);
+        interactables.add(
+                object
+        );
 
         Rectangle view =
                 new Rectangle(
@@ -395,6 +386,9 @@ public class ZoneManager {
                 );
     }
 
+    /**
+     * Cria a região que leva para o próximo mapa.
+     */
     private void createExitArea(
             String destination,
             double x,
@@ -412,8 +406,10 @@ public class ZoneManager {
 
         /*
          * Placeholder visual.
-         * No mapa final isso poderá ser uma estrada,
-         * portal, ponte, porta etc.
+         *
+         * Futuramente poderá representar
+         * uma estrada, ponte, porta,
+         * portal, caverna etc.
          */
         exitArea.setFill(
                 Color.rgb(
@@ -442,6 +438,10 @@ public class ZoneManager {
                 );
     }
 
+    /**
+     * Verifica se o personagem entrou
+     * na área de saída da região.
+     */
     public boolean intersectsExit(
             double x,
             double y,
@@ -472,16 +472,26 @@ public class ZoneManager {
                 && y <= exitBottom;
     }
 
+    /**
+     * Retorna a próxima região.
+     */
     public ExplorationZone getNextZone() {
 
         return currentZone.next();
     }
 
+    /**
+     * Retorna a região atualmente carregada.
+     */
     public ExplorationZone getCurrentZone() {
 
         return currentZone;
     }
 
+    /**
+     * Retorna os elementos interativos
+     * da região atual.
+     */
     public List<Interactable> getInteractables() {
 
         return List.copyOf(

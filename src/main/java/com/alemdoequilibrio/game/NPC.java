@@ -1,8 +1,5 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * Representa um personagem não controlável.
  */
@@ -11,7 +8,7 @@ public class NPC extends GameCharacter
 
     private final String name;
 
-    private final List<String> dialogues;
+    private final String dialogueId;
 
     private final double x;
     private final double y;
@@ -19,7 +16,8 @@ public class NPC extends GameCharacter
     private final double width;
     private final double height;
 
-    private final KnowledgeTopic knowledgeTopic;
+    private final KnowledgeTopic
+            knowledgeTopic;
 
     public NPC(
             String name,
@@ -27,7 +25,7 @@ public class NPC extends GameCharacter
             double y,
             double width,
             double height,
-            String... dialogues) {
+            String dialogueId) {
 
         this(
                 name,
@@ -36,7 +34,7 @@ public class NPC extends GameCharacter
                 width,
                 height,
                 null,
-                dialogues
+                dialogueId
         );
     }
 
@@ -47,7 +45,7 @@ public class NPC extends GameCharacter
             double width,
             double height,
             KnowledgeTopic knowledgeTopic,
-            String... dialogues) {
+            String dialogueId) {
 
         this.name = name;
 
@@ -60,12 +58,8 @@ public class NPC extends GameCharacter
         this.knowledgeTopic =
                 knowledgeTopic;
 
-        this.dialogues =
-                List.copyOf(
-                        Arrays.asList(
-                                dialogues
-                        )
-                );
+        this.dialogueId =
+                dialogueId;
     }
 
     @Override
@@ -79,8 +73,8 @@ public class NPC extends GameCharacter
     }
 
     @Override
-    public List<String> getInteractionTexts() {
-        return dialogues;
+    public String getDialogueId() {
+        return dialogueId;
     }
 
     public String getName() {

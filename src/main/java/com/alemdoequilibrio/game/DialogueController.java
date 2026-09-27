@@ -20,19 +20,28 @@ public class DialogueController {
 
     private final StackPane dialogueBox;
 
+    private final DialogueRepository
+            dialogueRepository;
+
     private final Consumer<Interactable>
             onDialogueCompleted;
 
     private Interactable currentInteractable;
 
-    private List<String> currentTexts;
+    private List<DialogueLine> currentLines;
 
-    private int currentTextIndex;
+    private int currentLineIndex;
 
     public DialogueController(
             Pane hudLayer,
+            DialogueRepository dialogueRepository,
             Consumer<Interactable>
                     onDialogueCompleted) {
+
+        this.dialogueRepository =
+                Objects.requireNonNull(
+                        dialogueRepository
+                );
 
         this.onDialogueCompleted =
                 Objects.requireNonNull(
@@ -123,20 +132,23 @@ public class DialogueController {
         currentInteractable =
                 interactable;
 
-        currentTexts =
-                interactable
-                        .getInteractionTexts();
+        currentLines =
+                dialogueRepository
+                        .getDialogue(
+                                interactable
+                                        .getDialogueId()
+                        );
 
-        currentTextIndex = 0;
+        currentLineIndex = 0;
 
-        if (currentTexts.isEmpty()) {
+        if (currentLines.isEmpty()) {
 
             closeDialogue();
 
             return;
         }
 
-        showCurrentText();
+        showCurrentLine();
 
         dialogueBox.setVisible(
                 true
@@ -149,10 +161,10 @@ public class DialogueController {
             return false;
         }
 
-        currentTextIndex++;
+        currentLineIndex++;
 
-        if (currentTextIndex
-                >= currentTexts.size()) {
+        if (currentLineIndex
+                >= currentLines.size()) {
 
             Interactable completed =
                     currentInteractable;
@@ -166,20 +178,22 @@ public class DialogueController {
             return false;
         }
 
-        showCurrentText();
+        showCurrentLine();
 
         return true;
     }
 
-    private void showCurrentText() {
+    private void showCurrentLine() {
+
+        DialogueLine line =
+                currentLines.get(
+                        currentLineIndex
+                );
 
         dialogueLabel.setText(
-                currentInteractable
-                        .getInteractionName()
+                line.getSpeaker()
                 + ": "
-                + currentTexts.get(
-                        currentTextIndex
-                )
+                + line.getText()
         );
     }
 
@@ -190,9 +204,10 @@ public class DialogueController {
         );
 
         currentInteractable = null;
-        currentTexts = null;
 
-        currentTextIndex = 0;
+        currentLines = null;
+
+        currentLineIndex = 0;
     }
 
     public boolean isOpen() {
