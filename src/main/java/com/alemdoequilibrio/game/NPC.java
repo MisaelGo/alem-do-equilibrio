@@ -1,20 +1,23 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
- * Representa um personagem não controlável do mundo.
+ * Representa um personagem não controlável.
  */
-public class NPC extends GameCharacter implements Interactable {
+public class NPC extends GameCharacter
+        implements Interactable {
 
     private final String name;
-    private final List<String> dialogues;
+
+    private final String dialogueId;
 
     private final double x;
     private final double y;
+
     private final double width;
     private final double height;
+
+    private final KnowledgeTopic
+            knowledgeTopic;
 
     public NPC(
             String name,
@@ -22,21 +25,46 @@ public class NPC extends GameCharacter implements Interactable {
             double y,
             double width,
             double height,
-            String... dialogues) {
+            String dialogueId) {
+
+        this(
+                name,
+                x,
+                y,
+                width,
+                height,
+                null,
+                dialogueId
+        );
+    }
+
+    public NPC(
+            String name,
+            double x,
+            double y,
+            double width,
+            double height,
+            KnowledgeTopic knowledgeTopic,
+            String dialogueId) {
 
         this.name = name;
+
         this.x = x;
         this.y = y;
+
         this.width = width;
         this.height = height;
 
-        this.dialogues =
-                List.copyOf(Arrays.asList(dialogues));
+        this.knowledgeTopic =
+                knowledgeTopic;
+
+        this.dialogueId =
+                dialogueId;
     }
 
     @Override
     public void updateState() {
-        // O NPC não possui atualização dinâmica por enquanto.
+        // NPC estático nesta etapa.
     }
 
     @Override
@@ -45,8 +73,16 @@ public class NPC extends GameCharacter implements Interactable {
     }
 
     @Override
-    public List<String> getInteractionTexts() {
-        return dialogues;
+    public String getDialogueId() {
+        return dialogueId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public KnowledgeTopic getKnowledgeTopic() {
+        return knowledgeTopic;
     }
 
     @Override

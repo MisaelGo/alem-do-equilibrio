@@ -1,6 +1,5 @@
 package com.alemdoequilibrio.game;
 
-import java.util.List;
 import java.util.Objects;
 
 import com.alemdoequilibrio.core.ResourceManager;
@@ -14,34 +13,43 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 /**
- * Controla o modo de exploração.
+ * Controla exploração, movimento, câmera,
+ * interação e mudança entre regiões.
  */
 public class ExplorationController {
 
-    private static final double LOGICAL_WIDTH = 1280;
-    private static final double LOGICAL_HEIGHT = 720;
+    private static final double LOGICAL_WIDTH =
+            1280;
 
-    private static final double WORLD_WIDTH = 3200;
-    private static final double WORLD_HEIGHT = 1800;
+    private static final double LOGICAL_HEIGHT =
+            720;
 
-    private static final double TILE_SIZE = 40;
+    private static final double TILE_SIZE =
+            40;
 
-    private static final double INTERACTION_RANGE = 90;
+    private static final double INTERACTION_RANGE =
+            90;
+
+    private static final double HERO_START_X =
+            100;
+
+    private static final double HERO_START_Y =
+            ZoneManager.WORLD_HEIGHT - 100;
 
     private static final String HERO_SPRITE_PATH =
             "/images/hero_idle_01.png";
 
-    private final ResourceManager resourceManager;
-
     private final Hero hero;
+
     private final ImageView heroView;
 
     private final Pane worldLayer;
+
     private final Pane hudLayer;
+
     private final Pane gameRoot;
 
     private final StackPane screenRoot;
@@ -52,26 +60,38 @@ public class ExplorationController {
 
     private final AnimationTimer gameLoop;
 
-    private final List<Interactable> interactables;
+    private final ZoneManager zoneManager;
 
-    private final DialogueController dialogueController;
+    private final ChapterProgress chapterProgress;
 
-    private final Runnable onDialogueStarted;
-    private final Runnable onDialogueFinished;
+    private final DialogueController
+            dialogueController;
+
+    private final Runnable
+            onDialogueStarted;
+
+    private final Runnable
+            onDialogueFinished;
 
     private long lastTime;
 
     private double cameraX;
+
     private double cameraY;
 
     public ExplorationController(
             ResourceManager resourceManager,
+            ChapterProgress chapterProgress,
             Runnable onDialogueStarted,
             Runnable onDialogueFinished) {
 
-        this.resourceManager =
+        Objects.requireNonNull(
+                resourceManager
+        );
+
+        this.chapterProgress =
                 Objects.requireNonNull(
-                        resourceManager
+                        chapterProgress
                 );
 
         this.onDialogueStarted =
@@ -84,10 +104,10 @@ public class ExplorationController {
                         onDialogueFinished
                 );
 
-        this.hero =
+        hero =
                 new Hero(
-                        100,
-                        WORLD_HEIGHT - 100,
+                        HERO_START_X,
+                        HERO_START_Y,
                         200
                 );
 
@@ -96,7 +116,7 @@ public class ExplorationController {
                         HERO_SPRITE_PATH
                 );
 
-        this.heroView =
+        heroView =
                 new ImageView(
                         heroSprite
                 );
@@ -113,104 +133,20 @@ public class ExplorationController {
                 false
         );
 
-        heroView.relocate(
-                hero.getX(),
-                hero.getY()
-        );
-
-        this.worldLayer =
+        worldLayer =
                 new Pane();
 
         worldLayer.setPrefSize(
-                WORLD_WIDTH,
-                WORLD_HEIGHT
+                ZoneManager.WORLD_WIDTH,
+                ZoneManager.WORLD_HEIGHT
         );
 
-        DebugGridRenderer.render(
-                worldLayer,
-                WORLD_WIDTH,
-                WORLD_HEIGHT,
-                TILE_SIZE
-        );
-
-        CameraTestOverlay.renderWorld(
-                worldLayer,
-                TILE_SIZE
-        );
-
-        /*
-         * NPC de teste.
-         */
-        NPC villageNPC =
-                new NPC(
-                        "Nilo",
-                        260,
-                        WORLD_HEIGHT - 100,
-                        40,
-                        50,
-                        "Olá, viajante.",
-                        "Algo estranho está acontecendo "
-                        + "com as cargas desta região."
+        zoneManager =
+                new ZoneManager(
+                        worldLayer
                 );
 
-        Rectangle npcView =
-                new Rectangle(
-                        villageNPC.getWidth(),
-                        villageNPC.getHeight()
-                );
-
-        npcView.setFill(
-                Color.GOLD
-        );
-
-        npcView.relocate(
-                villageNPC.getX(),
-                villageNPC.getY()
-        );
-
-        /*
-         * Objeto de teste.
-         * Usa exatamente o mesmo fluxo de interação do NPC.
-         */
-        WorldObject testObject =
-                new WorldObject(
-                        "Placa",
-                        450,
-                        WORLD_HEIGHT - 100,
-                        40,
-                        40,
-                        "Pressione E perto de elementos "
-                        + "interativos."
-                );
-
-        Rectangle objectView =
-                new Rectangle(
-                        testObject.getWidth(),
-                        testObject.getHeight()
-                );
-
-        objectView.setFill(
-                Color.LIGHTBLUE
-        );
-
-        objectView.relocate(
-                testObject.getX(),
-                testObject.getY()
-        );
-
-        this.interactables =
-                List.of(
-                        villageNPC,
-                        testObject
-                );
-
-        worldLayer.getChildren().addAll(
-                heroView,
-                npcView,
-                objectView
-        );
-
-        this.hudLayer =
+        hudLayer =
                 new Pane();
 
         hudLayer.setPrefSize(
@@ -222,12 +158,17 @@ public class ExplorationController {
                 hudLayer
         );
 
-        this.dialogueController =
-                new DialogueController(
-                        hudLayer
-                );
+        DialogueRepository dialogueRepository =
+        new DialogueRepository();
 
-        this.gameRoot =
+        dialogueController =
+        new DialogueController(
+                hudLayer,
+                dialogueRepository,
+                this::completeInteraction
+        );
+
+        gameRoot =
                 new Pane();
 
         gameRoot.setPrefSize(
@@ -260,12 +201,12 @@ public class ExplorationController {
                 viewportClip
         );
 
-        this.screenRoot =
+        screenRoot =
                 new StackPane(
                         gameRoot
                 );
 
-        this.scene =
+        scene =
                 new Scene(
                         screenRoot,
                         LOGICAL_WIDTH,
@@ -274,6 +215,7 @@ public class ExplorationController {
 
         NumberBinding scale =
                 Bindings.min(
+
                         scene.widthProperty()
                                 .divide(
                                         LOGICAL_WIDTH
@@ -293,17 +235,56 @@ public class ExplorationController {
                 .scaleYProperty()
                 .bind(scale);
 
-        this.keys =
+        keys =
                 new boolean[4];
 
         configureInput();
 
-        this.gameLoop =
+        gameLoop =
                 createGameLoop();
+
+        loadZone(
+                ExplorationZone.NEUTRAL_BORDER
+        );
     }
 
     public Scene getScene() {
+
         return scene;
+    }
+
+    /**
+     * Carrega uma nova região mantendo a mesma
+     * estrutura de mundo grande + câmera.
+     */
+    private void loadZone(
+            ExplorationZone zone) {
+
+        zoneManager.loadZone(
+                zone
+        );
+
+        hero.setPosition(
+                HERO_START_X,
+                HERO_START_Y
+        );
+
+        heroView.relocate(
+                hero.getX(),
+                hero.getY()
+        );
+
+        /*
+         * ZoneManager limpa o worldLayer.
+         * Por isso o Hero precisa ser recolocado.
+         */
+        worldLayer
+                .getChildren()
+                .add(heroView);
+
+        resetKeys();
+
+        updateCamera();
     }
 
     private void configureInput() {
@@ -389,9 +370,6 @@ public class ExplorationController {
 
     private void handleInteraction() {
 
-        /*
-         * Durante um diálogo, E avança a fala.
-         */
         if (dialogueController.isOpen()) {
 
             boolean stillOpen =
@@ -399,6 +377,7 @@ public class ExplorationController {
                             .advanceDialogue();
 
             if (!stillOpen) {
+
                 onDialogueFinished.run();
             }
 
@@ -412,22 +391,28 @@ public class ExplorationController {
             return;
         }
 
-        dialogueController.startDialogue(
-                interactable
-        );
+        dialogueController
+                .startDialogue(
+                        interactable
+                );
 
-        onDialogueStarted.run();
+        if (dialogueController.isOpen()) {
+
+            onDialogueStarted.run();
+        }
     }
 
-    private Interactable findNearestInteractable() {
+    private Interactable
+            findNearestInteractable() {
 
-        Interactable nearest = null;
+        Interactable nearest =
+                null;
 
         double nearestDistance =
                 Double.MAX_VALUE;
 
         for (Interactable interactable
-                : interactables) {
+                : zoneManager.getInteractables()) {
 
             double distance =
                     distanceTo(
@@ -472,12 +457,43 @@ public class ExplorationController {
                 / 2.0;
 
         return Math.hypot(
+
                 heroCenterX
                 - targetCenterX,
 
                 heroCenterY
                 - targetCenterY
         );
+    }
+
+    private void completeInteraction(
+            Interactable interactable) {
+
+        if (!(interactable
+                instanceof NPC npc)) {
+
+            return;
+        }
+
+        KnowledgeTopic topic =
+                npc.getKnowledgeTopic();
+
+        if (topic == null) {
+            return;
+        }
+
+        if (!chapterProgress
+                .hasLearned(topic)) {
+
+            chapterProgress.learn(
+                    topic
+            );
+
+            System.out.println(
+                    "Tópico aprendido: "
+                    + topic
+            );
+        }
     }
 
     private AnimationTimer createGameLoop() {
@@ -501,6 +517,7 @@ public class ExplorationController {
                 lastTime = now;
 
                 double directionX = 0;
+
                 double directionY = 0;
 
                 if (keys[0]) {
@@ -520,12 +537,16 @@ public class ExplorationController {
                 }
 
                 hero.updateMovement(
+
                         directionX,
                         directionY,
+
                         deltaTime,
-                        WORLD_WIDTH
+
+                        ZoneManager.WORLD_WIDTH
                         - TILE_SIZE,
-                        WORLD_HEIGHT
+
+                        ZoneManager.WORLD_HEIGHT
                         - TILE_SIZE
                 );
 
@@ -534,11 +555,58 @@ public class ExplorationController {
                         hero.getY()
                 );
 
+                /*
+                 * Primeiro verifica se o personagem
+                 * entrou numa área de mudança de mapa.
+                 */
+                if (handleZoneTransition()) {
+                    return;
+                }
+
+                /*
+                 * Depois move a câmera para acompanhar
+                 * a posição atual do herói.
+                 */
                 updateCamera();
             }
         };
     }
 
+    private boolean handleZoneTransition() {
+
+        boolean reachedExit =
+                zoneManager.intersectsExit(
+
+                        hero.getX(),
+                        hero.getY(),
+
+                        TILE_SIZE,
+                        TILE_SIZE
+                );
+
+        if (!reachedExit) {
+            return false;
+        }
+
+        ExplorationZone nextZone =
+                zoneManager.getNextZone();
+
+        if (nextZone == null) {
+
+            return false;
+        }
+
+        loadZone(
+                nextZone
+        );
+
+        return true;
+    }
+
+    /**
+     * Centraliza a câmera no herói sem permitir
+     * que ela ultrapasse os limites do mapa.
+     */
     private void updateCamera() {
 
         double targetX =
@@ -556,7 +624,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetX,
-                                WORLD_WIDTH
+
+                                ZoneManager.WORLD_WIDTH
                                 - LOGICAL_WIDTH
                         )
                 );
@@ -566,7 +635,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetY,
-                                WORLD_HEIGHT
+
+                                ZoneManager.WORLD_HEIGHT
                                 - LOGICAL_HEIGHT
                         )
                 );
@@ -580,6 +650,16 @@ public class ExplorationController {
         );
     }
 
+    private void resetKeys() {
+
+        for (int i = 0;
+                i < keys.length;
+                i++) {
+
+            keys[i] = false;
+        }
+    }
+
     public void start() {
 
         lastTime = 0;
@@ -590,10 +670,19 @@ public class ExplorationController {
     }
 
     public void stop() {
+
         gameLoop.stop();
     }
 
     public void closeDialogue() {
-        dialogueController.closeDialogue();
+
+        dialogueController
+                .closeDialogue();
+    }
+
+    public ExplorationZone getCurrentZone() {
+
+        return zoneManager
+                .getCurrentZone();
     }
 }

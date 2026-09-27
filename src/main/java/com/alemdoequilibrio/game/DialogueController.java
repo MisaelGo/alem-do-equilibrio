@@ -1,6 +1,8 @@
 package com.alemdoequilibrio.game;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -15,19 +17,51 @@ import javafx.scene.paint.Color;
 public class DialogueController {
 
     private final Label dialogueLabel;
+
     private final StackPane dialogueBox;
 
+    private final DialogueRepository
+            dialogueRepository;
+
+    private final Consumer<Interactable>
+            onDialogueCompleted;
+
     private Interactable currentInteractable;
-    private List<String> currentTexts;
 
-    private int currentTextIndex;
+    private List<DialogueLine> currentLines;
 
-    public DialogueController(Pane hudLayer) {
+    private int currentLineIndex;
 
-        this.dialogueLabel = new Label("");
+    public DialogueController(
+            Pane hudLayer,
+            DialogueRepository dialogueRepository,
+            Consumer<Interactable>
+                    onDialogueCompleted) {
 
-        dialogueLabel.setTextFill(Color.BLACK);
-        dialogueLabel.setWrapText(true);
+        this.dialogueRepository =
+                Objects.requireNonNull(
+                        dialogueRepository
+                );
+
+        this.onDialogueCompleted =
+                Objects.requireNonNull(
+                        onDialogueCompleted
+                );
+
+        dialogueLabel =
+                new Label("");
+
+        dialogueLabel.setTextFill(
+                Color.BLACK
+        );
+
+        dialogueLabel.setWrapText(
+                true
+        );
+
+        dialogueLabel.setMaxWidth(
+                820
+        );
 
         dialogueLabel.setStyle(
                 "-fx-font-family: 'Courier New', monospace;"
@@ -38,11 +72,8 @@ public class DialogueController {
         Label arrowIndicator =
                 new Label("▼");
 
-        arrowIndicator.setTextFill(Color.BLACK);
-
-        arrowIndicator.setStyle(
-                "-fx-font-size: 14px;"
-                + "-fx-font-weight: bold;"
+        arrowIndicator.setTextFill(
+                Color.BLACK
         );
 
         StackPane.setAlignment(
@@ -50,14 +81,16 @@ public class DialogueController {
                 Pos.BOTTOM_RIGHT
         );
 
-        this.dialogueBox =
+        dialogueBox =
                 new StackPane(
                         dialogueLabel,
                         arrowIndicator
                 );
 
-        dialogueBox.setPrefWidth(900);
-        dialogueBox.setPrefHeight(140);
+        dialogueBox.setPrefSize(
+                900,
+                140
+        );
 
         dialogueBox.setPadding(
                 new Insets(
@@ -73,103 +106,112 @@ public class DialogueController {
                 Pos.TOP_LEFT
         );
 
-        /*
-         * Visual temporário.
-         * A UI definitiva poderá ser substituída pelo M5
-         * sem alterar a lógica de diálogo.
-         */
         dialogueBox.setStyle(
                 "-fx-background-color: #F8F8F8;"
                 + "-fx-border-color: #000000;"
                 + "-fx-border-width: 6px;"
-                + "-fx-border-style: solid;"
         );
 
         dialogueBox.relocate(
-                (1280 - 900) / 2.0,
-                720 - 170
+                190,
+                550
         );
 
-        dialogueBox.setVisible(false);
+        dialogueBox.setVisible(
+                false
+        );
 
         hudLayer.getChildren().add(
                 dialogueBox
         );
     }
 
-    /**
-     * Inicia uma interação.
-     */
     public void startDialogue(
             Interactable interactable) {
 
-        this.currentInteractable =
+        currentInteractable =
                 interactable;
 
-        this.currentTexts =
-                interactable.getInteractionTexts();
+        currentLines =
+                dialogueRepository
+                        .getDialogue(
+                                interactable
+                                        .getDialogueId()
+                        );
 
-        this.currentTextIndex = 0;
+        currentLineIndex = 0;
 
-        if (currentTexts.isEmpty()) {
+        if (currentLines.isEmpty()) {
+
             closeDialogue();
+
             return;
         }
 
-        showCurrentText();
+        showCurrentLine();
 
-        dialogueBox.setVisible(true);
+        dialogueBox.setVisible(
+                true
+        );
     }
 
-    /**
-     * Avança para a próxima fala.
-     *
-     * @return true enquanto o diálogo continuar aberto
-     */
     public boolean advanceDialogue() {
 
         if (!isOpen()) {
             return false;
         }
 
-        currentTextIndex++;
+        currentLineIndex++;
 
-        if (currentTextIndex
-                >= currentTexts.size()) {
+        if (currentLineIndex
+                >= currentLines.size()) {
+
+            Interactable completed =
+                    currentInteractable;
 
             closeDialogue();
+
+            onDialogueCompleted.accept(
+                    completed
+            );
 
             return false;
         }
 
-        showCurrentText();
+        showCurrentLine();
 
         return true;
     }
 
-    private void showCurrentText() {
+    private void showCurrentLine() {
+
+        DialogueLine line =
+                currentLines.get(
+                        currentLineIndex
+                );
 
         dialogueLabel.setText(
-                currentInteractable
-                        .getInteractionName()
+                line.getSpeaker()
                 + ": "
-                + currentTexts.get(
-                        currentTextIndex
-                )
+                + line.getText()
         );
     }
 
     public void closeDialogue() {
 
-        dialogueBox.setVisible(false);
+        dialogueBox.setVisible(
+                false
+        );
 
         currentInteractable = null;
-        currentTexts = null;
 
-        currentTextIndex = 0;
+        currentLines = null;
+
+        currentLineIndex = 0;
     }
 
     public boolean isOpen() {
+
         return dialogueBox.isVisible();
     }
 }
