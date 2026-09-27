@@ -144,4 +144,23 @@ public class Hero extends GameCharacter
     public float getHealth() {
         return health;
     }
+    
+    public void setPosition(
+        double x,
+        double y) {
+
+        if (!Double.isFinite(x)
+            || !Double.isFinite(y)
+            || x < 0
+            || y < 0) {
+
+            throw new IllegalArgumentException(
+                    "A posição deve ser válida."
+            );
+        }
+
+        this.x = x;
+        this.y = y;
+    }
+    
 }

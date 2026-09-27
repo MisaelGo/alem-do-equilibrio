@@ -1,15 +1,12 @@
 package com.alemdoequilibrio.core;
 
+import com.alemdoequilibrio.game.ChapterProgress;
 import com.alemdoequilibrio.game.ExplorationController;
 
 import javafx.stage.Stage;
 
 /**
  * Controla o fluxo geral do jogo.
- *
- * Coordena estados e controladores sem implementar
- * diretamente as regras internas de exploração,
- * diálogo, combate ou quiz.
  */
 public class GameController {
 
@@ -17,10 +14,11 @@ public class GameController {
 
     private final ResourceManager resourceManager;
 
+    private final ChapterProgress chapterProgress;
+
     /*
      * POO 1.3 - Enum:
-     * utiliza GameState para restringir os estados
-     * possíveis da aplicação.
+     * restringe os estados possíveis do jogo.
      */
     private GameState currentState;
 
@@ -30,12 +28,13 @@ public class GameController {
     public GameController(Stage stage) {
 
         this.sceneRouter =
-                new SceneRouter(
-                        stage
-                );
+                new SceneRouter(stage);
 
         this.resourceManager =
                 new ResourceManager();
+
+        this.chapterProgress =
+                new ChapterProgress();
 
         this.currentState =
                 GameState.MENU;
@@ -44,6 +43,8 @@ public class GameController {
                 new ExplorationController(
 
                         resourceManager,
+
+                        chapterProgress,
 
                         () -> changeState(
                                 GameState.DIALOGUE
@@ -66,20 +67,13 @@ public class GameController {
         );
     }
 
-    /**
-     * Realiza a transição entre os estados globais.
-     *
-     * Antes de iniciar o novo estado, encerra o sistema
-     * incompatível que estava ativo anteriormente.
-     */
     public void changeState(
             GameState newState) {
 
         if (newState == null) {
 
             throw new IllegalArgumentException(
-                    "O novo estado "
-                    + "não pode ser nulo."
+                    "O novo estado não pode ser nulo."
             );
         }
 
@@ -105,10 +99,12 @@ public class GameController {
         switch (state) {
 
             case EXPLORATION -> {
+
                 explorationController.stop();
             }
 
             case DIALOGUE -> {
+
                 explorationController
                         .closeDialogue();
             }
@@ -118,7 +114,8 @@ public class GameController {
                  QUIZ,
                  PAUSED,
                  CHAPTER_COMPLETE -> {
-                // Sistemas ainda não implementados.
+
+                // Sistemas ainda serão integrados.
             }
         }
     }
@@ -129,33 +126,40 @@ public class GameController {
         switch (state) {
 
             case MENU -> {
-                // Futuro menu principal.
+
+                // Futuro menu.
             }
 
             case EXPLORATION -> {
+
                 startExploration();
             }
 
             case DIALOGUE -> {
+
                 /*
-                 * A própria cena de exploração permanece
-                 * visível, mas o game loop está parado.
+                 * A cena de exploração continua
+                 * visível, mas o loop é pausado.
                  */
             }
 
             case BATTLE -> {
+
                 // Futuro BattleController.
             }
 
             case QUIZ -> {
+
                 // Futuro sistema de quiz.
             }
 
             case PAUSED -> {
+
                 // Futuro menu de pausa.
             }
 
             case CHAPTER_COMPLETE -> {
+
                 // Futuro encerramento do capítulo.
             }
         }
@@ -172,6 +176,7 @@ public class GameController {
     }
 
     public GameState getCurrentState() {
+
         return currentState;
     }
 }
