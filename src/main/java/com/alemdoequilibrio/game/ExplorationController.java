@@ -78,7 +78,9 @@ public class ExplorationController {
     private double cameraX;
 
     private double cameraY;
-
+    
+    private MapEnemySpawner mapEnemySpawner;
+    
     public ExplorationController(
             ResourceManager resourceManager,
             ChapterProgress chapterProgress,
@@ -281,6 +283,14 @@ public class ExplorationController {
         worldLayer
                 .getChildren()
                 .add(heroView);
+        
+        /**
+         * Spawner de inimigos
+         */
+        this.mapEnemySpawner = new MapEnemySpawner(worldLayer);
+        
+        this.mapEnemySpawner.spawnEnemy(1, "Inimigo A", 1, 50.0f, HERO_START_X + 400, HERO_START_Y - 400);
+        
 
         resetKeys();
 
@@ -515,6 +525,18 @@ public class ExplorationController {
                         / 1_000_000_000.0;
 
                 lastTime = now;
+                
+                if (mapEnemySpawner != null){
+                    for (MapEnemySpawner.MapEnemyNode enemyNode : mapEnemySpawner.getActiveEnemies()){
+                        if (enemyNode.isCloseTo(hero, 100)) {
+                            
+                            stop();
+                            
+                            startBattle(enemyNode.getEnemy());
+                            break;         
+                        }                  
+                    }
+                }
 
                 double directionX = 0;
 
@@ -562,6 +584,8 @@ public class ExplorationController {
                 if (handleZoneTransition()) {
                     return;
                 }
+            
+                
 
                 /*
                  * Depois move a câmera para acompanhar
@@ -570,6 +594,17 @@ public class ExplorationController {
                 updateCamera();
             }
         };
+    }
+    
+    private void startBattle(Enemy enemy) {
+        BattleController battleControler = new BattleController(
+            hero,
+            enemy,
+            () -> {
+                System.out.println("Batalha com " + enemy.getName() + " encerrada!");
+            }
+        );
+        //transição visual para a tela de batalha
     }
 
     private boolean handleZoneTransition() {
