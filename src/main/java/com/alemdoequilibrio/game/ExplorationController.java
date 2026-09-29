@@ -50,6 +50,8 @@ public class ExplorationController {
 
     private final Pane hudLayer;
 
+    private final HUD hud;
+
     private final Pane gameRoot;
 
     private final StackPane screenRoot;
@@ -154,8 +156,15 @@ public class ExplorationController {
                 LOGICAL_HEIGHT
         );
 
-        CameraTestOverlay.renderHud(
-                hudLayer
+        hud =
+                new HUD(
+                        hudLayer,
+                        resourceManager
+                );
+
+        hud.updateHealth(
+                hero.getHealth(),
+                100.0f
         );
 
         DialogueRepository dialogueRepository =
@@ -379,6 +388,7 @@ public class ExplorationController {
             if (!stillOpen) {
 
                 onDialogueFinished.run();
+                updateInteractionPrompt();
             }
 
             return;
@@ -398,6 +408,7 @@ public class ExplorationController {
 
         if (dialogueController.isOpen()) {
 
+            hud.hideInteractionPrompt();
             onDialogueStarted.run();
         }
     }
@@ -489,6 +500,10 @@ public class ExplorationController {
                     topic
             );
 
+            hud.showConceptLearned(
+                    topic
+            );
+
             System.out.println(
                     "Tópico aprendido: "
                     + topic
@@ -554,6 +569,8 @@ public class ExplorationController {
                         hero.getX(),
                         hero.getY()
                 );
+
+                updateInteractionPrompt();
 
                 /*
                  * Primeiro verifica se o personagem
@@ -678,6 +695,27 @@ public class ExplorationController {
 
         dialogueController
                 .closeDialogue();
+
+        updateInteractionPrompt();
+    }
+
+    private void updateInteractionPrompt() {
+
+        if (dialogueController.isOpen()) {
+            hud.hideInteractionPrompt();
+            return;
+        }
+
+        Interactable nearest =
+                findNearestInteractable();
+
+        if (nearest != null) {
+            hud.showInteractionPrompt(
+                    nearest.getInteractionName()
+            );
+        } else {
+            hud.hideInteractionPrompt();
+        }
     }
 
     public ExplorationZone getCurrentZone() {
