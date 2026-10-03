@@ -8,8 +8,6 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -39,12 +37,9 @@ public class ExplorationController {
     private static final double HERO_START_Y =
             ZoneManager.WORLD_HEIGHT - 100;
 
-    private static final String HERO_SPRITE_PATH =
-            "/images/hero_idle_01.png";
-
     private final Hero hero;
 
-    private final ImageView heroView;
+    private final HeroView heroView;
 
     private final Pane worldLayer;
 
@@ -113,26 +108,15 @@ public class ExplorationController {
                         200
                 );
 
-        Image heroSprite =
-                resourceManager.getImage(
-                        HERO_SPRITE_PATH
-                );
-
         heroView =
-                new ImageView(
-                        heroSprite
+                new HeroView(
+                        resourceManager,
+                        TILE_SIZE
                 );
 
-        heroView.setFitWidth(
-                TILE_SIZE
-        );
-
-        heroView.setFitHeight(
-                TILE_SIZE
-        );
-
-        heroView.setPreserveRatio(
-                false
+        heroView.setPosition(
+                HERO_START_X,
+                HERO_START_Y
         );
 
         worldLayer =
@@ -145,7 +129,8 @@ public class ExplorationController {
 
         zoneManager =
                 new ZoneManager(
-                        worldLayer
+                        worldLayer,
+                        resourceManager
                 );
 
         hudLayer =
@@ -278,7 +263,7 @@ public class ExplorationController {
                 HERO_START_Y
         );
 
-        heroView.relocate(
+        heroView.setPosition(
                 hero.getX(),
                 hero.getY()
         );
@@ -289,7 +274,7 @@ public class ExplorationController {
          */
         worldLayer
                 .getChildren()
-                .add(heroView);
+                .add(heroView.getNode());
 
         resetKeys();
 
@@ -565,7 +550,10 @@ public class ExplorationController {
                         - TILE_SIZE
                 );
 
-                heroView.relocate(
+                heroView.update(
+                        directionX,
+                        directionY,
+                        deltaTime,
                         hero.getX(),
                         hero.getY()
                 );
@@ -717,6 +705,7 @@ public class ExplorationController {
             hud.hideInteractionPrompt();
         }
     }
+
 
     public ExplorationZone getCurrentZone() {
 
