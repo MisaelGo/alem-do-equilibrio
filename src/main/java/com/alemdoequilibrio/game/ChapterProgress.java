@@ -3,12 +3,11 @@ package com.alemdoequilibrio.game;
 import java.util.EnumSet;
 import java.util.Set;
 
-/**
- * Armazena o progresso pedagógico do jogador no capítulo.
- */
 public class ChapterProgress {
 
     private final EnumSet<KnowledgeTopic> learnedTopics;
+
+    private ExplorationZone checkpoint;
 
     public ChapterProgress() {
 
@@ -16,12 +15,16 @@ public class ChapterProgress {
                 EnumSet.noneOf(
                         KnowledgeTopic.class
                 );
+
+        this.checkpoint =
+                ExplorationZone.NEUTRAL_BORDER;
     }
 
     public void learn(
             KnowledgeTopic topic) {
 
         if (topic == null) {
+
             throw new IllegalArgumentException(
                     "O tópico não pode ser nulo."
             );
@@ -41,5 +44,29 @@ public class ChapterProgress {
         return Set.copyOf(
                 learnedTopics
         );
+    }
+
+    public boolean reachCheckpoint(
+            ExplorationZone zone) {
+
+        if (zone == null) {
+
+            throw new IllegalArgumentException(
+                    "O checkpoint não pode ser nulo."
+            );
+        }
+
+        if (checkpoint == zone) {
+            return false;
+        }
+
+        checkpoint = zone;
+
+        return true;
+    }
+
+    public ExplorationZone getCheckpoint() {
+
+        return checkpoint;
     }
 }

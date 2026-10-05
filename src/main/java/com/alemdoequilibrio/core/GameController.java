@@ -1,49 +1,55 @@
 package com.alemdoequilibrio.core;
 
+import com.alemdoequilibrio.game.BattleController;
+import com.alemdoequilibrio.game.BattleView;
 import com.alemdoequilibrio.game.ChapterProgress;
+import com.alemdoequilibrio.game.Enemy;
 import com.alemdoequilibrio.game.ExplorationController;
 
 import javafx.stage.Stage;
 
-/**
- * Controla o fluxo geral do jogo.
- */
 public class GameController {
 
-    private final SceneRouter sceneRouter;
+    private final SceneRouter
+            sceneRouter;
 
-    private final ResourceManager resourceManager;
+    private final ResourceManager
+            resourceManager;
 
-    private final ChapterProgress chapterProgress;
+    private final ChapterProgress
+            chapterProgress;
 
-    /*
-     * POO 1.3 - Enum:
-     * restringe os estados possíveis do jogo.
-     */
     private GameState currentState;
 
     private final ExplorationController
             explorationController;
 
-    public GameController(Stage stage) {
+    private BattleController
+            currentBattleController;
 
-        this.sceneRouter =
-                new SceneRouter(stage);
+    private BattleView
+            currentBattleView;
 
-        this.resourceManager =
+    public GameController(
+            Stage stage) {
+
+        sceneRouter =
+                new SceneRouter(
+                        stage
+                );
+
+        resourceManager =
                 new ResourceManager();
 
-        this.chapterProgress =
+        chapterProgress =
                 new ChapterProgress();
 
-        this.currentState =
+        currentState =
                 GameState.MENU;
 
-        this.explorationController =
+        explorationController =
                 new ExplorationController(
-
                         resourceManager,
-
                         chapterProgress,
 
                         () -> changeState(
@@ -52,7 +58,9 @@ public class GameController {
 
                         () -> changeState(
                                 GameState.EXPLORATION
-                        )
+                        ),
+
+                        this::startBattle
                 );
     }
 
@@ -98,24 +106,19 @@ public class GameController {
 
         switch (state) {
 
-            case EXPLORATION -> {
+            case EXPLORATION ->
+                explorationController
+                        .stop();
 
-                explorationController.stop();
-            }
-
-            case DIALOGUE -> {
-
+            case DIALOGUE ->
                 explorationController
                         .closeDialogue();
-            }
 
             case MENU,
                  BATTLE,
                  QUIZ,
                  PAUSED,
                  CHAPTER_COMPLETE -> {
-
-                // Sistemas ainda serão integrados.
             }
         }
     }
@@ -125,42 +128,17 @@ public class GameController {
 
         switch (state) {
 
-            case MENU -> {
-
-                // Futuro menu.
-            }
-
-            case EXPLORATION -> {
-
+            case EXPLORATION ->
                 startExploration();
-            }
 
-            case DIALOGUE -> {
+            case BATTLE ->
+                showBattle();
 
-                /*
-                 * A cena de exploração continua
-                 * visível, mas o loop é pausado.
-                 */
-            }
-
-            case BATTLE -> {
-
-                // Futuro BattleController.
-            }
-
-            case QUIZ -> {
-
-                // Futuro sistema de quiz.
-            }
-
-            case PAUSED -> {
-
-                // Futuro menu de pausa.
-            }
-
-            case CHAPTER_COMPLETE -> {
-
-                // Futuro encerramento do capítulo.
+            case MENU,
+                 DIALOGUE,
+                 QUIZ,
+                 PAUSED,
+                 CHAPTER_COMPLETE -> {
             }
         }
     }
@@ -172,11 +150,113 @@ public class GameController {
                         .getScene()
         );
 
-        explorationController.start();
+        explorationController
+                .start();
+    }
+
+    private void startBattle(
+            Enemy enemy) {
+
+        if (enemy == null
+                || currentState
+                != GameState.EXPLORATION) {
+
+            return;
+        }
+
+        currentBattleController =
+                new BattleController(
+                        explorationController
+                                .getHero(),
+
+                        enemy,
+
+                        this::finishBattle
+                );
+
+        currentBattleView =
+                new BattleView(
+                        currentBattleController
+                );
+
+        changeState(
+                GameState.BATTLE
+        );
+    }
+
+    private void showBattle() {
+
+        if (currentBattleView == null) {
+
+            throw new IllegalStateException(
+                    "Não existe batalha ativa."
+            );
+        }
+
+        sceneRouter.show(
+                currentBattleView
+                        .getScene()
+        );
+    }
+
+    private void finishBattle() {
+
+        if (currentBattleController
+                == null) {
+
+            return;
+        }
+
+        BattleController.BattleResult result =
+                currentBattleController
+                        .getResult();
+
+        if (result
+                == BattleController
+                        .BattleResult.VICTORY) {
+
+            explorationController
+                    .removeDefeatedEnemy(
+                            currentBattleController
+                                    .getEnemy()
+                    );
+
+            currentBattleController =
+                    null;
+
+            currentBattleView =
+                    null;
+
+            changeState(
+                    GameState.EXPLORATION
+            );
+
+            return;
+        }
+
+        if (result
+                == BattleController
+                        .BattleResult.DEFEAT) {
+
+            System.out.println(
+                    "O Herói foi derrotado."
+            );
+
+            /*
+             * Fluxo de derrota/checkpoint
+             * será integrado depois.
+             */
+        }
     }
 
     public GameState getCurrentState() {
 
         return currentState;
+    }
+
+    public BattleController
+            getCurrentBattleController() {
+
+        return currentBattleController;
     }
 }

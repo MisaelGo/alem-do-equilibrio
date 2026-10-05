@@ -1,13 +1,14 @@
 package com.alemdoequilibrio.game;
 
-/**
- * Regiões de exploração disponíveis nesta etapa.
- */
 public enum ExplorationZone {
 
     NEUTRAL_BORDER,
     INSULATOR_TRAIL,
-    FACTION_CROSSROADS;
+    FACTION_CROSSROADS,
+    COULOMB_VALLEY,
+    FIELD_PLATEAU,
+    EQUIPOTENTIAL_RUINS,
+    FRAGMENT_CHAMBER;
 
     public ExplorationZone next() {
 
@@ -20,6 +21,18 @@ public enum ExplorationZone {
                 FACTION_CROSSROADS;
 
             case FACTION_CROSSROADS ->
+                COULOMB_VALLEY;
+
+            case COULOMB_VALLEY ->
+                FIELD_PLATEAU;
+
+            case FIELD_PLATEAU ->
+                EQUIPOTENTIAL_RUINS;
+
+            case EQUIPOTENTIAL_RUINS ->
+                FRAGMENT_CHAMBER;
+
+            case FRAGMENT_CHAMBER ->
                 null;
         };
     }
