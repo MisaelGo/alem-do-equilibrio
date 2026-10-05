@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.alemdoequilibrio.core.ResourceManager;
+
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -33,12 +35,29 @@ public class ZoneManager {
 
     private Rectangle exitArea;
 
+    private final ResourceManager resourceManager;
+
     public ZoneManager(Pane worldLayer) {
+
+        this(
+                worldLayer,
+                new ResourceManager()
+        );
+    }
+
+    public ZoneManager(
+            Pane worldLayer,
+            ResourceManager resourceManager) {
 
         this.worldLayer =
                 Objects.requireNonNull(
                         worldLayer
                 );
+
+        this.resourceManager =
+                resourceManager != null
+                        ? resourceManager
+                        : new ResourceManager();
 
         this.interactables =
                 new ArrayList<>();
@@ -73,27 +92,38 @@ public class ZoneManager {
                 WORLD_HEIGHT
         );
 
-        /*
-         * Placeholder enquanto o mapa definitivo
-         * ainda não foi implementado.
-         */
-        DebugGridRenderer.render(
-                worldLayer,
-                WORLD_WIDTH,
-                WORLD_HEIGHT,
-                TILE_SIZE
-        );
-
         switch (zone) {
 
-            case NEUTRAL_BORDER ->
+            case NEUTRAL_BORDER -> {
+                TileMapRenderer.renderNeutralBorder(
+                        worldLayer,
+                        resourceManager,
+                        WORLD_WIDTH,
+                        WORLD_HEIGHT,
+                        TILE_SIZE
+                );
                 buildNeutralBorder();
+            }
 
-            case INSULATOR_TRAIL ->
+            case INSULATOR_TRAIL -> {
+                DebugGridRenderer.render(
+                        worldLayer,
+                        WORLD_WIDTH,
+                        WORLD_HEIGHT,
+                        TILE_SIZE
+                );
                 buildInsulatorTrail();
+            }
 
-            case FACTION_CROSSROADS ->
+            case FACTION_CROSSROADS -> {
+                DebugGridRenderer.render(
+                        worldLayer,
+                        WORLD_WIDTH,
+                        WORLD_HEIGHT,
+                        TILE_SIZE
+                );
                 buildFactionCrossroads();
+            }
         }
     }
 

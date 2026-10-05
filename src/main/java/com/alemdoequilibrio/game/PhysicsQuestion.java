@@ -12,7 +12,11 @@ public class PhysicsQuestion {
     // da pergunta, das alternativas e do gabarito (correctIndex). O acesso 
     // a essas informações ocorre estritamente via métodos getters.
     private String id;
-    private String topic; // Refere-se às flags de conhecimento, ex: "KNOW_CHARGE_SIGNS"
+    
+    // Correção de Integração: Utilizando a tipagem forte definida pela equipe 
+    // em vez de uma String genérica.
+    private KnowledgeTopic topic; 
+    
     private int difficulty;
     private String prompt;
     private String[] options;
@@ -23,7 +27,7 @@ public class PhysicsQuestion {
     // Justificativa: O construtor obriga que a questão seja instanciada com
     // estado completo e válido. Isso evita que objetos incompletos 
     // entrem no QuestionBank e causem NullPointerExceptions no meio do quiz.
-    public PhysicsQuestion(String id, String topic, int difficulty, String prompt, 
+    public PhysicsQuestion(String id, KnowledgeTopic topic, int difficulty, String prompt, 
                            String[] options, String[] feedbacks, int correctIndex) {
         
         if (options == null || options.length != 4) {
@@ -47,7 +51,7 @@ public class PhysicsQuestion {
 
     // Getters
     public String getId() { return id; }
-    public String getTopic() { return topic; }
+    public KnowledgeTopic getTopic() { return topic; } // Atualizado para retornar o tipo correto
     public int getDifficulty() { return difficulty; }
     public String getPrompt() { return prompt; }
     public String[] getOptions() { return options; }

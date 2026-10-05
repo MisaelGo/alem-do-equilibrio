@@ -1,15 +1,69 @@
 ID;SPEAKER;TEXT
-NILO_CHARGE_SIGNS;Nilo;Aqui todos estão olhando para o símbolo no peito do outro e chamando isso de culpa.
-NILO_CHARGE_SIGNS;Nilo;Quando duas cargas possuem o mesmo sinal, elas tendem a se repelir.
-NILO_CHARGE_SIGNS;Nilo;Quando possuem sinais opostos, elas tendem a se atrair.
-NILO_CHARGE_SIGNS;Nilo;Positivo e negativo são sinais de uma propriedade física, não julgamentos.
-FRONTIER_SIGN;Placa;Fronteira Neutra. Pressione E próximo a elementos interativos.
-ELIA_ELECTRIZATION;Élia;Nestes condutores, as cargas conseguem se rearranjar com mais facilidade.
-ELIA_ELECTRIZATION;Élia;Em materiais comuns, esse rearranjo costuma envolver elétrons.
-ELIA_ELECTRIZATION;Élia;Nos isolantes, as cargas ficam muito menos livres.
-ELIA_ELECTRIZATION;Élia;Uma carga próxima também pode induzir uma separação de cargas sem precisar encostar no condutor.
-INSULATOR_STRUCTURE;Estrutura;Uma parte da estrutura conduz cargas facilmente, enquanto outra atua como isolante.
-MARA_CROSSROADS;Mara;Os Prótons acreditam que os Elétrons sabem mais sobre estas anomalias do que dizem.
-MARA_CROSSROADS;Mara;As descargas começaram a atingir nossa região e precisamos descobrir o que está causando isso.
-ELIA_CROSSROADS;Élia;Os Elétrons também registraram as anomalias no mesmo período.
-ELIA_CROSSROADS;Élia;Se os dois lados observaram o mesmo padrão, precisamos investigar antes de culpar uma das facções.
+NILO_CHARGE_SIGNS;Nilo;Olhe para eles, viajante. Prótons e Elétrons discutindo novamente. Aqui, todo mundo está olhando para o símbolo no peito do outro e chamando isso de culpa pela instabilidade da região.
+NILO_CHARGE_SIGNS;Herói;Eles parecem prestes a se atacar. O que significam esses símbolos de 'positivo' e 'negativo'?
+NILO_CHARGE_SIGNS;Nilo;São apenas sinais de uma propriedade física, e não julgamentos. O sinal 'positivo' não quer dizer bom, e o 'negativo' não quer dizer ruim.
+NILO_CHARGE_SIGNS;Nilo;Comece pelo que é observável: quando duas cargas têm o mesmo sinal, a interação natural tende a afastá-las. É o que chamamos de força de repulsão.
+NILO_CHARGE_SIGNS;Nilo;Por outro lado, quando os sinais são opostos, a interação tende a aproximá-las. Essa é a força de atração.
+NILO_CHARGE_SIGNS;Herói;Isso explica por que aquelas pequenas criaturas ali na frente estão se chocando violentamente ou fugindo umas das outras.
+NILO_CHARGE_SIGNS;Nilo;Exatamente. A instabilidade afeta a todos. Preste atenção aos sinais das Cargas Descontroladas que encontrar pelo caminho.
+NILO_CHARGE_SIGNS;Nilo;Reconhecer de relance quem atrai e quem repele quem será uma vantagem vital para você sobreviver em combate por aqui.
+ELIA_ELECTRIZATION;Élia;Cuidado onde pisa, viajante! Essa estrutura metálica está acumulando energia de forma anormal. Se você encostar nela agora, vai tomar um choque e tanto.
+ELIA_ELECTRIZATION;Herói;Parece perigoso. Mas por que as faíscas só estão pulando pela parte de metal, e não na madeira ou na cerâmica aqui do lado?
+ELIA_ELECTRIZATION;Élia;É uma questão de material. O que se move com facilidade por estes condutores são cargas — em materiais comuns, o rearranjo costuma envolver os elétrons, que são mais livres para viajar.
+ELIA_ELECTRIZATION;Élia;Já na cerâmica ao lado, que é um material isolante, essas cargas ficam muito menos livres. É por isso que duas partes de uma mesma máquina reagem de modos tão diferentes a essa anomalia.
+ELIA_ELECTRIZATION;Herói;Entendi. Então, enquanto eu não encostar no metal, estou seguro e as cargas não vão se mover para mim?
+ELIA_ELECTRIZATION;Élia;Não tenha tanta certeza! Nem sempre é preciso encostar para redistribuir carga. Apenas a aproximação de uma carga forte pode induzir uma separação de cargas dentro de um condutor.
+ELIA_ELECTRIZATION;Élia;Chamamos isso de eletrização por indução. A energia anômala daquele fragmento está tão forte que afeta os metais mesmo a distância.
+ELIA_ELECTRIZATION;Élia;Use a cabeça para passar por aqui. Empurre os blocos de cerâmica isolante para bloquear os arcos elétricos e liberar a passagem.
+ELIA_ELECTRIZATION;Élia;E lembre-se disso nas próximas lutas: saber qual inimigo acumula energia como um condutor e como você pode usar isolantes a seu favor vai salvar sua pele.
+MARA_CROSSROADS;Mara;Atenção por onde anda, viajante. Se foram os Elétrons que te enviaram para nos investigar, saiba que não confiamos neles. Eles se movem rápido demais e escondem o que realmente causou tudo isso.
+MARA_CROSSROADS;Herói;Ninguém me enviou. Estou rastreando as anomalias, e a técnica Élia parecia estar sofrendo com as descargas tanto quanto vocês.
+MARA_CROSSROADS;Mara;Eles adoram culpar a nossa natureza pesada, o nosso núcleo positivo. Mas ignoram o princípio mais sagrado da nossa estrutura...
+MARA_CROSSROADS;Mara;A carga elétrica não pode ser criada nem destruída, ela é apenas transferida de um corpo para outro. É o que chamamos de conservação da carga.
+MARA_CROSSROADS;Herói;Então toda essa energia acumulada nos inimigos não surgiu do nada? Alguém ou alguma coisa injetou isso na região?
+MARA_CROSSROADS;Mara;Exato. A soma total das cargas em um sistema isolado deve permanecer constante. Nós analisamos os nossos registros e percebemos algo perturbador...
+MARA_CROSSROADS;Mara;Os nossos painéis registraram as anomalias exatamente nos mesmos horários que as passarelas dos Elétrons. O distúrbio afeta os dois lados de forma simultânea.
+MARA_CROSSROADS;Mara;Estou começando a separar a 'carga' da 'culpa'. Nenhuma das duas facções teria poder para violar a conservação de forma tão drástica. Há uma fonte de ruptura externa agindo aqui.
+MARA_CROSSROADS;Mara;Lembre-se da conservação nos seus combates: se um inimigo de repente perder sua carga, essa energia não sumiu. Ela certamente foi transferida para outra criatura ao lado. Adapte sua estratégia!
+ELIA_CROSSROADS;Élia;A Mara pode ser teimosa, mas os dados dela batem com os meus. A anomalia é externa. Explore os arredores e veja o que consegue descobrir.
+ION_INTRO_I;Íon;Saudações, viajante! Vejo que sobreviveu aos discursos afiados dos Prótons e dos Elétrons sem tomar nenhum choque mortal.
+ION_INTRO_I;Íon;Sabe, por aqui a moeda compra ferramentas comuns. Mas o entendimento... ah, o entendimento compra técnica!
+ION_INTRO_I;Íon;Se você realmente ouviu o pessoal desta região e entendeu os fenômenos locais, eu consigo te ensinar algo que vale muito mais numa luta. O que me diz de uma troca?
+VECTOR_COULOMB;Vetor;Ah, um viajante! Venha ver isso, os padrões são fascinantes. As medições de interação entre estes marcos estão totalmente inconsistentes com uma sabotagem comum.
+VECTOR_COULOMB;Herói;Eles reagem de forma violenta de perto, mas se acalmam logo que a distância aumenta um pouco. Por que isso acontece?
+VECTOR_COULOMB;Vetor;Exatamente essa é a chave! Dobrar a distância entre duas cargas não reduz a força apenas pela metade. A dependência é muito mais forte.
+VECTOR_COULOMB;Vetor;Para cargas como essas, a força elétrica cai com o quadrado da distância. Chamamos essa relação matemática de Lei de Coulomb.
+VECTOR_COULOMB;Herói;Deixe-me ver se entendi: se eu dobrar a distância de um inimigo que está prestes a me atacar...
+VECTOR_COULOMB;Vetor;A intensidade da força elétrica que ele exerce sobre você cairá para um quarto do valor original! Além disso, a força depende do produto das cargas envolvidas.
+VECTOR_COULOMB;Herói;Faz sentido. Mas o que acontece se eu for cercado por várias daquelas Cargas Descontroladas ao mesmo tempo?
+VECTOR_COULOMB;Vetor;Nesse caso, a força total sobre você será a soma vetorial de cada contribuição individual. Chamamos isso de princípio de superposição.
+VECTOR_COULOMB;Vetor;Aplique essa lógica nos seus combates neste vale: um passo para trás pode enfraquecer o golpe inimigo drasticamente. E jamais fique no ponto onde múltiplas forças se somam contra você!
+VECTOR_FIELD;Vetor;Viajante, olhe para o chão e para o ar! Veja como essas correntes de partículas não estão se movendo ao acaso. Elas desenham um mapa invisível em toda a região.
+VECTOR_FIELD;Herói;É como se houvesse uma 'correnteza' invisível puxando e empurrando a energia por caminhos específicos. O que é isso?
+VECTOR_FIELD;Vetor;Isso é o que chamamos de campo elétrico. Em cada ponto do espaço, ele indica que força, e em qual direção, uma carga de teste positiva sentiria se fosse colocada ali.
+VECTOR_FIELD;Vetor;Por ser uma grandeza vetorial, a direção importa tanto quanto a intensidade. Nós podemos ler esse campo através destas linhas de força no ar.
+VECTOR_FIELD;Herói;E qual é a regra para ler essas linhas? Como eu sei para onde a correnteza vai?
+VECTOR_FIELD;Vetor;É simples: as linhas de campo elétrico sempre apontam para fora de uma carga positiva e entram em uma carga negativa.
+VECTOR_FIELD;Vetor;E se houver várias cargas no planalto, o campo elétrico em um ponto será a soma vetorial das contribuições de todas elas. A superposição molda todo este espaço!
+VECTOR_FIELD;Herói;Então as linhas que convergem para aquelas ruínas ao longe... estão sendo causadas pela grande instabilidade?
+VECTOR_FIELD;Vetor;Exatamente. O epicentro do distúrbio está lá. Mas tenha cuidado redobrado nos seus próximos combates. Leia as setas e linhas de campo no chão da arena.
+VECTOR_FIELD;Vetor;Se você souber ler a direção do campo antes de agir, poderá prever o movimento da energia e ganhar a vantagem tática antes mesmo do golpe do inimigo!
+ION_INTRO_II;Íon;Ora, ora, o nosso viajante continua de pé! E vejo que já está a observar as correntes invisíveis que cruzam este planalto.
+ION_INTRO_II;Íon;Como já lhe disse, o conhecimento vale mais do que a moeda. Mostre-me que compreendeu a força invisível que rege as distâncias e as direções por aqui.
+ION_INTRO_II;Íon;Está pronto para uma nova troca? Tenho uma técnica de combate que se adequa perfeitamente a quem sabe ler o campo de batalha.
+SERA_POTENTIAL;Sera;Aproxime-se com reverência, viajante. Observe os anéis de luz gravados no piso deste santuário. Eles não são meros enfeites, mas a própria malha da estabilidade.
+SERA_POTENTIAL;Herói;Eles formam círculos perfeitos aqui nas bordas, mas estão completamente rompidos e distorcidos ali na frente. O que essas curvas representam?
+SERA_POTENTIAL;Sera;As setas do campo elétrico que você viu lá fora contam uma história de direção. O potencial elétrico, no entanto, conta outra: ele é uma grandeza escalar, um puro valor de energia sem direção própria.
+SERA_POTENTIAL;Sera;Estas curvas que você vê marcam pontos exatos de mesmo potencial. Nós as chamamos de linhas ou superfícies equipotenciais.
+SERA_POTENTIAL;Herói;Isso significa que, se eu caminhar exatamente por cima de uma dessas linhas ininterruptas...
+SERA_POTENTIAL;Sera;O seu potencial não muda. Caminhar ao longo de uma mesma equipotencial não exige esforço do campo, o que é muito diferente de atravessar bruscamente de uma para outra.
+SERA_POTENTIAL;Sera;Infelizmente, a distorção no centro das ruínas está rasgando esse equilíbrio. O Guardião da Ruptura aguarda logo adiante, envolto no caos.
+SERA_POTENTIAL;Sera;Lembre-se disto quando for enfrentá-lo: nem toda defesa precisa de força física. Criar um escudo que estabilize a diferença de potencial ao seu redor pode neutralizar ataques fatais.
+ION_INTRO_III;Íon;Chegamos ao coração da instabilidade, viajante. A tensão no ar é quase palpável. Você conversou com a Sera e viu as antigas marcas de estabilidade no chão do santuário?
+ION_INTRO_III;Íon;Antes de você mergulhar de cabeça nessa ruptura, vamos fazer nossa última troca. Se dominar as leis do potencial, tenho algo que vai garantir que você não seja despedaçado lá dentro.
+POST_BOSS_ENDING;Herói;Acabou. A criatura corrompida cedeu. A instabilidade estava sendo gerada por este fragmento central o tempo todo.
+POST_BOSS_ENDING;Élia;Minhas ferramentas confirmam. As descargas e o campo anômalo desapareceram. A perturbação emanava diretamente daqui, afetando os nossos condutores e as estruturas de vocês com a mesma intensidade.
+POST_BOSS_ENDING;Mara;Então... os registros batiam porque fomos todos atingidos pela mesma fonte externa. A culpa pela corrupção da região não foi dos Elétrons.
+POST_BOSS_ENDING;Élia;E nem de uma sabotagem dos Prótons. Estávamos tão focados em nos culpar que não vimos o verdadeiro problema no centro do vale.
+POST_BOSS_ENDING;Nilo;Como eu lhes disse, a natureza não julga e não toma partido. Sinais de atração e repulsão apenas respondem às leis do universo. O que quer que tenha corrompido este fragmento, ignorou o equilíbrio de ambos.
+POST_BOSS_ENDING;Herói;Este é apenas o primeiro fragmento do Núcleo do Equilíbrio. Vou guardá-lo comigo. Há muito mais a ser descoberto... e consertado.
