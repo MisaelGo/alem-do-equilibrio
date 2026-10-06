@@ -1,6 +1,8 @@
 package com.alemdoequilibrio.game;
 
 import java.util.Objects;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import com.alemdoequilibrio.core.ResourceManager;
@@ -140,10 +142,16 @@ public class ExplorationController {
                 ZoneManager.WORLD_HEIGHT
         );
 
+        QuestionBank questionBank = new QuestionBank();
+        questionBank.loadQuestionsFromFile(
+                "/questions/questions.csv"
+        );
+
         zoneManager =
                 new ZoneManager(
                         worldLayer,
-                        resourceManager
+                        resourceManager,
+                        questionBank
                 );
 
         mapEnemySpawner =
@@ -407,6 +415,23 @@ public class ExplorationController {
             return;
         }
 
+        if (interactable instanceof Merchant merchant) {
+            Set<String> unlockedNames = new HashSet<>();
+
+            for (Ability ability : hero.getAbilityBook()
+                    .getAbilities()) {
+                unlockedNames.add(ability.getName());
+            }
+
+            merchant.startQuiz(
+                    hero,
+                    chapterProgress,
+                    unlockedNames
+            );
+
+            return;
+        }
+
         dialogueController
                 .startDialogue(
                         interactable
@@ -633,6 +658,12 @@ public class ExplorationController {
         if (chapterProgress
                 .reachCheckpoint(zone)) {
 
+            hero.restoreHealth();
+            hud.updateHealth(
+                    hero.getHealth(),
+                    hero.getMaxHealth()
+            );
+
             System.out.println(
                     "Checkpoint alcançado: "
                     + zone
@@ -750,6 +781,11 @@ public class ExplorationController {
 
         lastTime = 0;
 
+        hud.updateHealth(
+                hero.getHealth(),
+                hero.getMaxHealth()
+        );
+
         updateCamera();
 
         gameLoop.start();
@@ -777,6 +813,18 @@ public class ExplorationController {
                 .removeEnemy(
                         enemy
                 );
+    }
+
+    /**
+     * Reposiciona e recupera o Hero depois de uma derrota.
+     */
+    public void respawnAtCheckpoint() {
+        hero.restoreHealth();
+        loadZone(chapterProgress.getCheckpoint());
+        hud.updateHealth(
+                hero.getHealth(),
+                hero.getMaxHealth()
+        );
     }
 
     public Hero getHero() {

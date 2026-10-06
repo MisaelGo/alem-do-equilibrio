@@ -45,6 +45,7 @@ public class BattleController {
     private int completedRounds;
     private boolean interruptNextEnemyTurn;
     private boolean lastEnemyTurnInterrupted;
+    private int nextInterruptAvailableRound;
 
     /**
      * Cria uma batalha sem uma acao automatica de encerramento.
@@ -106,6 +107,7 @@ public class BattleController {
         this.completedRounds = 0;
         this.interruptNextEnemyTurn = false;
         this.lastEnemyTurnInterrupted = false;
+        this.nextInterruptAvailableRound = 0;
     }
 
     /**
@@ -164,7 +166,17 @@ public class BattleController {
     void interruptNextEnemyTurn() {
         ensureBattleInProgress();
         ensureTurn(BattleTurn.PLAYER_TURN);
-        interruptNextEnemyTurn = true;
+
+        if (completedRounds >= nextInterruptAvailableRound) {
+            interruptNextEnemyTurn = true;
+            nextInterruptAvailableRound = completedRounds + 2;
+        }
+    }
+
+    void activateEquipotentialShield() {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+        hero.activateEquipotentialShield();
     }
 
     /**
@@ -193,11 +205,9 @@ public class BattleController {
 
     /**
      * Ponto central para atualizar efeitos no fim da rodada.
-     *
-     * Os efeitos concretos serao adicionados junto ao sistema de habilidades.
      */
     private void updateTemporaryEffects() {
-        // Nenhum efeito temporario foi definido nesta etapa.
+        hero.expireEquipotentialShield();
     }
 
     private void ensureBattleInProgress() {

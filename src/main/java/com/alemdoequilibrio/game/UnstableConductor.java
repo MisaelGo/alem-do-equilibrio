@@ -43,7 +43,13 @@ public class UnstableConductor extends Enemy {
         float dischargeDamage =
                 calculateTurnDamage() * DISCHARGE_MULTIPLIER;
 
+        boolean shielded = hero.isEquipotentialShieldActive();
         hero.takeDamage(dischargeDamage);
+
+        if (!shielded && hero.isAlive()) {
+            hero.markUnstable();
+        }
+
         energyStored = false;
     }
 

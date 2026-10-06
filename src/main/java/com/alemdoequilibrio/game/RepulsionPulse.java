@@ -1,7 +1,7 @@
 package com.alemdoequilibrio.game;
 
 /**
- * Pulso positivo que causa dano leve e repele inimigos da mesma polaridade.
+ * Pulso que causa dano leve e repele inimigos da mesma polaridade.
  *
  * A repulsao impede um ataque inimigo. Os valores sao regras de jogo, nao uma
  * simulacao numerica da forca eletrostatica.
@@ -13,7 +13,7 @@ public class RepulsionPulse extends Ability {
     public RepulsionPulse() {
         super(
                 "Pulso de Repulsão",
-                "Causa dano leve e interrompe o ataque de um inimigo positivo."
+                "Causa dano leve e interrompe um ataque de carga igual."
         );
     }
 
@@ -22,9 +22,19 @@ public class RepulsionPulse extends Ability {
         Enemy enemy = battle.getEnemy();
         enemy.takeDamage(DAMAGE);
 
+        ChargeType heroCharge = battle.getHero().getChargeType();
+        ChargeType pulseCharge = heroCharge == ChargeType.NEUTRAL
+                ? ChargeType.POSITIVE : heroCharge;
+
+        boolean matchingChargedEnemy = enemy instanceof ChargedEnemy chargedEnemy
+                && chargedEnemy.getChargeType() == pulseCharge;
+
+        boolean matchingBoss = enemy instanceof BossEnemy bossEnemy
+                && bossEnemy.getPhase() == BossEnemy.Phase.POLARITY
+                && bossEnemy.getChargeType() == pulseCharge;
+
         if (enemy.isAlive()
-                && enemy instanceof ChargedEnemy chargedEnemy
-                && chargedEnemy.getChargeType() == ChargeType.POSITIVE) {
+                && (matchingChargedEnemy || matchingBoss)) {
             battle.interruptNextEnemyTurn();
         }
     }
