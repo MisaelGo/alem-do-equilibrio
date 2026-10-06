@@ -494,8 +494,7 @@ public class ZoneManager {
 
         Label label =
                 new Label(
-                        "Entrada do boss — integração "
-                        + "final prevista para a S4."
+                        "O Guardião da Ruptura aguarda no centro da câmara."
                 );
 
         label.relocate(

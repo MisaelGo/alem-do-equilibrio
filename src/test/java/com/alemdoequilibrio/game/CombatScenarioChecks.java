@@ -17,6 +17,7 @@ public final class CombatScenarioChecks {
     public static void main(String[] args) {
         checkBossIsWinnableWithoutAbilities();
         checkRepulsionAndTurnOrder();
+        checkChargeSelectionDuringBattle();
         checkFieldImpulseAndShield();
         checkPotentialPhaseAlternates();
         checkDefeatRecovery();
@@ -135,6 +136,59 @@ public final class CombatScenarioChecks {
         check(protectedHero.getHealth() == 89.0f
                         && !protectedHero.isUnstable(),
                 "O Escudo deve reduzir a descarga e impedir instabilidade.");
+    }
+
+    private static void checkChargeSelectionDuringBattle() {
+        Hero hero = new Hero(0, 0, 200);
+        hero.learnAbility(new RepulsionPulse(), true);
+        BattleController battle = new BattleController(
+                hero, new UncontrolledCharge(10, ChargeType.NEGATIVE)
+        );
+
+        battle.setHeroChargeType(ChargeType.NEGATIVE);
+        check(hero.getChargeType() == ChargeType.NEGATIVE,
+                "A polaridade escolhida deve chegar ao Hero.");
+        battle.performPlayerAbility();
+
+        boolean rejectedDuringEnemyTurn = false;
+        try {
+            battle.setHeroChargeType(ChargeType.POSITIVE);
+        } catch (IllegalStateException expected) {
+            rejectedDuringEnemyTurn = true;
+        }
+        check(rejectedDuringEnemyTurn,
+                "Nao pode mudar a carga durante o turno inimigo.");
+
+        battle.performEnemyTurn();
+        check(battle.wasLastEnemyTurnInterrupted()
+                        && hero.getHealth() == hero.getMaxHealth(),
+                "O Pulso deve interromper o inimigo com a carga escolhida.");
+
+        battle.setHeroChargeType(ChargeType.POSITIVE);
+        check(hero.getChargeType() == ChargeType.POSITIVE,
+                "A carga deve poder mudar no turno seguinte.");
+
+        boolean rejectedNullCharge = false;
+        try {
+            battle.setHeroChargeType(null);
+        } catch (IllegalArgumentException expected) {
+            rejectedNullCharge = true;
+        }
+        check(rejectedNullCharge,
+                "Uma carga nula nao pode ser selecionada.");
+
+        battle.performPlayerAttack(30.0f);
+        check(battle.getResult() == BattleController.BattleResult.VICTORY,
+                "O ataque deve encerrar a batalha.");
+
+        boolean rejectedAfterVictory = false;
+        try {
+            battle.setHeroChargeType(ChargeType.NEUTRAL);
+        } catch (IllegalStateException expected) {
+            rejectedAfterVictory = true;
+        }
+        check(rejectedAfterVictory,
+                "Nao pode mudar a carga depois da batalha.");
     }
 
     private static void checkPotentialPhaseAlternates() {

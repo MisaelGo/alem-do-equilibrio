@@ -161,6 +161,18 @@ public class BattleController {
     }
 
     /**
+     * Escolhe a polaridade do Hero antes de agir. Ajustar a carga nao consome
+     * o turno, mas so e permitido enquanto a batalha espera o jogador.
+     *
+     * @param chargeType nova polaridade do Hero
+     */
+    public void setHeroChargeType(ChargeType chargeType) {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+        hero.setChargeType(chargeType);
+    }
+
+    /**
      * Permite que uma habilidade interrompa o proximo ataque do inimigo.
      */
     void interruptNextEnemyTurn() {

@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 public class BattleView {
 
@@ -34,6 +35,7 @@ public class BattleView {
     private final Button attackButton;
     private final Button abilityButton;
     private final ComboBox<String> abilitySelector;
+    private final ComboBox<ChargeType> chargeSelector;
 
     private final Scene scene;
 
@@ -72,6 +74,27 @@ public class BattleView {
         heroChargeLabel =
                 new Label();
 
+        chargeSelector = new ComboBox<>();
+        chargeSelector.getItems().addAll(ChargeType.values());
+        chargeSelector.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(ChargeType chargeType) {
+                return chargeType == null ? "" : chargeType.getDescription()
+                        + " (" + chargeType.getSymbol() + ")";
+            }
+
+            @Override
+            public ChargeType fromString(String value) {
+                for (ChargeType chargeType : ChargeType.values()) {
+                    if (toString(chargeType).equals(value)) {
+                        return chargeType;
+                    }
+                }
+                throw new IllegalArgumentException("Carga desconhecida: " + value);
+            }
+        });
+        chargeSelector.setValue(battleController.getHero().getChargeType());
+
         enemyHealthLabel =
                 new Label();
 
@@ -80,8 +103,21 @@ public class BattleView {
 
         statusLabel =
                 new Label(
-                        "Seu turno."
+                        "Seu turno. Escolha a carga e depois ataque ou use uma habilidade."
                 );
+        statusLabel.setMaxWidth(900);
+        statusLabel.setWrapText(true);
+        statusLabel.setAlignment(Pos.CENTER);
+
+        chargeSelector.setOnAction(event -> {
+            ChargeType selectedCharge = chargeSelector.getValue();
+            if (selectedCharge != null) {
+                battleController.setHeroChargeType(selectedCharge);
+                updateView();
+                statusLabel.setText("Carga ajustada para "
+                        + selectedCharge.getDescription() + ". Seu turno.");
+            }
+        });
 
         attackButton =
                 new Button(
@@ -139,6 +175,7 @@ public class BattleView {
                         enemyName,
                         heroHealthLabel,
                         heroChargeLabel,
+                        chargeSelector,
                         enemyHealthLabel,
                         enemyPhaseLabel,
                         statusLabel,
@@ -170,6 +207,14 @@ public class BattleView {
             return;
         }
 
+        Hero hero = battleController.getHero();
+        Enemy enemy = battleController.getEnemy();
+        float enemyHealthBefore = enemy.getHealth();
+        float heroHealthBefore = hero.getHealth();
+        String actionName = useAbility
+                ? hero.getAbilityBook().getEquippedAbility().getName()
+                : "Ataque";
+
         if (useAbility) {
             battleController
                     .performPlayerAbility();
@@ -188,20 +233,19 @@ public class BattleView {
             return;
         }
 
-        statusLabel.setText(
-                "O inimigo atacou."
-        );
-
         battleController
                 .performEnemyTurn();
 
         updateView();
 
-        if (!battleController.isBattleFinished()
-                && battleController.wasLastEnemyTurnInterrupted()) {
-            statusLabel.setText(
-                    "O Pulso interrompeu o ataque. Seu turno."
-            );
+        if (!battleController.isBattleFinished()) {
+            String enemyResponse = battleController.wasLastEnemyTurnInterrupted()
+                    ? "Ataque inimigo interrompido."
+                    : "Você sofreu " + Math.round(heroHealthBefore
+                            - hero.getHealth()) + " de dano.";
+            statusLabel.setText(actionName + " causou "
+                    + Math.round(enemyHealthBefore - enemy.getHealth())
+                    + " de dano. " + enemyResponse + " Seu turno.");
         }
     }
 
@@ -279,6 +323,7 @@ public class BattleView {
             );
 
             abilitySelector.setDisable(true);
+            chargeSelector.setDisable(true);
 
             switch (battleController
                     .getResult()) {
@@ -300,9 +345,6 @@ public class BattleView {
             return;
         }
 
-        statusLabel.setText(
-                "Seu turno."
-        );
     }
 
     public Scene getScene() {
