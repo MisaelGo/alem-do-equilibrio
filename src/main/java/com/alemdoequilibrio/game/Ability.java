@@ -42,7 +42,7 @@ public abstract class Ability {
      *
      * @param battle batalha em que a habilidade sera usada
      */
-    public abstract void execute(BattleController battle);
+    protected abstract void execute(BattleController battle);
 
     public String getName() {
         return name;

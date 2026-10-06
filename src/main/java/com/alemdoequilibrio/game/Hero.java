@@ -12,6 +12,12 @@ public class Hero extends GameCharacter
 
     private float health;
 
+    /*
+     * POO - Composicao:
+     * o Hero cria e possui seu proprio AbilityBook.
+     */
+    private final AbilityBook abilityBook;
+
     public Hero(
             double x,
             double y,
@@ -44,6 +50,7 @@ public class Hero extends GameCharacter
         this.y = y;
         this.speed = speed;
         this.health = health;
+        this.abilityBook = new AbilityBook();
 
         if (!isAlive()) {
             deactivate();
@@ -143,6 +150,36 @@ public class Hero extends GameCharacter
 
     public float getHealth() {
         return health;
+    }
+
+    /**
+     * Aprende uma habilidade sem equipa-la automaticamente.
+     *
+     * @param ability habilidade a aprender
+     */
+    public void learnAbility(Ability ability) {
+        abilityBook.addAbility(ability);
+    }
+
+    /**
+     * Aprende uma habilidade e opcionalmente a equipa.
+     *
+     * POO - Sobrecarga: este metodo tem o mesmo nome do metodo acima, mas
+     * recebe um parametro adicional para decidir se a habilidade sera equipada.
+     *
+     * @param ability habilidade a aprender
+     * @param equipNow true para equipar a habilidade imediatamente
+     */
+    public void learnAbility(Ability ability, boolean equipNow) {
+        learnAbility(ability);
+
+        if (equipNow) {
+            abilityBook.equipAbility(ability);
+        }
+    }
+
+    public AbilityBook getAbilityBook() {
+        return abilityBook;
     }
     
     public void setPosition(

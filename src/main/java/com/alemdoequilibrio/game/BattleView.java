@@ -29,6 +29,7 @@ public class BattleView {
     private final Label statusLabel;
 
     private final Button attackButton;
+    private final Button abilityButton;
 
     private final Scene scene;
 
@@ -79,7 +80,15 @@ public class BattleView {
 
         attackButton.setOnAction(
                 event ->
-                        performPlayerTurn()
+                        performPlayerTurn(false)
+        );
+
+        abilityButton =
+                new Button();
+
+        abilityButton.setOnAction(
+                event ->
+                        performPlayerTurn(true)
         );
 
         VBox root =
@@ -90,7 +99,8 @@ public class BattleView {
                         heroHealthLabel,
                         enemyHealthLabel,
                         statusLabel,
-                        attackButton
+                        attackButton,
+                        abilityButton
                 );
 
         root.setAlignment(
@@ -107,7 +117,8 @@ public class BattleView {
         updateView();
     }
 
-    private void performPlayerTurn() {
+    private void performPlayerTurn(
+            boolean useAbility) {
 
         if (battleController
                 .isBattleFinished()) {
@@ -115,10 +126,15 @@ public class BattleView {
             return;
         }
 
-        battleController
-                .performPlayerAttack(
-                        PLAYER_DAMAGE
-                );
+        if (useAbility) {
+            battleController
+                    .performPlayerAbility();
+        } else {
+            battleController
+                    .performPlayerAttack(
+                            PLAYER_DAMAGE
+                    );
+        }
 
         if (battleController
                 .isBattleFinished()) {
@@ -136,6 +152,13 @@ public class BattleView {
                 .performEnemyTurn();
 
         updateView();
+
+        if (!battleController.isBattleFinished()
+                && battleController.wasLastEnemyTurnInterrupted()) {
+            statusLabel.setText(
+                    "O Pulso interrompeu o ataque. Seu turno."
+            );
+        }
     }
 
     private void updateView() {
@@ -147,6 +170,21 @@ public class BattleView {
         Enemy enemy =
                 battleController
                         .getEnemy();
+
+        Ability equippedAbility =
+                hero.getAbilityBook()
+                        .getEquippedAbility();
+
+        abilityButton.setText(
+                equippedAbility == null
+                        ? "Habilidade indisponível"
+                        : "Usar " + equippedAbility.getName()
+        );
+
+        abilityButton.setDisable(
+                equippedAbility == null
+                        || battleController.isBattleFinished()
+        );
 
         heroHealthLabel.setText(
                 "HP do Herói: "
