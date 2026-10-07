@@ -11,6 +11,18 @@ public class Hero extends GameCharacter
     private double speed;
 
     private float health;
+    private final float maxHealth;
+    private boolean equipotentialShieldActive;
+    private boolean unstable;
+
+    /* POO 1.3 - Enum: restringe a polaridade do Hero a valores conhecidos. */
+    private ChargeType chargeType;
+
+    /*
+     * POO - Composicao:
+     * o Hero cria e possui seu proprio AbilityBook.
+     */
+    private final AbilityBook abilityBook;
 
     public Hero(
             double x,
@@ -44,6 +56,9 @@ public class Hero extends GameCharacter
         this.y = y;
         this.speed = speed;
         this.health = health;
+        this.maxHealth = health;
+        this.abilityBook = new AbilityBook();
+        this.chargeType = ChargeType.NEUTRAL;
 
         if (!isAlive()) {
             deactivate();
@@ -62,10 +77,22 @@ public class Hero extends GameCharacter
             );
         }
 
+        float actualDamage = damage;
+
+        if (damage > 0.0f && unstable) {
+            actualDamage += 2.0f;
+            unstable = false;
+        }
+
+        if (damage > 0.0f && equipotentialShieldActive) {
+            actualDamage *= 0.5f;
+            equipotentialShieldActive = false;
+        }
+
         health =
                 Math.max(
                         0.0f,
-                        health - damage
+                        health - actualDamage
                 );
 
         updateState();
@@ -143,6 +170,88 @@ public class Hero extends GameCharacter
 
     public float getHealth() {
         return health;
+    }
+
+    public float getMaxHealth() {
+        return maxHealth;
+    }
+
+    /**
+     * Recupera o Hero depois de uma derrota sem perder suas habilidades.
+     */
+    public void restoreHealth() {
+        health = maxHealth;
+        unstable = false;
+        equipotentialShieldActive = false;
+
+        if (isAlive()) {
+            activate();
+        }
+    }
+
+    void activateEquipotentialShield() {
+        equipotentialShieldActive = true;
+        unstable = false;
+    }
+
+    void expireEquipotentialShield() {
+        equipotentialShieldActive = false;
+    }
+
+    public boolean isEquipotentialShieldActive() {
+        return equipotentialShieldActive;
+    }
+
+    public void markUnstable() {
+        unstable = true;
+    }
+
+    public boolean isUnstable() {
+        return unstable;
+    }
+
+    public ChargeType getChargeType() {
+        return chargeType;
+    }
+
+    public void setChargeType(ChargeType chargeType) {
+        if (chargeType == null) {
+            throw new IllegalArgumentException(
+                    "A carga do Hero nao pode ser nula."
+            );
+        }
+
+        this.chargeType = chargeType;
+    }
+
+    /**
+     * Aprende uma habilidade sem equipa-la automaticamente.
+     *
+     * @param ability habilidade a aprender
+     */
+    public void learnAbility(Ability ability) {
+        abilityBook.addAbility(ability);
+    }
+
+    /**
+     * Aprende uma habilidade e opcionalmente a equipa.
+     *
+     * POO - Sobrecarga: este metodo tem o mesmo nome do metodo acima, mas
+     * recebe um parametro adicional para decidir se a habilidade sera equipada.
+     *
+     * @param ability habilidade a aprender
+     * @param equipNow true para equipar a habilidade imediatamente
+     */
+    public void learnAbility(Ability ability, boolean equipNow) {
+        learnAbility(ability);
+
+        if (equipNow) {
+            abilityBook.equipAbility(ability);
+        }
+    }
+
+    public AbilityBook getAbilityBook() {
+        return abilityBook;
     }
     
     public void setPosition(

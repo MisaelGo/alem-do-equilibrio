@@ -43,6 +43,9 @@ public class BattleController {
     private BattleTurn currentTurn;
     private BattleResult result;
     private int completedRounds;
+    private boolean interruptNextEnemyTurn;
+    private boolean lastEnemyTurnInterrupted;
+    private int nextInterruptAvailableRound;
 
     /**
      * Cria uma batalha sem uma acao automatica de encerramento.
@@ -102,6 +105,9 @@ public class BattleController {
         this.currentTurn = BattleTurn.PLAYER_TURN;
         this.result = BattleResult.IN_PROGRESS;
         this.completedRounds = 0;
+        this.interruptNextEnemyTurn = false;
+        this.lastEnemyTurnInterrupted = false;
+        this.nextInterruptAvailableRound = 0;
     }
 
     /**
@@ -130,13 +136,74 @@ public class BattleController {
     }
 
     /**
+     * Usa a habilidade equipada do Hero como sua acao neste turno.
+     */
+    public void performPlayerAbility() {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+
+        Ability ability = hero.getAbilityBook().getEquippedAbility();
+
+        if (ability == null) {
+            throw new IllegalStateException(
+                    "O Hero nao possui habilidade equipada."
+            );
+        }
+
+        ability.execute(this);
+
+        if (!enemy.isAlive()) {
+            finishBattle(BattleResult.VICTORY);
+            return;
+        }
+
+        currentTurn = BattleTurn.ENEMY_TURN;
+    }
+
+    /**
+     * Escolhe a polaridade do Hero antes de agir. Ajustar a carga nao consome
+     * o turno, mas so e permitido enquanto a batalha espera o jogador.
+     *
+     * @param chargeType nova polaridade do Hero
+     */
+    public void setHeroChargeType(ChargeType chargeType) {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+        hero.setChargeType(chargeType);
+    }
+
+    /**
+     * Permite que uma habilidade interrompa o proximo ataque do inimigo.
+     */
+    void interruptNextEnemyTurn() {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+
+        if (completedRounds >= nextInterruptAvailableRound) {
+            interruptNextEnemyTurn = true;
+            nextInterruptAvailableRound = completedRounds + 2;
+        }
+    }
+
+    void activateEquipotentialShield() {
+        ensureBattleInProgress();
+        ensureTurn(BattleTurn.PLAYER_TURN);
+        hero.activateEquipotentialShield();
+    }
+
+    /**
      * Executa o comportamento polimorfico do inimigo e conclui a rodada.
      */
     public void performEnemyTurn() {
         ensureBattleInProgress();
         ensureTurn(BattleTurn.ENEMY_TURN);
 
-        enemy.performTurn(hero);
+        lastEnemyTurnInterrupted = interruptNextEnemyTurn;
+        interruptNextEnemyTurn = false;
+
+        if (!lastEnemyTurnInterrupted) {
+            enemy.performTurn(hero);
+        }
 
         if (!hero.isAlive()) {
             finishBattle(BattleResult.DEFEAT);
@@ -150,11 +217,9 @@ public class BattleController {
 
     /**
      * Ponto central para atualizar efeitos no fim da rodada.
-     *
-     * Os efeitos concretos serao adicionados junto ao sistema de habilidades.
      */
     private void updateTemporaryEffects() {
-        // Nenhum efeito temporario foi definido nesta etapa.
+        hero.expireEquipotentialShield();
     }
 
     private void ensureBattleInProgress() {
@@ -201,5 +266,9 @@ public class BattleController {
 
     public boolean isBattleFinished() {
         return result != BattleResult.IN_PROGRESS;
+    }
+
+    public boolean wasLastEnemyTurnInterrupted() {
+        return lastEnemyTurnInterrupted;
     }
 }

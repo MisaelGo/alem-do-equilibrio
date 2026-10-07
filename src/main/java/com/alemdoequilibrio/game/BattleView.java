@@ -5,8 +5,10 @@ import java.util.Objects;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 public class BattleView {
 
@@ -23,12 +25,17 @@ public class BattleView {
             battleController;
 
     private final Label heroHealthLabel;
+    private final Label heroChargeLabel;
 
     private final Label enemyHealthLabel;
+    private final Label enemyPhaseLabel;
 
     private final Label statusLabel;
 
     private final Button attackButton;
+    private final Button abilityButton;
+    private final ComboBox<String> abilitySelector;
+    private final ComboBox<ChargeType> chargeSelector;
 
     private final Scene scene;
 
@@ -64,13 +71,53 @@ public class BattleView {
         heroHealthLabel =
                 new Label();
 
+        heroChargeLabel =
+                new Label();
+
+        chargeSelector = new ComboBox<>();
+        chargeSelector.getItems().addAll(ChargeType.values());
+        chargeSelector.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(ChargeType chargeType) {
+                return chargeType == null ? "" : chargeType.getDescription()
+                        + " (" + chargeType.getSymbol() + ")";
+            }
+
+            @Override
+            public ChargeType fromString(String value) {
+                for (ChargeType chargeType : ChargeType.values()) {
+                    if (toString(chargeType).equals(value)) {
+                        return chargeType;
+                    }
+                }
+                throw new IllegalArgumentException("Carga desconhecida: " + value);
+            }
+        });
+        chargeSelector.setValue(battleController.getHero().getChargeType());
+
         enemyHealthLabel =
+                new Label();
+
+        enemyPhaseLabel =
                 new Label();
 
         statusLabel =
                 new Label(
-                        "Seu turno."
+                        "Seu turno. Escolha a carga e depois ataque ou use uma habilidade."
                 );
+        statusLabel.setMaxWidth(900);
+        statusLabel.setWrapText(true);
+        statusLabel.setAlignment(Pos.CENTER);
+
+        chargeSelector.setOnAction(event -> {
+            ChargeType selectedCharge = chargeSelector.getValue();
+            if (selectedCharge != null) {
+                battleController.setHeroChargeType(selectedCharge);
+                updateView();
+                statusLabel.setText("Carga ajustada para "
+                        + selectedCharge.getDescription() + ". Seu turno.");
+            }
+        });
 
         attackButton =
                 new Button(
@@ -79,8 +126,47 @@ public class BattleView {
 
         attackButton.setOnAction(
                 event ->
-                        performPlayerTurn()
+                        performPlayerTurn(false)
         );
+
+        abilityButton =
+                new Button();
+
+        abilityButton.setOnAction(
+                event ->
+                        performPlayerTurn(true)
+        );
+
+        abilitySelector =
+                new ComboBox<>();
+
+        for (Ability ability : battleController.getHero()
+                .getAbilityBook().getAbilities()) {
+            abilitySelector.getItems().add(ability.getName());
+        }
+
+        Ability equipped = battleController.getHero()
+                .getAbilityBook().getEquippedAbility();
+
+        if (equipped != null) {
+            abilitySelector.setValue(equipped.getName());
+        }
+
+        abilitySelector.setPromptText("Escolha uma habilidade");
+        abilitySelector.setDisable(abilitySelector.getItems().isEmpty());
+        abilitySelector.setOnAction(event -> {
+            String selectedName = abilitySelector.getValue();
+
+            for (Ability ability : battleController.getHero()
+                    .getAbilityBook().getAbilities()) {
+                if (ability.getName().equals(selectedName)) {
+                    battleController.getHero().getAbilityBook()
+                            .equipAbility(ability);
+                    updateView();
+                    break;
+                }
+            }
+        });
 
         VBox root =
                 new VBox(
@@ -88,9 +174,14 @@ public class BattleView {
                         title,
                         enemyName,
                         heroHealthLabel,
+                        heroChargeLabel,
+                        chargeSelector,
                         enemyHealthLabel,
+                        enemyPhaseLabel,
                         statusLabel,
-                        attackButton
+                        attackButton,
+                        abilitySelector,
+                        abilityButton
                 );
 
         root.setAlignment(
@@ -107,7 +198,8 @@ public class BattleView {
         updateView();
     }
 
-    private void performPlayerTurn() {
+    private void performPlayerTurn(
+            boolean useAbility) {
 
         if (battleController
                 .isBattleFinished()) {
@@ -115,10 +207,23 @@ public class BattleView {
             return;
         }
 
-        battleController
-                .performPlayerAttack(
-                        PLAYER_DAMAGE
-                );
+        Hero hero = battleController.getHero();
+        Enemy enemy = battleController.getEnemy();
+        float enemyHealthBefore = enemy.getHealth();
+        float heroHealthBefore = hero.getHealth();
+        String actionName = useAbility
+                ? hero.getAbilityBook().getEquippedAbility().getName()
+                : "Ataque";
+
+        if (useAbility) {
+            battleController
+                    .performPlayerAbility();
+        } else {
+            battleController
+                    .performPlayerAttack(
+                            PLAYER_DAMAGE
+                    );
+        }
 
         if (battleController
                 .isBattleFinished()) {
@@ -128,14 +233,20 @@ public class BattleView {
             return;
         }
 
-        statusLabel.setText(
-                "O inimigo atacou."
-        );
-
         battleController
                 .performEnemyTurn();
 
         updateView();
+
+        if (!battleController.isBattleFinished()) {
+            String enemyResponse = battleController.wasLastEnemyTurnInterrupted()
+                    ? "Ataque inimigo interrompido."
+                    : "Você sofreu " + Math.round(heroHealthBefore
+                            - hero.getHealth()) + " de dano.";
+            statusLabel.setText(actionName + " causou "
+                    + Math.round(enemyHealthBefore - enemy.getHealth())
+                    + " de dano. " + enemyResponse + " Seu turno.");
+        }
     }
 
     private void updateView() {
@@ -148,11 +259,30 @@ public class BattleView {
                 battleController
                         .getEnemy();
 
+        Ability equippedAbility =
+                hero.getAbilityBook()
+                        .getEquippedAbility();
+
+        abilityButton.setText(
+                equippedAbility == null
+                        ? "Habilidade indisponível"
+                        : "Usar " + equippedAbility.getName()
+        );
+
+        abilityButton.setDisable(
+                equippedAbility == null
+                        || battleController.isBattleFinished()
+        );
+
         heroHealthLabel.setText(
                 "HP do Herói: "
                 + Math.round(
                         hero.getHealth()
                 )
+        );
+
+        heroChargeLabel.setText(
+                "Carga do Herói: " + hero.getChargeType().getSymbol()
         );
 
         enemyHealthLabel.setText(
@@ -164,12 +294,36 @@ public class BattleView {
                 )
         );
 
+        if (enemy instanceof BossEnemy boss) {
+            String phaseDescription = switch (boss.getPhase()) {
+                case POLARITY -> "Fase 1 - Polaridade: "
+                        + boss.getChargeType().getSymbol();
+                case FIELD -> "Fase 2 - Campo: "
+                        + (boss.getFieldDirection()
+                                == BossEnemy.FieldDirection.LEFT
+                                ? "esquerda" : "direita");
+                case POTENTIAL -> "Fase 3 - Potencial: "
+                        + (boss.isPotentialShieldActive()
+                                ? "escudo ativo" : "escudo inativo");
+            };
+
+            enemyPhaseLabel.setText(phaseDescription);
+        } else if (enemy instanceof ChargedEnemy chargedEnemy) {
+            enemyPhaseLabel.setText(
+                    "Carga do inimigo: "
+                    + chargedEnemy.getChargeType().getSymbol()
+            );
+        }
+
         if (battleController
                 .isBattleFinished()) {
 
             attackButton.setDisable(
                     true
             );
+
+            abilitySelector.setDisable(true);
+            chargeSelector.setDisable(true);
 
             switch (battleController
                     .getResult()) {
@@ -191,9 +345,6 @@ public class BattleView {
             return;
         }
 
-        statusLabel.setText(
-                "Seu turno."
-        );
     }
 
     public Scene getScene() {
