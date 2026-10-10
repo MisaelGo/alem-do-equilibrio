@@ -32,6 +32,7 @@ public class HUD {
      * outras classes interagem apenas por métodos de apresentação.
      */
     private final Pane hudLayer;
+    private final ResourceManager resourceManager;
     private final VBox statusCard;
     private final ProgressBar hpBar;
     private final Label hpValueLabel;
@@ -55,7 +56,7 @@ public class HUD {
                 hudLayer,
                 "A camada hudLayer não pode ser nula."
         );
-        Objects.requireNonNull(
+        this.resourceManager = Objects.requireNonNull(
                 resourceManager,
                 "O ResourceManager não pode ser nulo."
         );
@@ -178,6 +179,12 @@ public class HUD {
         conceptTitleLabel.setText(getTopicDisplayName(topic));
         conceptBanner.setOpacity(0.0);
         conceptBanner.setVisible(true);
+
+        try {
+            resourceManager.getAudioClip("/audio/sfx_quiz_correct.wav").play();
+        } catch (Exception e) {
+            // Se áudio estiver desabilitado no ambiente, continua silenciosamente
+        }
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(350), conceptBanner);
         fadeIn.setFromValue(0.0);

@@ -331,11 +331,20 @@ public class BattleView {
         updateView();
     }
 
+    private void playSfx(String path) {
+        try {
+            resourceManager.getAudioClip(path).play();
+        } catch (Exception e) {
+            // Silencioso se áudio não estiver disponível
+        }
+    }
+
     private Button createCommandButton(String text) {
         Button btn = new Button(text);
         btn.getStyleClass().add("command-btn");
         btn.setMaxWidth(Double.MAX_VALUE);
         VBox.setVgrow(btn, Priority.ALWAYS);
+        btn.addEventHandler(javafx.event.ActionEvent.ACTION, e -> playSfx("/audio/sfx_menu_select.wav"));
         return btn;
     }
 
@@ -465,6 +474,7 @@ public class BattleView {
         setButtonsDisabled(true);
         triggerScreenShake();
         playEnemyHitFlash();
+        playSfx("/audio/sfx_hit.wav");
 
         battleController.performPlayerAttack(PLAYER_DAMAGE);
 
@@ -495,6 +505,7 @@ public class BattleView {
 
         triggerScreenShake();
         playPlayerDamageFlash();
+        playSfx("/audio/sfx_hit.wav");
 
         telegraphTextLabel.setText(battleController.getEnemy().getName()
                 + " descarrega seu potencial elétrico e causou "
@@ -530,6 +541,7 @@ public class BattleView {
 
         stanceStatusLabel.setText("Postura: Aterramento Condutor ao Solo");
         telegraphTextLabel.setText("Você estabelece um caminho condutor com o solo! As cargas excedentes encontram escoamento seguro enquanto você aguarda o impacto.");
+        playSfx("/audio/sfx_electric_discharge.wav");
 
         setButtonsDisabled(true);
 
@@ -562,6 +574,7 @@ public class BattleView {
     }
 
     private void handleAbilitySelect(String name, String message) {
+        playSfx("/audio/sfx_electric_discharge.wav");
         telegraphTextLabel.setText("[" + name + "] " + message);
     }
 
@@ -664,6 +677,10 @@ public class BattleView {
         fadeIn.setFromValue(0.0);
         fadeIn.setToValue(1.0);
         fadeIn.play();
+
+        if (victory) {
+            playSfx("/audio/sfx_battle_victory.wav");
+        }
     }
 
     public Scene getScene() {
