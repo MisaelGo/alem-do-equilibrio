@@ -6,7 +6,10 @@ import java.util.Objects;
 
 import com.alemdoequilibrio.core.ResourceManager;
 
+import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -517,18 +520,32 @@ public class ZoneManager {
                 npc
         );
 
-        Rectangle body =
-                new Rectangle(
-                        npc.getWidth(),
-                        npc.getHeight()
-                );
-
-        body.setFill(color);
-
-        body.relocate(
-                npc.getX(),
-                npc.getY()
-        );
+        Node visualNode;
+        String spritePath = getNpcSpritePath(npc.getName());
+        try {
+            Image sprite = resourceManager.getImage(spritePath);
+            ImageView imageView = new ImageView(sprite);
+            imageView.setFitWidth(npc.getWidth());
+            imageView.setFitHeight(npc.getHeight());
+            imageView.setPreserveRatio(true);
+            imageView.relocate(
+                    npc.getX(),
+                    npc.getY()
+            );
+            visualNode = imageView;
+        } catch (Exception e) {
+            Rectangle body =
+                    new Rectangle(
+                            npc.getWidth(),
+                            npc.getHeight()
+                    );
+            body.setFill(color);
+            body.relocate(
+                    npc.getX(),
+                    npc.getY()
+            );
+            visualNode = body;
+        }
 
         Label name =
                 new Label(
@@ -543,9 +560,24 @@ public class ZoneManager {
         worldLayer
                 .getChildren()
                 .addAll(
-                        body,
+                        visualNode,
                         name
                 );
+    }
+
+    private String getNpcSpritePath(String name) {
+        if (name == null) {
+            return "/images/npc_scholar.png";
+        }
+        return switch (name.trim().toLowerCase()) {
+            case "nilo" -> "/images/npc_nilo.png";
+            case "élia", "elia" -> "/images/npc_elia.png";
+            case "mara" -> "/images/npc_mara.png";
+            case "vetor" -> "/images/npc_vetor.png";
+            case "sera" -> "/images/npc_sera.png";
+            case "íon", "ion" -> "/images/npc_merchant_ion.png";
+            default -> "/images/npc_scholar.png";
+        };
     }
 
     private void addDecoration(

@@ -374,7 +374,9 @@ public class BattleView {
         String imagePath;
         Enemy enemy = battleController.getEnemy();
 
-        if (enemy instanceof CorruptedDipole) {
+        if (enemy instanceof BossEnemy) {
+            imagePath = "/images/enemy_battle_boss.png";
+        } else if (enemy instanceof CorruptedDipole) {
             imagePath = "/images/enemy_battle_dipole.png";
         } else if (enemy instanceof UncontrolledCharge uncharged) {
             imagePath = (uncharged.getChargeType() == ChargeType.POSITIVE)
@@ -400,7 +402,10 @@ public class BattleView {
         Label badge = new Label();
         badge.getStyleClass().add("polarity-badge");
 
-        if (enemy instanceof ChargedEnemy charged) {
+        if (enemy instanceof BossEnemy) {
+            badge.setText("✦ RUPTURA");
+            badge.getStyleClass().add("polarity-positive");
+        } else if (enemy instanceof ChargedEnemy charged) {
             ChargeType type = charged.getChargeType();
             if (type == ChargeType.POSITIVE) {
                 badge.setText("+ PRÓTON");
@@ -437,7 +442,9 @@ public class BattleView {
 
     private String buildInitialTelegraphText() {
         Enemy enemy = battleController.getEnemy();
-        if (enemy instanceof WanderingSpark) {
+        if (enemy instanceof BossEnemy) {
+            return "O Guardião da Ruptura desperta! As singularidades opostas colapsam o equilíbrio e o ar é saturado de alta voltagem!";
+        } else if (enemy instanceof WanderingSpark) {
             return "A Faísca Errante crepita com descargas desordenadas no ar. O ambiente ressoa com instabilidade dielétrica!";
         } else if (enemy instanceof UncontrolledCharge uncharged) {
             String sign = (uncharged.getChargeType() == ChargeType.POSITIVE) ? "positivas (+)" : "negativas (−)";
