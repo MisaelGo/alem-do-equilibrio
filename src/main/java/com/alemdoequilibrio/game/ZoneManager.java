@@ -86,28 +86,14 @@ public class ZoneManager {
                 WORLD_HEIGHT
         );
 
-        if (zone
-                == ExplorationZone
-                        .NEUTRAL_BORDER) {
-
-            TileMapRenderer
-                    .renderNeutralBorder(
-                            worldLayer,
-                            resourceManager,
-                            WORLD_WIDTH,
-                            WORLD_HEIGHT,
-                            TILE_SIZE
-                    );
-
-        } else {
-
-            DebugGridRenderer.render(
-                    worldLayer,
-                    WORLD_WIDTH,
-                    WORLD_HEIGHT,
-                    TILE_SIZE
-            );
-        }
+        TileMapRenderer.renderZone(
+                worldLayer,
+                zone,
+                resourceManager,
+                WORLD_WIDTH,
+                WORLD_HEIGHT,
+                TILE_SIZE
+        );
 
         switch (zone) {
 
