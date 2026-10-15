@@ -1,78 +1,149 @@
 package com.alemdoequilibrio.game;
 
+import java.util.List;
 import java.util.Objects;
 
+import com.alemdoequilibrio.core.ResourceManager;
+
+import javafx.animation.FadeTransition;
+import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.NumberBinding;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 import javafx.util.StringConverter;
 
+/**
+ * Interface gráfica de batalha inspirada no estilo Fear & Hunger.
+ *
+ * Apresenta o confronto clássico com o Herói posicionado à esquerda e o
+ * Inimigo à direita, acompanhados de telegrafia narrativa superior, caixas
+ * austeras de comandos e monitoramento de cargas com acessibilidade visual.
+ *
+ * POO 1.1 - Encapsulamento:
+ * Todos os nós visuais, animações e controles internos são privados.
+ *
+ * POO 3 - Construtores:
+ * Inicialização robusta vinculada ao BattleController e ResourceManager.
+ *
+ * POO 5 - Agregação:
+ * Agrega BattleController e ResourceManager sem alterar suas regras internas.
+ */
 public class BattleView {
 
-    private static final double WIDTH =
-            1280;
+    private static final double LOGICAL_WIDTH = 1280;
+    private static final double LOGICAL_HEIGHT = 720;
+    private static final float PLAYER_DAMAGE = 20.0f;
 
-    private static final double HEIGHT =
-            720;
+    /*
+     * POO 5 - Agregação
+     */
+    private final BattleController battleController;
+    private final ResourceManager resourceManager;
 
-    private static final float PLAYER_DAMAGE =
-            20.0f;
-
-    private final BattleController
-            battleController;
-
-    private final Label heroHealthLabel;
-    private final Label heroChargeLabel;
-
-    private final Label enemyHealthLabel;
-    private final Label enemyPhaseLabel;
-
-    private final Label statusLabel;
-
-    private final Button attackButton;
-    private final Button abilityButton;
-    private final ComboBox<String> abilitySelector;
-    private final ComboBox<ChargeType> chargeSelector;
-
+    private final Pane gameRoot;
+    private final StackPane screenRoot;
     private final Scene scene;
 
-    public BattleView(
-            BattleController battleController) {
+    /* Componentes da telegrafia superior */
+    private final Label telegraphTitleLabel;
+    private final Label telegraphTextLabel;
 
-        this.battleController =
-                Objects.requireNonNull(
-                        battleController
-                );
+    /* Componentes do palco de combate: Herói (Esquerda) */
+    private final Label heroNameLabel;
+    private final Label heroPolarityBadge;
+    private final ComboBox<ChargeType> chargeSelector;
+    private final Rectangle heroHpBar;
+    private final Label heroHpText;
+    private final ImageView heroSpriteView;
+    private final VBox heroStageBox;
 
-        Label title =
-                new Label(
-                        "BATALHA"
-                );
+    /* Componentes do palco de combate: Inimigo (Direita) */
+    private final Label enemyNameLabel;
+    private final Label enemyPolarityBadge;
+    private final Label enemyPhaseLabel;
+    private final Rectangle enemyHpBar;
+    private final Label enemyHpText;
+    private final ImageView enemySpriteView;
+    private final VBox enemyStageBox;
 
-        title.setStyle(
-                "-fx-font-size: 36px;"
-                + "-fx-font-weight: bold;"
-        );
+    /* Componentes do painel de comandos (Inferior Esquerdo) */
+    private final VBox mainCommandList;
+    private final VBox abilityCommandList;
+    private final Button btnAttack;
+    private final Button btnAbilities;
+    private final Button btnAnalyze;
+    private final Button btnGrounding;
 
-        Label enemyName =
-                new Label(
-                        battleController
-                                .getEnemy()
-                                .getName()
-                );
+    /* Componentes do painel de status/registro (Inferior Direito) */
+    private final Label stanceStatusLabel;
+    private final Label physicsInsightLabel;
+    private final Label roundCounterLabel;
 
-        enemyName.setStyle(
-                "-fx-font-size: 24px;"
-        );
+    /* Efeitos de impacto visual */
+    private final Rectangle damageFlash;
+    private float maxEnemyHealth = 50.0f;
+    private final float maxHeroHealth = 100.0f;
 
-        heroHealthLabel =
-                new Label();
+    /*
+     * POO 7.1 - Sobrecarga de construtores
+     */
+    public BattleView(BattleController battleController) {
+        this(battleController, new ResourceManager());
+    }
 
-        heroChargeLabel =
-                new Label();
+    public BattleView(BattleController battleController, ResourceManager resourceManager) {
+        this.battleController = Objects.requireNonNull(battleController, "BattleController não pode ser nulo.");
+        this.resourceManager = (resourceManager != null) ? resourceManager : new ResourceManager();
+
+        maxEnemyHealth = Math.max(1.0f, battleController.getEnemy().getHealth());
+
+        gameRoot = new Pane();
+        gameRoot.setPrefSize(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        gameRoot.setMinSize(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        gameRoot.setMaxSize(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        gameRoot.getStyleClass().add("battle-root");
+
+        // 1. Caixa de Telegrafia e Narrativa Superior (Fear & Hunger Style)
+        telegraphTitleLabel = new Label("> REGISTRO DE CAMPO ELETROSTÁTICO");
+        telegraphTitleLabel.getStyleClass().add("telegraph-title");
+
+        telegraphTextLabel = new Label(buildInitialTelegraphText());
+        telegraphTextLabel.getStyleClass().add("telegraph-text");
+        telegraphTextLabel.setWrapText(true);
+
+        VBox telegraphBox = new VBox(6, telegraphTitleLabel, telegraphTextLabel);
+        telegraphBox.getStyleClass().add("telegraph-box");
+        telegraphBox.setLayoutX(40);
+        telegraphBox.setLayoutY(20);
+        telegraphBox.setPrefWidth(LOGICAL_WIDTH - 80);
+        telegraphBox.setPrefHeight(88);
+
+        // 2. PALCO DE CONFRONTO: Herói à Esquerda, Inimigo à Direita
+
+        // --- LADO DO HERÓI (ESQUERDA) ---
+        heroNameLabel = new Label("HERÓI");
+        heroNameLabel.getStyleClass().add("hero-name");
+
+        heroPolarityBadge = new Label("0 NEUTRO");
+        heroPolarityBadge.getStyleClass().addAll("polarity-badge", "polarity-neutral");
 
         chargeSelector = new ComboBox<>();
         chargeSelector.getItems().addAll(ChargeType.values());
@@ -94,261 +165,659 @@ public class BattleView {
             }
         });
         chargeSelector.setValue(battleController.getHero().getChargeType());
-
-        enemyHealthLabel =
-                new Label();
-
-        enemyPhaseLabel =
-                new Label();
-
-        statusLabel =
-                new Label(
-                        "Seu turno. Escolha a carga e depois ataque ou use uma habilidade."
-                );
-        statusLabel.setMaxWidth(900);
-        statusLabel.setWrapText(true);
-        statusLabel.setAlignment(Pos.CENTER);
-
+        chargeSelector.getStyleClass().add("charge-combo");
         chargeSelector.setOnAction(event -> {
             ChargeType selectedCharge = chargeSelector.getValue();
-            if (selectedCharge != null) {
+            if (selectedCharge != null && !battleController.isBattleFinished()
+                    && battleController.getCurrentTurn() == BattleController.BattleTurn.PLAYER_TURN) {
                 battleController.setHeroChargeType(selectedCharge);
-                updateView();
-                statusLabel.setText("Carga ajustada para "
-                        + selectedCharge.getDescription() + ". Seu turno.");
+                updateHeroPolarityBadge(selectedCharge);
+                playSfx("/audio/sfx_menu_select.wav");
+                telegraphTextLabel.setText("Polaridade do Herói reconfigurada para "
+                        + selectedCharge.getDescription() + " (" + selectedCharge.getSymbol() + ").");
             }
         });
 
-        attackButton =
-                new Button(
-                        "Atacar"
-                );
+        HBox heroHeaderRow = new HBox(10, heroNameLabel, heroPolarityBadge, chargeSelector);
+        heroHeaderRow.setAlignment(Pos.CENTER);
 
-        attackButton.setOnAction(
-                event ->
-                        performPlayerTurn(false)
+        heroHpBar = new Rectangle(240, 14);
+        heroHpBar.getStyleClass().add("hp-fill-hero");
+
+        Rectangle heroHpTrack = new Rectangle(244, 18);
+        heroHpTrack.getStyleClass().add("hp-track");
+
+        StackPane heroHpStack = new StackPane(heroHpTrack, heroHpBar);
+        heroHpStack.setAlignment(Pos.CENTER_LEFT);
+
+        heroHpText = new Label("100 / 100");
+        heroHpText.getStyleClass().add("hp-text");
+
+        HBox heroHpRow = new HBox(10, heroHpStack, heroHpText);
+        heroHpRow.setAlignment(Pos.CENTER);
+
+        heroSpriteView = new ImageView();
+        heroSpriteView.setFitWidth(150);
+        heroSpriteView.setFitHeight(150);
+        heroSpriteView.setPreserveRatio(true);
+        loadHeroSprite();
+
+        // Animação de respiração/idle sutil do herói
+        TranslateTransition heroBobbing = new TranslateTransition(Duration.seconds(1.4), heroSpriteView);
+        heroBobbing.setFromY(-4);
+        heroBobbing.setToY(4);
+        heroBobbing.setAutoReverse(true);
+        heroBobbing.setCycleCount(TranslateTransition.INDEFINITE);
+        heroBobbing.setInterpolator(Interpolator.EASE_BOTH);
+        heroBobbing.play();
+
+        heroStageBox = new VBox(8, heroHeaderRow, heroHpRow, heroSpriteView);
+        heroStageBox.setAlignment(Pos.CENTER);
+        heroStageBox.setLayoutX(80);
+        heroStageBox.setLayoutY(130);
+        heroStageBox.setPrefWidth(440);
+
+        // --- TENSÃO DE CAMPO CENTRAL (VS / CAMPO) ---
+        Label vsLabel = new Label("VS");
+        vsLabel.setStyle("-fx-text-fill: #4a4556; -fx-font-size: 28px; -fx-font-weight: bold; -fx-font-family: Georgia;");
+        Label vsLines = new Label("⚡  E  ⚡");
+        vsLines.setStyle("-fx-text-fill: #D9A441; -fx-font-size: 13px; -fx-font-family: Consolas;");
+        VBox clashBox = new VBox(4, vsLabel, vsLines);
+        clashBox.setAlignment(Pos.CENTER);
+        clashBox.setLayoutX((LOGICAL_WIDTH - 120) / 2.0);
+        clashBox.setLayoutY(220);
+        clashBox.setPrefWidth(120);
+
+        // --- LADO DO INIMIGO (DIREITA) ---
+        enemyNameLabel = new Label(battleController.getEnemy().getName());
+        enemyNameLabel.getStyleClass().add("enemy-name");
+
+        enemyPolarityBadge = createPolarityBadge(battleController.getEnemy());
+
+        enemyPhaseLabel = new Label();
+        enemyPhaseLabel.setStyle("-fx-text-fill: #D9A441; -fx-font-size: 11px; -fx-font-family: Consolas;");
+
+        HBox enemyHeaderRow = new HBox(10, enemyNameLabel, enemyPolarityBadge, enemyPhaseLabel);
+        enemyHeaderRow.setAlignment(Pos.CENTER);
+
+        enemyHpBar = new Rectangle(240, 14);
+        enemyHpBar.getStyleClass().add("hp-fill-enemy");
+
+        Rectangle enemyHpTrack = new Rectangle(244, 18);
+        enemyHpTrack.getStyleClass().add("hp-track");
+
+        StackPane enemyHpStack = new StackPane(enemyHpTrack, enemyHpBar);
+        enemyHpStack.setAlignment(Pos.CENTER_LEFT);
+
+        enemyHpText = new Label();
+        enemyHpText.getStyleClass().add("hp-text");
+
+        HBox enemyHpRow = new HBox(10, enemyHpStack, enemyHpText);
+        enemyHpRow.setAlignment(Pos.CENTER);
+
+        enemySpriteView = new ImageView();
+        enemySpriteView.setFitWidth(180);
+        enemySpriteView.setFitHeight(180);
+        enemySpriteView.setPreserveRatio(true);
+        loadEnemySprite();
+
+        // Animação de flutuação sutil do inimigo
+        TranslateTransition enemyFloating = new TranslateTransition(Duration.seconds(1.8), enemySpriteView);
+        enemyFloating.setFromY(-6);
+        enemyFloating.setToY(6);
+        enemyFloating.setAutoReverse(true);
+        enemyFloating.setCycleCount(TranslateTransition.INDEFINITE);
+        enemyFloating.setInterpolator(Interpolator.EASE_BOTH);
+        enemyFloating.play();
+
+        enemyStageBox = new VBox(8, enemyHeaderRow, enemyHpRow, enemySpriteView);
+        enemyStageBox.setAlignment(Pos.CENTER);
+        enemyStageBox.setLayoutX(LOGICAL_WIDTH - 520);
+        enemyStageBox.setLayoutY(130);
+        enemyStageBox.setPrefWidth(440);
+
+        // 3. PAINEL DE COMANDOS (Inferior Esquerdo)
+        Label commandHeader = new Label("> COMANDOS");
+        commandHeader.getStyleClass().add("panel-header");
+
+        btnAttack = createCommandButton("[1]  ⚔  ATACAR");
+        btnAttack.setOnAction(e -> handlePlayerAttack());
+
+        btnAbilities = createCommandButton("[2]  ⚡  MODULAÇÕES DE CAMPO");
+        btnAbilities.setOnAction(e -> showAbilitySubmenu());
+
+        btnAnalyze = createCommandButton("[3]  🔍  ANALISAR CAMPO");
+        btnAnalyze.setOnAction(e -> handleAnalyzeAction());
+
+        btnGrounding = createCommandButton("[4]  🛡  ATERRAMENTO CONDUTOR");
+        btnGrounding.setOnAction(e -> handleGroundingAction());
+
+        mainCommandList = new VBox(8, btnAttack, btnAbilities, btnAnalyze, btnGrounding);
+
+        // Submenu de Habilidades
+        abilityCommandList = new VBox(8);
+        abilityCommandList.setVisible(false);
+        abilityCommandList.setManaged(false);
+
+        VBox commandBox = new VBox(10, commandHeader, mainCommandList, abilityCommandList);
+        commandBox.getStyleClass().add("panel-box");
+        commandBox.setLayoutX(40);
+        commandBox.setLayoutY(470);
+        commandBox.setPrefWidth(585);
+        commandBox.setPrefHeight(225);
+
+        // 4. PAINEL DE ANÁLISE E ESTADO (Inferior Direito)
+        Label statusHeader = new Label("> ANÁLISE DE ESTADO E FÍSICA");
+        statusHeader.getStyleClass().add("panel-header");
+
+        stanceStatusLabel = new Label("Postura: Equilíbrio Eletrostático Normal");
+        stanceStatusLabel.getStyleClass().add("hero-condition-text");
+
+        physicsInsightLabel = new Label(buildPhysicsInsightText());
+        physicsInsightLabel.setStyle("-fx-text-fill: #CFC9BE; -fx-font-family: Georgia; -fx-font-size: 14px;");
+        physicsInsightLabel.setWrapText(true);
+
+        roundCounterLabel = new Label("Rodada: 1  |  Turno: SEU TURNO");
+        roundCounterLabel.setStyle("-fx-text-fill: #D9A441; -fx-font-family: Consolas; -fx-font-size: 13px; -fx-font-weight: bold;");
+
+        VBox statusBox = new VBox(10, statusHeader, stanceStatusLabel, physicsInsightLabel, roundCounterLabel);
+        statusBox.getStyleClass().add("panel-box");
+        statusBox.setLayoutX(655);
+        statusBox.setLayoutY(470);
+        statusBox.setPrefWidth(585);
+        statusBox.setPrefHeight(225);
+
+        // 5. Overlay de Flash de Dano (Screen Flash)
+        damageFlash = new Rectangle(LOGICAL_WIDTH, LOGICAL_HEIGHT, Color.rgb(220, 20, 20, 0.0));
+        damageFlash.setMouseTransparent(true);
+
+        gameRoot.getChildren().addAll(
+                telegraphBox,
+                heroStageBox,
+                clashBox,
+                enemyStageBox,
+                commandBox,
+                statusBox,
+                damageFlash
         );
 
-        abilityButton =
-                new Button();
+        // Viewport e binding responsivo
+        Rectangle viewportClip = new Rectangle(LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        gameRoot.setClip(viewportClip);
 
-        abilityButton.setOnAction(
-                event ->
-                        performPlayerTurn(true)
+        screenRoot = new StackPane(gameRoot);
+        scene = new Scene(screenRoot, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+        NumberBinding scale = Bindings.min(
+                scene.widthProperty().divide(LOGICAL_WIDTH),
+                scene.heightProperty().divide(LOGICAL_HEIGHT)
         );
 
-        abilitySelector =
-                new ComboBox<>();
+        gameRoot.scaleXProperty().bind(scale);
+        gameRoot.scaleYProperty().bind(scale);
 
-        for (Ability ability : battleController.getHero()
-                .getAbilityBook().getAbilities()) {
-            abilitySelector.getItems().add(ability.getName());
-        }
-
-        Ability equipped = battleController.getHero()
-                .getAbilityBook().getEquippedAbility();
-
-        if (equipped != null) {
-            abilitySelector.setValue(equipped.getName());
-        }
-
-        abilitySelector.setPromptText("Escolha uma habilidade");
-        abilitySelector.setDisable(abilitySelector.getItems().isEmpty());
-        abilitySelector.setOnAction(event -> {
-            String selectedName = abilitySelector.getValue();
-
-            for (Ability ability : battleController.getHero()
-                    .getAbilityBook().getAbilities()) {
-                if (ability.getName().equals(selectedName)) {
-                    battleController.getHero().getAbilityBook()
-                            .equipAbility(ability);
-                    updateView();
-                    break;
-                }
-            }
-        });
-
-        VBox root =
-                new VBox(
-                        20,
-                        title,
-                        enemyName,
-                        heroHealthLabel,
-                        heroChargeLabel,
-                        chargeSelector,
-                        enemyHealthLabel,
-                        enemyPhaseLabel,
-                        statusLabel,
-                        attackButton,
-                        abilitySelector,
-                        abilityButton
-                );
-
-        root.setAlignment(
-                Pos.CENTER
-        );
-
-        scene =
-                new Scene(
-                        root,
-                        WIDTH,
-                        HEIGHT
-                );
-
+        applyStylesheet();
         updateView();
     }
 
-    private void performPlayerTurn(
-            boolean useAbility) {
-
-        if (battleController
-                .isBattleFinished()) {
-
-            return;
+    private void playSfx(String path) {
+        try {
+            resourceManager.getAudioClip(path).play();
+        } catch (Exception e) {
+            // Silencioso se áudio não estiver disponível
         }
+    }
 
-        Hero hero = battleController.getHero();
+    private Button createCommandButton(String text) {
+        Button btn = new Button(text);
+        btn.getStyleClass().add("command-btn");
+        btn.setMaxWidth(Double.MAX_VALUE);
+        VBox.setVgrow(btn, Priority.ALWAYS);
+        btn.addEventHandler(javafx.event.ActionEvent.ACTION, e -> playSfx("/audio/sfx_menu_select.wav"));
+        return btn;
+    }
+
+    private void applyStylesheet() {
+        try {
+            String css = resourceManager.getStylesheet("/css/battle.css");
+            scene.getStylesheets().add(css);
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao carregar battle.css pelo ResourceManager: " + e.getMessage());
+            var url = getClass().getResource("/css/battle.css");
+            if (url != null) {
+                scene.getStylesheets().add(url.toExternalForm());
+            }
+        }
+    }
+
+    private void loadHeroSprite() {
+        try {
+            Image img = resourceManager.getImage("/images/hero_idle_right.png");
+            heroSpriteView.setImage(img);
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao carregar sprite do herói: " + e.getMessage());
+        }
+    }
+
+    private void loadEnemySprite() {
+        String imagePath;
         Enemy enemy = battleController.getEnemy();
-        float enemyHealthBefore = enemy.getHealth();
-        float heroHealthBefore = hero.getHealth();
-        String actionName = useAbility
-                ? hero.getAbilityBook().getEquippedAbility().getName()
-                : "Ataque";
 
-        if (useAbility) {
-            battleController
-                    .performPlayerAbility();
+        if (enemy instanceof BossEnemy) {
+            imagePath = "/images/enemy_battle_boss.png";
+        } else if (enemy instanceof CorruptedDipole) {
+            imagePath = "/images/enemy_battle_dipole.png";
+        } else if (enemy instanceof UncontrolledCharge uncharged) {
+            imagePath = (uncharged.getChargeType() == ChargeType.POSITIVE)
+                    ? "/images/enemy_battle_charge_pos.png"
+                    : "/images/enemy_battle_charge_neg.png";
+        } else if (enemy instanceof ChargedEnemy charged) {
+            imagePath = (charged.getChargeType() == ChargeType.POSITIVE)
+                    ? "/images/enemy_battle_charge_pos.png"
+                    : "/images/enemy_battle_charge_neg.png";
         } else {
-            battleController
-                    .performPlayerAttack(
-                            PLAYER_DAMAGE
-                    );
+            imagePath = "/images/enemy_battle_wandering_spark.png";
         }
 
-        if (battleController
-                .isBattleFinished()) {
+        try {
+            Image img = resourceManager.getImage(imagePath);
+            enemySpriteView.setImage(img);
+        } catch (Exception e) {
+            System.err.println("Aviso: Falha ao carregar sprite do inimigo: " + e.getMessage());
+        }
+    }
 
-            updateView();
+    private Label createPolarityBadge(Enemy enemy) {
+        Label badge = new Label();
+        badge.getStyleClass().add("polarity-badge");
 
+        if (enemy instanceof BossEnemy) {
+            badge.setText("✦ RUPTURA");
+            badge.getStyleClass().add("polarity-positive");
+        } else if (enemy instanceof ChargedEnemy charged) {
+            ChargeType type = charged.getChargeType();
+            if (type == ChargeType.POSITIVE) {
+                badge.setText("+ PRÓTON");
+                badge.getStyleClass().add("polarity-positive");
+            } else if (type == ChargeType.NEGATIVE) {
+                badge.setText("− ELÉTRON");
+                badge.getStyleClass().add("polarity-negative");
+            } else {
+                badge.setText("0 NEUTRO");
+                badge.getStyleClass().add("polarity-neutral");
+            }
+        } else if (enemy instanceof UncontrolledCharge uncharged) {
+            ChargeType type = uncharged.getChargeType();
+            if (type == ChargeType.POSITIVE) {
+                badge.setText("+ PRÓTON");
+                badge.getStyleClass().add("polarity-positive");
+            } else if (type == ChargeType.NEGATIVE) {
+                badge.setText("− ELÉTRON");
+                badge.getStyleClass().add("polarity-negative");
+            } else {
+                badge.setText("0 NEUTRO");
+                badge.getStyleClass().add("polarity-neutral");
+            }
+        } else if (enemy instanceof CorruptedDipole) {
+            badge.setText("± DIPOLO");
+            badge.getStyleClass().add("polarity-negative");
+        } else {
+            badge.setText("~ OSCILANTE");
+            badge.getStyleClass().add("polarity-neutral");
+        }
+
+        return badge;
+    }
+
+    private void updateHeroPolarityBadge(ChargeType type) {
+        heroPolarityBadge.getStyleClass().removeAll("polarity-positive", "polarity-negative", "polarity-neutral");
+        if (type == ChargeType.POSITIVE) {
+            heroPolarityBadge.setText("+ PRÓTON");
+            heroPolarityBadge.getStyleClass().add("polarity-positive");
+        } else if (type == ChargeType.NEGATIVE) {
+            heroPolarityBadge.setText("− ELÉTRON");
+            heroPolarityBadge.getStyleClass().add("polarity-negative");
+        } else {
+            heroPolarityBadge.setText("0 NEUTRO");
+            heroPolarityBadge.getStyleClass().add("polarity-neutral");
+        }
+    }
+
+    private String buildInitialTelegraphText() {
+        Enemy enemy = battleController.getEnemy();
+        if (enemy instanceof BossEnemy) {
+            return "O Guardião da Ruptura desperta! As singularidades opostas colapsam o equilíbrio e o ar é saturado de alta voltagem!";
+        } else if (enemy instanceof WanderingSpark) {
+            return "A Faísca Errante crepita com descargas desordenadas no ar. O ambiente ressoa com instabilidade dielétrica!";
+        } else if (enemy instanceof UncontrolledCharge uncharged) {
+            String sign = (uncharged.getChargeType() == ChargeType.POSITIVE) ? "positivas (+)" : "negativas (−)";
+            return "Uma concentração densa de cargas " + sign + " distorce o campo elétrico à sua frente!";
+        } else if (enemy instanceof CorruptedDipole) {
+            return "Dois polos opostos em colapso atraem e repelem o solo simultaneamente. As linhas de campo formam arcos perigosos!";
+        }
+        return "Uma presença anômala de matéria eletrizada barra o seu caminho. Prepare sua modulação de cargas!";
+    }
+
+    private String buildPhysicsInsightText() {
+        Enemy enemy = battleController.getEnemy();
+        if (enemy instanceof ChargedEnemy charged) {
+            if (charged.getChargeType() == ChargeType.POSITIVE) {
+                return "Carga Positiva (+): As linhas de força divergem radialmente do centro. Repele cargas de mesmo sinal com força de Coulomb inversamente proporcional a d².";
+            } else if (charged.getChargeType() == ChargeType.NEGATIVE) {
+                return "Carga Negativa (−): As linhas de força convergem para o centro. Possui excesso de elétrons livres.";
+            }
+        } else if (enemy instanceof UncontrolledCharge uncharged) {
+            if (uncharged.getChargeType() == ChargeType.POSITIVE) {
+                return "Carga Positiva (+): Concentração protonada. Interage fortemente com qualquer condutor desbalanceado.";
+            } else if (uncharged.getChargeType() == ChargeType.NEGATIVE) {
+                return "Carga Negativa (−): Campo convergente. Pode atrair corpos neutros por polarização induzida.";
+            }
+        }
+        return "Matéria Neutra / Oscilante: Cargas em equilíbrio ou transição rápida. Sofre forças apenas por gradientes de campo.";
+    }
+
+    private void handlePlayerAttack() {
+        if (battleController.isBattleFinished()) {
             return;
         }
 
-        battleController
-                .performEnemyTurn();
+        setButtonsDisabled(true);
+        triggerScreenShake();
+        playEnemyHitFlash();
+        playSfx("/audio/sfx_hit.wav");
+
+        float enemyHpBefore = battleController.getEnemy().getHealth();
+        battleController.performPlayerAttack(PLAYER_DAMAGE);
+        float damageDealt = Math.max(0.0f, enemyHpBefore - battleController.getEnemy().getHealth());
 
         updateView();
 
-        if (!battleController.isBattleFinished()) {
-            String enemyResponse = battleController.wasLastEnemyTurnInterrupted()
-                    ? "Ataque inimigo interrompido."
-                    : "Você sofreu " + Math.round(heroHealthBefore
-                            - hero.getHealth()) + " de dano.";
-            statusLabel.setText(actionName + " causou "
-                    + Math.round(enemyHealthBefore - enemy.getHealth())
-                    + " de dano. " + enemyResponse + " Seu turno.");
+        if (battleController.isBattleFinished()) {
+            return;
         }
+
+        telegraphTextLabel.setText("Você desfere um ataque de neutralização direta (-" + Math.round(damageDealt) + " HP)! O inimigo prepara uma resposta de carga!");
+
+        Timeline enemyTurnTimer = new Timeline(new KeyFrame(Duration.millis(900), e -> {
+            executeEnemyTurn();
+        }));
+        enemyTurnTimer.play();
+    }
+
+    private void handlePlayerAbility(Ability ability) {
+        if (battleController.isBattleFinished()) {
+            return;
+        }
+
+        battleController.getHero().getAbilityBook().equipAbility(ability);
+
+        setButtonsDisabled(true);
+        triggerScreenShake();
+        playEnemyHitFlash();
+        playSfx("/audio/sfx_electric_discharge.wav");
+
+        float enemyHpBefore = battleController.getEnemy().getHealth();
+        battleController.performPlayerAbility();
+        float damageDealt = Math.max(0.0f, enemyHpBefore - battleController.getEnemy().getHealth());
+
+        updateView();
+
+        if (battleController.isBattleFinished()) {
+            return;
+        }
+
+        telegraphTextLabel.setText("Você canaliza [" + ability.getName() + "]"
+                + (damageDealt > 0 ? " causando -" + Math.round(damageDealt) + " HP!" : " ativando efeitos de campo!"));
+
+        showMainMenu();
+
+        Timeline enemyTurnTimer = new Timeline(new KeyFrame(Duration.millis(900), e -> {
+            executeEnemyTurn();
+        }));
+        enemyTurnTimer.play();
+    }
+
+    private void executeEnemyTurn() {
+        if (battleController.isBattleFinished()) {
+            return;
+        }
+
+        float hpBefore = battleController.getHero().getHealth();
+
+        battleController.performEnemyTurn();
+
+        float hpAfter = battleController.getHero().getHealth();
+        float damageTaken = Math.max(0.0f, hpBefore - hpAfter);
+
+        if (battleController.wasLastEnemyTurnInterrupted()) {
+            telegraphTextLabel.setText("Ataque de " + battleController.getEnemy().getName()
+                    + " foi INTERROMPIDO pela força de repulsão eletrostática de mesma polaridade!");
+            playSfx("/audio/sfx_quiz_correct.wav");
+        } else {
+            triggerScreenShake();
+            playPlayerDamageFlash();
+            playSfx("/audio/sfx_hit.wav");
+
+            telegraphTextLabel.setText(battleController.getEnemy().getName()
+                    + " descarrega seu potencial elétrico e causou "
+                    + Math.round(damageTaken) + " de dano!");
+        }
+
+        updateView();
+        setButtonsDisabled(false);
+    }
+
+    private void handleAnalyzeAction() {
+        Enemy enemy = battleController.getEnemy();
+        StringBuilder analysis = new StringBuilder("ANÁLISE DE CAMPO: ");
+
+        if (enemy instanceof BossEnemy boss) {
+            analysis.append("Chefe Ruptura [Fase ").append(boss.getPhase().ordinal() + 1).append("]. ")
+                    .append(boss.getPhase() == BossEnemy.Phase.POLARITY ? "Equilibre sua polaridade oposta! " : "")
+                    .append(boss.getPhase() == BossEnemy.Phase.FIELD ? "Oriente suas forças com o campo elétrico! " : "")
+                    .append(boss.getPhase() == BossEnemy.Phase.POTENTIAL ? (boss.isPotentialShieldActive() ? "Escudo de potencial ativo! " : "Escudo enfraquecido! ") : "");
+        } else if (enemy instanceof ChargedEnemy charged) {
+            analysis.append("Carga ").append(charged.getChargeType().getDescription())
+                    .append(" [").append(charged.getChargeType().getSymbol()).append("]. ")
+                    .append("Cargas de mesmo sinal repelem; opostos atraem pela Lei de Coulomb.");
+        } else if (enemy instanceof UncontrolledCharge uncharged) {
+            analysis.append("Carga ").append(uncharged.getChargeType().getDescription())
+                    .append(" [").append(uncharged.getChargeType().getSymbol()).append("]. ")
+                    .append("Gradiente elétrico intenso. Cuidado com indução!");
+        } else {
+            analysis.append("Natureza oscilante. Não possui polaridade estável no momento.");
+        }
+
+        telegraphTextLabel.setText(analysis.toString());
+    }
+
+    private void handleGroundingAction() {
+        if (battleController.isBattleFinished()) {
+            return;
+        }
+
+        stanceStatusLabel.setText("Postura: Aterramento Condutor ao Solo");
+        telegraphTextLabel.setText("Você estabelece um caminho condutor com o solo! As cargas excedentes encontram escoamento seguro enquanto você aguarda o impacto.");
+        playSfx("/audio/sfx_electric_discharge.wav");
+
+        setButtonsDisabled(true);
+
+        // Avança o turno no BattleController com 0 de dano (postura puramente defensiva)
+        battleController.performPlayerAttack(0.0f);
+
+        if (battleController.isBattleFinished()) {
+            updateView();
+            return;
+        }
+
+        Timeline enemyTurnTimer = new Timeline(new KeyFrame(Duration.millis(900), e -> {
+            executeEnemyTurn();
+        }));
+        enemyTurnTimer.play();
+    }
+
+    private void showAbilitySubmenu() {
+        buildAbilitySubmenu();
+        mainCommandList.setVisible(false);
+        mainCommandList.setManaged(false);
+        abilityCommandList.setVisible(true);
+        abilityCommandList.setManaged(true);
+    }
+
+    private void buildAbilitySubmenu() {
+        abilityCommandList.getChildren().clear();
+
+        List<Ability> learnedAbilities = battleController.getHero().getAbilityBook().getAbilities();
+
+        if (learnedAbilities.isEmpty()) {
+            Label emptyNotice = new Label("Nenhuma habilidade aprendida ainda.\nConverse com NPCs e Mercador Íon!");
+            emptyNotice.setStyle("-fx-text-fill: #DDD7CE; -fx-font-family: Georgia; -fx-font-size: 13px;");
+            abilityCommandList.getChildren().add(emptyNotice);
+        } else {
+            for (Ability ability : learnedAbilities) {
+                Button btnSkill = createCommandButton("⚡ " + ability.getName());
+                btnSkill.setOnAction(e -> handlePlayerAbility(ability));
+                abilityCommandList.getChildren().add(btnSkill);
+            }
+        }
+
+        Button btnBack = createCommandButton("↩ Retornar");
+        btnBack.setOnAction(e -> showMainMenu());
+        abilityCommandList.getChildren().add(btnBack);
+    }
+
+    private void showMainMenu() {
+        abilityCommandList.setVisible(false);
+        abilityCommandList.setManaged(false);
+        mainCommandList.setVisible(true);
+        mainCommandList.setManaged(true);
+    }
+
+    private void triggerScreenShake() {
+        TranslateTransition shake = new TranslateTransition(Duration.millis(50), gameRoot);
+        shake.setFromX(-6);
+        shake.setToX(6);
+        shake.setCycleCount(4);
+        shake.setAutoReverse(true);
+        shake.setOnFinished(e -> gameRoot.setTranslateX(0));
+        shake.play();
+    }
+
+    private void playPlayerDamageFlash() {
+        Timeline flash = new Timeline(
+                new KeyFrame(Duration.ZERO, new KeyValue(damageFlash.fillProperty(), Color.rgb(180, 40, 40, 0.4))),
+                new KeyFrame(Duration.millis(180), new KeyValue(damageFlash.fillProperty(), Color.rgb(180, 40, 40, 0.0)))
+        );
+        flash.play();
+    }
+
+    private void playEnemyHitFlash() {
+        FadeTransition ft = new FadeTransition(Duration.millis(80), enemySpriteView);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.3);
+        ft.setCycleCount(2);
+        ft.setAutoReverse(true);
+        ft.play();
+    }
+
+    private void setButtonsDisabled(boolean disabled) {
+        btnAttack.setDisable(disabled);
+        btnAbilities.setDisable(disabled);
+        btnAnalyze.setDisable(disabled);
+        btnGrounding.setDisable(disabled);
+        chargeSelector.setDisable(disabled);
     }
 
     private void updateView() {
+        Hero hero = battleController.getHero();
+        Enemy enemy = battleController.getEnemy();
 
-        Hero hero =
-                battleController
-                        .getHero();
+        // 1. Atualiza HP do Inimigo
+        float enemyHp = Math.max(0.0f, enemy.getHealth());
+        double enemyHpRatio = Math.max(0.0, Math.min(1.0, enemyHp / maxEnemyHealth));
+        enemyHpBar.setWidth(240.0 * enemyHpRatio);
+        enemyHpText.setText(Math.round(enemyHp) + " / " + Math.round(maxEnemyHealth));
 
-        Enemy enemy =
-                battleController
-                        .getEnemy();
+        // 2. Atualiza HP do Herói
+        float heroHp = Math.max(0.0f, hero.getHealth());
+        double heroHpRatio = Math.max(0.0, Math.min(1.0, heroHp / maxHeroHealth));
+        heroHpBar.setWidth(240.0 * heroHpRatio);
+        heroHpText.setText(Math.round(heroHp) + " / " + Math.round(maxHeroHealth));
 
-        Ability equippedAbility =
-                hero.getAbilityBook()
-                        .getEquippedAbility();
-
-        abilityButton.setText(
-                equippedAbility == null
-                        ? "Habilidade indisponível"
-                        : "Usar " + equippedAbility.getName()
-        );
-
-        abilityButton.setDisable(
-                equippedAbility == null
-                        || battleController.isBattleFinished()
-        );
-
-        heroHealthLabel.setText(
-                "HP do Herói: "
-                + Math.round(
-                        hero.getHealth()
-                )
-        );
-
-        heroChargeLabel.setText(
-                "Carga do Herói: " + hero.getChargeType().getSymbol()
-        );
-
-        enemyHealthLabel.setText(
-                "HP de "
-                + enemy.getName()
-                + ": "
-                + Math.round(
-                        enemy.getHealth()
-                )
-        );
-
-        if (enemy instanceof BossEnemy boss) {
-            String phaseDescription = switch (boss.getPhase()) {
-                case POLARITY -> "Fase 1 - Polaridade: "
-                        + boss.getChargeType().getSymbol();
-                case FIELD -> "Fase 2 - Campo: "
-                        + (boss.getFieldDirection()
-                                == BossEnemy.FieldDirection.LEFT
-                                ? "esquerda" : "direita");
-                case POTENTIAL -> "Fase 3 - Potencial: "
-                        + (boss.isPotentialShieldActive()
-                                ? "escudo ativo" : "escudo inativo");
-            };
-
-            enemyPhaseLabel.setText(phaseDescription);
-        } else if (enemy instanceof ChargedEnemy chargedEnemy) {
-            enemyPhaseLabel.setText(
-                    "Carga do inimigo: "
-                    + chargedEnemy.getChargeType().getSymbol()
-            );
+        // 3. Atualiza Polaridade do Herói
+        updateHeroPolarityBadge(hero.getChargeType());
+        if (chargeSelector.getValue() != hero.getChargeType()) {
+            chargeSelector.setValue(hero.getChargeType());
         }
 
-        if (battleController
-                .isBattleFinished()) {
+        // 4. Atualiza Fase do Inimigo / Chefe
+        if (enemy instanceof BossEnemy boss) {
+            String phaseDescription = switch (boss.getPhase()) {
+                case POLARITY -> "F1 - Polaridade: " + boss.getChargeType().getSymbol();
+                case FIELD -> "F2 - Campo: " + (boss.getFieldDirection() == BossEnemy.FieldDirection.LEFT ? "← Esq" : "→ Dir");
+                case POTENTIAL -> "F3 - Potencial: " + (boss.isPotentialShieldActive() ? "🛡 Escudo Ativo" : "Escudo Inativo");
+            };
+            enemyPhaseLabel.setText(phaseDescription);
+        } else if (enemy instanceof ChargedEnemy chargedEnemy) {
+            enemyPhaseLabel.setText("[" + chargedEnemy.getChargeType().getSymbol() + "]");
+        }
 
-            attackButton.setDisable(
-                    true
-            );
+        // 5. Atualiza Contador de Rodadas
+        roundCounterLabel.setText("Rodada: " + (battleController.getCompletedRounds() + 1)
+                + "  |  Turno: " + (battleController.getCurrentTurn() == BattleController.BattleTurn.PLAYER_TURN ? "SEU TURNO" : "TURNO DO INIMIGO"));
 
-            abilitySelector.setDisable(true);
-            chargeSelector.setDisable(true);
+        // 6. Verifica Encerramento
+        if (battleController.isBattleFinished()) {
+            setButtonsDisabled(true);
 
-            switch (battleController
-                    .getResult()) {
-
-                case VICTORY ->
-                    statusLabel.setText(
-                            "Vitória!"
-                    );
-
-                case DEFEAT ->
-                    statusLabel.setText(
-                            "Derrota."
-                    );
-
+            switch (battleController.getResult()) {
+                case VICTORY -> {
+                    telegraphTitleLabel.setText("> VITÓRIA ELETROSTÁTICA");
+                    telegraphTextLabel.setText("A ameaça teve suas cargas dissipadas e o equilíbrio local foi restabelecido!");
+                    showBattleEndBanner(true);
+                }
+                case DEFEAT -> {
+                    telegraphTitleLabel.setText("> COLAPSO DE EQUILÍBRIO");
+                    telegraphTextLabel.setText("Suas reservas de carga entraram em colapso irreversível...");
+                    showBattleEndBanner(false);
+                }
                 case IN_PROGRESS -> {
                 }
             }
-
-            return;
         }
+    }
 
+    private void showBattleEndBanner(boolean victory) {
+        VBox banner = new VBox(12);
+        banner.setAlignment(Pos.CENTER);
+        banner.getStyleClass().add(victory ? "end-banner-victory" : "end-banner-defeat");
+
+        Label title = new Label(victory ? "VITÓRIA ELETROSTÁTICA" : "COLAPSO DE EQUILÍBRIO");
+        title.getStyleClass().add(victory ? "end-title-victory" : "end-title-defeat");
+
+        Label subtitle = new Label(victory
+                ? "O campo eletrostático foi neutralizado com sucesso."
+                : "A instabilidade elétrica superou suas forças.");
+        subtitle.setStyle("-fx-text-fill: #DDD7CE; -fx-font-size: 15px; -fx-font-family: Georgia;");
+
+        banner.getChildren().addAll(title, subtitle);
+        banner.setLayoutX((LOGICAL_WIDTH - 520) / 2.0);
+        banner.setLayoutY((LOGICAL_HEIGHT - 180) / 2.0);
+        banner.setPrefWidth(520);
+
+        gameRoot.getChildren().add(banner);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(400), banner);
+        fadeIn.setFromValue(0.0);
+        fadeIn.setToValue(1.0);
+        fadeIn.play();
+
+        if (victory) {
+            playSfx("/audio/sfx_battle_victory.wav");
+        }
     }
 
     public Scene getScene() {
-
         return scene;
     }
 }
