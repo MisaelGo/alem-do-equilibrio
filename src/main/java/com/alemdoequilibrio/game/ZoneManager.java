@@ -33,6 +33,8 @@ public class ZoneManager {
     private final ResourceManager
             resourceManager;
 
+    private final QuestionBank questionBank;
+
     private final List<Interactable>
             interactables;
 
@@ -44,7 +46,8 @@ public class ZoneManager {
 
     public ZoneManager(
             Pane worldLayer,
-            ResourceManager resourceManager) {
+            ResourceManager resourceManager,
+            QuestionBank questionBank) {
 
         this.worldLayer =
                 Objects.requireNonNull(
@@ -55,6 +58,8 @@ public class ZoneManager {
                 Objects.requireNonNull(
                         resourceManager
                 );
+
+        this.questionBank = Objects.requireNonNull(questionBank);
 
         this.interactables =
                 new ArrayList<>();
@@ -117,6 +122,21 @@ public class ZoneManager {
 
             case FRAGMENT_CHAMBER ->
                 buildFragmentChamber();
+        }
+
+        if (zone != ExplorationZone.FRAGMENT_CHAMBER) {
+            addNpc(
+                    new Merchant(
+                            "Íon",
+                            1250,
+                            1650,
+                            40,
+                            50,
+                            "",
+                            questionBank
+                    ),
+                    Color.GOLDENROD
+            );
         }
     }
 
@@ -463,8 +483,7 @@ public class ZoneManager {
 
         Label label =
                 new Label(
-                        "Entrada do boss — integração "
-                        + "final prevista para a S4."
+                        "O Guardião da Ruptura aguarda no centro da câmara."
                 );
 
         label.relocate(

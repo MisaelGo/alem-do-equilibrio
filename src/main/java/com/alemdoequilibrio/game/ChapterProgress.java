@@ -8,6 +8,7 @@ public class ChapterProgress {
     private final EnumSet<KnowledgeTopic> learnedTopics;
 
     private ExplorationZone checkpoint;
+    private boolean bossDefeated;
 
     public ChapterProgress() {
 
@@ -18,6 +19,8 @@ public class ChapterProgress {
 
         this.checkpoint =
                 ExplorationZone.NEUTRAL_BORDER;
+
+        this.bossDefeated = false;
     }
 
     public void learn(
@@ -68,5 +71,13 @@ public class ChapterProgress {
     public ExplorationZone getCheckpoint() {
 
         return checkpoint;
+    }
+
+    public void markBossDefeated() {
+        bossDefeated = true;
+    }
+
+    public boolean isBossDefeated() {
+        return bossDefeated;
     }
 }

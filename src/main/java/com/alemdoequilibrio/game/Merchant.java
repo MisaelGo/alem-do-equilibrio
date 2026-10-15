@@ -36,10 +36,8 @@ public class Merchant extends NPC implements QuizProvider {
     /**
      * POO 8 - Interfaces (Implementação obrigatória de QuizProvider)
      * 
-     * ALTERAÇÃO CHAVE: Como a classe Hero não guarda o progresso do capítulo, 
-     * a assinatura deste método foi expandida. Agora, o sistema que gerencia o jogo 
-     * (ex: ExplorationController) é obrigado a injetar o 'progress' e as 'unlockedAbilities' 
-     * no exato momento em que o jogador decide fazer a prova.
+     * O progresso do capítulo chega de fora. O conjunto de nomes representa as
+     * habilidades já aprendidas pelo Hero quando o quiz começa.
      */
     @Override
     public void startQuiz(Hero hero, ChapterProgress progress, Set<String> unlockedAbilities) {
@@ -109,7 +107,7 @@ public class Merchant extends NPC implements QuizProvider {
         }
 
         // 5. RESOLUÇÃO: Aciona o método auxiliar para verificar a nota de corte (3 acertos).
-        deliverReward(unlockedAbilities, currentTopic, correctAnswers);
+        deliverReward(hero, unlockedAbilities, currentTopic, correctAnswers);
     }
 
     /**
@@ -141,28 +139,27 @@ public class Merchant extends NPC implements QuizProvider {
 
     /**
      * MÉTODO AUXILIAR: Verifica se o jogador atingiu a nota de corte e entrega a recompensa.
-     * Importante: Em Java, coleções (como Set) são passadas por referência.
-     * Modificar 'unlockedAbilities' aqui atualiza a lista original do GameController.
+     * O livro do Hero guarda a recompensa entre as batalhas.
      */
-    private void deliverReward(Set<String> unlockedAbilities, KnowledgeTopic topic, int correctAnswers) {
+    private void deliverReward(Hero hero, Set<String> unlockedAbilities, KnowledgeTopic topic, int correctAnswers) {
         
         // A nota de corte definida no roteiro pedagógico é acertar 3 de 4 questões.
         if (correctAnswers >= 3) {
             String rewardMsg = "Brilhante! O seu entendimento compra esta técnica:\n";
-            String newAbility = "";
-            
-            // Relaciona o tópico que acabou de ser testado com a sua respectiva recompensa.
-            if (topic == KnowledgeTopic.KNOW_CHARGE_SIGNS || topic == KnowledgeTopic.KNOW_ELECTRIZATION) {
-                newAbility = "Pulso de Repulsão";
-            } else if (topic == KnowledgeTopic.KNOW_FIELD || topic == KnowledgeTopic.KNOW_COULOMB) {
-                newAbility = "Impulso de Campo";
-            } else if (topic == KnowledgeTopic.KNOW_POTENTIAL) {
-                newAbility = "Escudo Equipotencial";
+            Ability reward = createReward(topic);
+
+            boolean equipNow = hero.getAbilityBook()
+                    .getEquippedAbility() == null;
+
+            // A recompensa passa a existir no livro do Hero.
+            if (equipNow) {
+                hero.learnAbility(reward, true);
+            } else {
+                hero.learnAbility(reward);
             }
-            
-            // Adiciona a habilidade no inventário do jogador (reflete globalmente no jogo)
-            unlockedAbilities.add(newAbility);
-            rewardMsg += "-> Nova Habilidade Adquirida: " + newAbility + "!";
+            unlockedAbilities.add(reward.getName());
+            rewardMsg += "-> Nova Habilidade Adquirida: "
+                    + reward.getName() + "!";
             
             JOptionPane.showMessageDialog(null, rewardMsg, "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         } else {
@@ -172,5 +169,20 @@ public class Merchant extends NPC implements QuizProvider {
               + "As faíscas ainda confundem a sua mente. Tente novamente mais tarde.", 
                 "Falha", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    static Ability createReward(KnowledgeTopic topic) {
+        if (topic == null) {
+            throw new IllegalArgumentException("O topico nao pode ser nulo.");
+        }
+
+        return switch (topic) {
+            case KNOW_CHARGE_SIGNS, KNOW_ELECTRIZATION ->
+                new RepulsionPulse();
+            case KNOW_FIELD, KNOW_COULOMB ->
+                new FieldImpulse();
+            case KNOW_POTENTIAL ->
+                new EquipotentialShield();
+        };
     }
 }

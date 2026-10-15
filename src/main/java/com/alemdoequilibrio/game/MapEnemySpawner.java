@@ -157,9 +157,6 @@ public class MapEnemySpawner {
             /*
              * Na última região o encontro
              * é com o Guardião da Ruptura.
-             *
-             * O comportamento final das fases
-             * ainda pertence à etapa do boss.
              */
             case FRAGMENT_CHAMBER -> {
 

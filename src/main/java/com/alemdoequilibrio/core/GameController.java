@@ -2,7 +2,9 @@ package com.alemdoequilibrio.core;
 
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
+import com.alemdoequilibrio.game.BossEnemy;
 import com.alemdoequilibrio.game.ChapterProgress;
+import com.alemdoequilibrio.game.ChapterCompleteView;
 import com.alemdoequilibrio.game.Enemy;
 import com.alemdoequilibrio.game.ExplorationController;
 
@@ -18,6 +20,8 @@ public class GameController {
 
     private final ChapterProgress
             chapterProgress;
+
+    private final ChapterCompleteView chapterCompleteView;
 
     private GameState currentState;
 
@@ -43,6 +47,10 @@ public class GameController {
 
         chapterProgress =
                 new ChapterProgress();
+
+        chapterCompleteView = new ChapterCompleteView(
+                () -> changeState(GameState.EXPLORATION)
+        );
 
         currentState =
                 GameState.MENU;
@@ -134,11 +142,13 @@ public class GameController {
             case BATTLE ->
                 showBattle();
 
+            case CHAPTER_COMPLETE ->
+                sceneRouter.show(chapterCompleteView.getScene());
+
             case MENU,
                  DIALOGUE,
                  QUIZ,
-                 PAUSED,
-                 CHAPTER_COMPLETE -> {
+                 PAUSED -> {
             }
         }
     }
@@ -215,6 +225,13 @@ public class GameController {
                 == BattleController
                         .BattleResult.VICTORY) {
 
+            boolean bossVictory = currentBattleController.getEnemy()
+                    instanceof BossEnemy;
+
+            if (bossVictory) {
+                chapterProgress.markBossDefeated();
+            }
+
             explorationController
                     .removeDefeatedEnemy(
                             currentBattleController
@@ -227,9 +244,9 @@ public class GameController {
             currentBattleView =
                     null;
 
-            changeState(
-                    GameState.EXPLORATION
-            );
+            changeState(bossVictory
+                    ? GameState.CHAPTER_COMPLETE
+                    : GameState.EXPLORATION);
 
             return;
         }
@@ -237,15 +254,11 @@ public class GameController {
         if (result
                 == BattleController
                         .BattleResult.DEFEAT) {
+            currentBattleController = null;
+            currentBattleView = null;
 
-            System.out.println(
-                    "O Herói foi derrotado."
-            );
-
-            /*
-             * Fluxo de derrota/checkpoint
-             * será integrado depois.
-             */
+            explorationController.respawnAtCheckpoint();
+            changeState(GameState.EXPLORATION);
         }
     }
 
