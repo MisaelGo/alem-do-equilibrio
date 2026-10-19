@@ -1,22 +1,34 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Set;
+import java.util.List;
 
 /**
- * Interface que define o contrato para entidades capazes de fornecer um quiz ao jogador.
- * 
- * POO 8 - Interfaces
- * Justificativa: Define um contrato claro para a aplicação de testes.
+ * Interface que define o contrato para entidades
+ * capazes de fornecer um quiz ao jogador.
+ *
+ * POO 8 - Interfaces:
+ * o controlador visual pode pedir as questões
+ * sem conhecer a implementação concreta do provedor.
  */
 public interface QuizProvider {
-    
+
     /**
-     * Inicia a sequência do quiz, testando o conhecimento e recompensando o jogador.
-     * 
-     * @param hero O herói (jogador) que será submetido à prova.
-     * @param progress O registro de tópicos já descobertos (ChapterProgress).
-     * @param unlockedAbilities O conjunto de habilidades que o jogador já possui.
+     * Informa se o quiz deste provedor pode ser iniciado.
+     *
+     * @param progress progresso atual do capítulo
+     * @return true quando todos os pré-requisitos foram aprendidos
      */
-    void startQuiz(Hero hero, ChapterProgress progress, Set<String> unlockedAbilities);
-    
+    boolean canStartQuiz(
+            ChapterProgress progress);
+
+    /**
+     * Monta uma tentativa do quiz.
+     *
+     * @param progress progresso atual do capítulo
+     * @param amount quantidade de questões desejada
+     * @return questões sorteadas para a tentativa
+     */
+    List<PhysicsQuestion> startQuiz(
+            ChapterProgress progress,
+            int amount);
 }
