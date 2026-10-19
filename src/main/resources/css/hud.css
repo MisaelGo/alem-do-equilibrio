@@ -35,8 +35,8 @@
 }
 
 .hud-progress-bar {
-  -fx-pref-width: 180px;
-  -fx-pref-height: 16px;
+  -fx-pref-width: 155px;
+  -fx-pref-height: 14px;
 }
 
 .hud-progress-bar .track {
@@ -58,6 +58,7 @@
   -fx-font-family: "Consolas", "Courier New", monospace;
   -fx-font-size: 12px;
   -fx-font-weight: bold;
+  -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.85), 1, 0, 1, 1);
 }
 
 /* Prompt de Interação Dinâmico ([E] Interagir com ...) */
@@ -83,10 +84,11 @@
 }
 
 .hud-interaction-text {
-  -fx-text-fill: #ffffff;
-  -fx-font-family: "Segoe UI", "DejaVu Sans", sans-serif;
-  -fx-font-size: 14px;
+  -fx-text-fill: #fff8e7;
+  -fx-font-family: "Consolas", "Courier New", monospace;
+  -fx-font-size: 15px;
   -fx-font-weight: bold;
+  -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.9), 1, 0, 1, 1);
 }
 
 /* Banner de Notificação de Conceito de Física Aprendido */
