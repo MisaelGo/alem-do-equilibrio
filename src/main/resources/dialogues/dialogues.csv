@@ -13,6 +13,8 @@ INTRO_NEUTRAL_BORDER;Herói;Vou até lá perguntar.
 HOUSE_NEUTRAL_INTERACTION;Herói;Estranho... alguma coisa está me repelindo. Essa casa deve estar carregada com o mesmo sinal que eu.
 TREE_NEUTRAL_INTERACTION;Herói;Que árvore estranha... Quanto mais tento me aproximar, mais parece que alguma coisa me empurra para longe. Deve estar carregada com o mesmo sinal que eu.
 
+NEUTRAL_EXIT_NEED_NILO;Herói;Antes de seguir, eu deveria conversar com aquela pessoa que vi quando cheguei. Talvez ela saiba mais sobre este lugar.
+NEUTRAL_EXIT_NEED_ION;Herói;Aquele sujeito que encontrei por aqui parece saber bastante sobre este mundo. Melhor falar com ele antes de seguir.
 
 NILO_CHARGE_SIGNS;Herói;Ei... com licença.
 NILO_CHARGE_SIGNS;Nilo;Hm? Quem é você?
