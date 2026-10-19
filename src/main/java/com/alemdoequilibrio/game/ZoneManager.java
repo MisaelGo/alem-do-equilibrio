@@ -67,11 +67,23 @@ public class ZoneManager {
     private static final String NEUTRAL_BUSH_IMAGE =
             "/images/arbusto.png";
 
-    private static final double NEUTRAL_BUSH_WIDTH =
+    static final double NEUTRAL_BUSH_WIDTH =
+            80;
+
+    static final double NEUTRAL_BUSH_HEIGHT =
             120;
 
-    private static final double NEUTRAL_BUSH_HEIGHT =
-            180;
+    static final double NEUTRAL_BUSH_1_X =
+            210;
+
+    static final double NEUTRAL_BUSH_1_Y =
+            170;
+
+    static final double NEUTRAL_BUSH_2_X =
+            830;
+
+    static final double NEUTRAL_BUSH_2_Y =
+            210;
 
     private final Pane worldLayer;
 
@@ -202,13 +214,13 @@ public class ZoneManager {
         addNeutralTree();
 
         addNeutralBush(
-                210,
-                170
+                NEUTRAL_BUSH_1_X,
+                NEUTRAL_BUSH_1_Y
         );
 
         addNeutralBush(
-                830,
-                210
+                NEUTRAL_BUSH_2_X,
+                NEUTRAL_BUSH_2_Y
         );
 
         NPC nilo =
