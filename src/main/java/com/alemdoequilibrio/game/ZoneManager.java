@@ -64,6 +64,15 @@ public class ZoneManager {
     private static final String NEUTRAL_TREE_IMAGE =
             "/images/tree.png";
 
+    private static final String NEUTRAL_BUSH_IMAGE =
+            "/images/arbusto.png";
+
+    private static final double NEUTRAL_BUSH_WIDTH =
+            120;
+
+    private static final double NEUTRAL_BUSH_HEIGHT =
+            180;
+
     private final Pane worldLayer;
 
     private final ResourceManager
@@ -191,6 +200,16 @@ public class ZoneManager {
         addNeutralHouse();
 
         addNeutralTree();
+
+        addNeutralBush(
+                210,
+                170
+        );
+
+        addNeutralBush(
+                830,
+                210
+        );
 
         NPC nilo =
                 new NPC(
@@ -760,6 +779,48 @@ public class ZoneManager {
                         NEUTRAL_TREE_HEIGHT
                 )
         );
+    }
+
+    private void addNeutralBush(
+            double x,
+            double y) {
+
+        Image bushImage =
+                resourceManager.getImage(
+                        NEUTRAL_BUSH_IMAGE
+                );
+
+        ImageView bushView =
+                new ImageView(
+                        bushImage
+                );
+
+        bushView.setFitWidth(
+                NEUTRAL_BUSH_WIDTH
+        );
+
+        bushView.setFitHeight(
+                NEUTRAL_BUSH_HEIGHT
+        );
+
+        bushView.setPreserveRatio(
+                true
+        );
+
+        bushView.setSmooth(
+                false
+        );
+
+        bushView.relocate(
+                x,
+                y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        bushView
+                );
     }
 
     private void addNpc(
