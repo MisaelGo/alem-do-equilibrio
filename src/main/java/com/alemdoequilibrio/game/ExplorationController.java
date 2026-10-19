@@ -386,8 +386,8 @@ public class ExplorationController {
 
             case NEUTRAL_BORDER ->
                 hero.setPosition(
-                        365,
-                        1670
+                        220,
+                        1040
                 );
 
             case INSULATOR_TRAIL ->
@@ -878,9 +878,11 @@ public class ExplorationController {
                 deltaTime * Math.abs(
                     normalizedX
                 ),
-                ZoneManager.WORLD_WIDTH
+                zoneManager
+                        .getCurrentWorldWidth()
                     - TILE_SIZE,
-                ZoneManager.WORLD_HEIGHT
+                zoneManager
+                        .getCurrentWorldHeight()
                     - TILE_SIZE
             );
 
@@ -914,9 +916,11 @@ public class ExplorationController {
                     * Math.abs(
                             normalizedY
                     ),
-                    ZoneManager.WORLD_WIDTH
+                    zoneManager
+                            .getCurrentWorldWidth()
                             - TILE_SIZE,
-                    ZoneManager.WORLD_HEIGHT
+                    zoneManager
+                            .getCurrentWorldHeight()
                             - TILE_SIZE
             );
 
@@ -1045,7 +1049,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetX,
-                                ZoneManager.WORLD_WIDTH
+                                zoneManager
+                                        .getCurrentWorldWidth()
                                         - LOGICAL_WIDTH
                         )
                 );
@@ -1055,7 +1060,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetY,
-                                ZoneManager.WORLD_HEIGHT
+                                zoneManager
+                                        .getCurrentWorldHeight()
                                         - LOGICAL_HEIGHT
                         )
                 );
