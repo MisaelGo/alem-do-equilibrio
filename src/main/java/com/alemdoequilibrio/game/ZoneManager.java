@@ -61,18 +61,6 @@ public class ZoneManager {
     static final double NEUTRAL_TREE_HEIGHT =
             240;
 
-    static final double NEUTRAL_TREE_COLLISION_X =
-            NEUTRAL_TREE_X + 60;
-
-    static final double NEUTRAL_TREE_COLLISION_Y =
-            NEUTRAL_TREE_Y + 165;
-
-    static final double NEUTRAL_TREE_COLLISION_WIDTH =
-            120;
-
-    static final double NEUTRAL_TREE_COLLISION_HEIGHT =
-            75;
-
     private static final String NEUTRAL_TREE_IMAGE =
             "/images/tree.png";
 
@@ -710,6 +698,17 @@ public class ZoneManager {
                 .add(
                         houseView
                 );
+
+        interactables.add(
+                new SceneryInteractable(
+                        "a casa",
+                        "HOUSE_NEUTRAL_INTERACTION",
+                        NEUTRAL_HOUSE_X,
+                        NEUTRAL_HOUSE_Y,
+                        NEUTRAL_HOUSE_WIDTH,
+                        NEUTRAL_HOUSE_HEIGHT
+                )
+        );
     }
 
     private void addNeutralTree() {
@@ -750,6 +749,17 @@ public class ZoneManager {
                 .add(
                         treeView
                 );
+
+        interactables.add(
+                new SceneryInteractable(
+                        "a árvore",
+                        "TREE_NEUTRAL_INTERACTION",
+                        NEUTRAL_TREE_X,
+                        NEUTRAL_TREE_Y,
+                        NEUTRAL_TREE_WIDTH,
+                        NEUTRAL_TREE_HEIGHT
+                )
+        );
     }
 
     private void addNpc(
