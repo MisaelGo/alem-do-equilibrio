@@ -268,7 +268,7 @@ public final class TileMapRenderer {
      * começa junto à borda inferior, sobe suavemente depois do Nilo
      * e termina alinhado à abertura leste.
      */
-    private static boolean isNeutralBorderPathTile(
+    static boolean isNeutralBorderPathTile(
             int col,
             int row,
             int columns,
