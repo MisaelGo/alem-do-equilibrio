@@ -163,8 +163,7 @@ public class ChapterProgress {
             Set<KnowledgeTopic> learnedTopics,
             Set<KnowledgeTopic> completedQuizzes,
             boolean bossDefeated,
-            boolean fragmentObtained,
-            boolean neutralIonMet) {
+            boolean fragmentObtained) {
 
         restoreFromSave(
                 checkpoint,
@@ -184,7 +183,8 @@ public class ChapterProgress {
             Set<KnowledgeTopic> learnedTopics,
             Set<KnowledgeTopic> completedQuizzes,
             boolean bossDefeated,
-            boolean fragmentObtained) {
+            boolean fragmentObtained,
+            boolean neutralIonMet) {
 
         if (checkpoint == null
                 || learnedTopics == null
