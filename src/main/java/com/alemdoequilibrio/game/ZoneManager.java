@@ -53,7 +53,7 @@ public class ZoneManager {
             1120;
 
     static final double NEUTRAL_TREE_Y =
-            280;
+            150;
 
     static final double NEUTRAL_TREE_WIDTH =
             240;

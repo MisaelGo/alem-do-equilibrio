@@ -75,10 +75,10 @@ public class CollisionManager {
                 );
 
                 addObstacle(
-                        ZoneManager.NEUTRAL_TREE_COLLISION_X,
-                        ZoneManager.NEUTRAL_TREE_COLLISION_Y,
-                        ZoneManager.NEUTRAL_TREE_COLLISION_WIDTH,
-                        ZoneManager.NEUTRAL_TREE_COLLISION_HEIGHT
+                        ZoneManager.NEUTRAL_TREE_X,
+                        ZoneManager.NEUTRAL_TREE_Y,
+                        ZoneManager.NEUTRAL_TREE_WIDTH,
+                        ZoneManager.NEUTRAL_TREE_HEIGHT
                 );
 
                 addNeutralBorderWallCollisions();
