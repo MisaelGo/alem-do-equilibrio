@@ -183,15 +183,12 @@ public final class TileMapRenderer {
                         );
 
                 // 1. Paredes e montanhas rochosas de limite do cenário
-                boolean isNorthWall = row <= 1;
-                boolean isSouthWall = row >= rows - 2;
-                boolean isWestWall = col == 0;
-
-                boolean isEastWall =
-                        col == columns - 1
-                        && !isPath;
-
-                if (isNorthWall || isSouthWall || isWestWall || isEastWall) {
+                if (isNeutralBorderWallTile(
+                        col,
+                        row,
+                        columns,
+                        rows
+                )) {
                     gc.drawImage(rockImg, x, y, tileSize, tileSize);
                     continue;
                 }
@@ -259,6 +256,46 @@ public final class TileMapRenderer {
     private static boolean isEquipotentialCircle(int col, int row, int centerCol, int centerRow, int radius) {
         double dist = Math.hypot(col - centerCol, row - centerRow);
         return Math.abs(dist - radius) < 0.9;
+    }
+
+    /**
+     * Define se o tile pertence às paredes da Fronteira Neutra.
+     *
+     * A borda superior possui duas fileiras, a inferior duas,
+     * a esquerda uma coluna e a direita uma coluna. Na borda
+     * direita, os tiles da estrada permanecem livres.
+     */
+    static boolean isNeutralBorderWallTile(
+            int col,
+            int row,
+            int columns,
+            int rows) {
+
+        boolean isPath =
+                isNeutralBorderPathTile(
+                        col,
+                        row,
+                        columns,
+                        rows
+                );
+
+        boolean isNorthWall =
+                row <= 1;
+
+        boolean isSouthWall =
+                row >= rows - 2;
+
+        boolean isWestWall =
+                col == 0;
+
+        boolean isEastWall =
+                col == columns - 1
+                && !isPath;
+
+        return isNorthWall
+                || isSouthWall
+                || isWestWall
+                || isEastWall;
     }
 
     /**
