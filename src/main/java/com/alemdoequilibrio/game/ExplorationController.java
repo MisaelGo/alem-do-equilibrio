@@ -33,11 +33,10 @@ public class ExplorationController {
             ENEMY_RANGE = 70;
 
     private static final double
-            HERO_START_X = 100;
+            HERO_START_X = 220;
 
     private static final double
-            HERO_START_Y =
-            ZoneManager.WORLD_HEIGHT - 100;
+            HERO_START_Y = 1040;
 
     private final Hero hero;
 
@@ -176,8 +175,8 @@ public class ExplorationController {
                 new Pane();
 
         worldLayer.setPrefSize(
-                ZoneManager.WORLD_WIDTH,
-                ZoneManager.WORLD_HEIGHT
+                ZoneManager.NEUTRAL_BORDER_WIDTH,
+                ZoneManager.NEUTRAL_BORDER_HEIGHT
         );
 
         QuestionBank questionBank =
