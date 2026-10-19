@@ -518,9 +518,7 @@ public class ExplorationController {
         }
 
         if (dialogueController
-                .isOpen()
-                || quizController
-                        .isOpen()) {
+                .isOpen()) {
 
             boolean stillOpen =
                     dialogueController
@@ -1084,7 +1082,9 @@ public class ExplorationController {
     private void updateInteractionPrompt() {
 
         if (dialogueController
-                .isOpen()) {
+                .isOpen()
+                || quizController
+                        .isOpen()) {
 
             hud.hideInteractionPrompt();
 
