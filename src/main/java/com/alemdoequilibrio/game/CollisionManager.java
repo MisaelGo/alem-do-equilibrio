@@ -65,8 +65,10 @@ public class CollisionManager {
          */
         switch (zone) {
 
-            case NEUTRAL_BORDER ->
+            case NEUTRAL_BORDER -> {
                 addNeutralBorderWallCollisions();
+                addNeutralBushCollisions();
+            }
 
             case INSULATOR_TRAIL ->
                 addObstacle(
@@ -83,6 +85,23 @@ public class CollisionManager {
                  FRAGMENT_CHAMBER -> {
             }
         }
+    }
+
+    private void addNeutralBushCollisions() {
+
+        addObstacle(
+                ZoneManager.NEUTRAL_BUSH_1_X,
+                ZoneManager.NEUTRAL_BUSH_1_Y,
+                ZoneManager.NEUTRAL_BUSH_WIDTH,
+                ZoneManager.NEUTRAL_BUSH_HEIGHT
+        );
+
+        addObstacle(
+                ZoneManager.NEUTRAL_BUSH_2_X,
+                ZoneManager.NEUTRAL_BUSH_2_Y,
+                ZoneManager.NEUTRAL_BUSH_WIDTH,
+                ZoneManager.NEUTRAL_BUSH_HEIGHT
+        );
     }
 
     /**
