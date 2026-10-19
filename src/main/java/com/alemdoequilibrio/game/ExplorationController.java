@@ -104,6 +104,9 @@ public class ExplorationController {
     private boolean
         neutralBorderIntroShown;
 
+    private boolean
+        neutralIonMet;
+
     public ExplorationController(
             ResourceManager resourceManager,
             ChapterProgress chapterProgress,
@@ -308,6 +311,9 @@ public class ExplorationController {
                 new boolean[4];
         
         neutralBorderIntroShown =
+                false;
+
+        neutralIonMet =
                 false;
 
         configureInput();
@@ -552,10 +558,9 @@ public class ExplorationController {
             return;
         }
 
-        dialogueController
-                .startDialogue(
-                        interactable
-                );
+        startInteractionDialogue(
+                interactable
+        );
 
         if (dialogueController
                 .isOpen()) {
@@ -565,6 +570,57 @@ public class ExplorationController {
             onDialogueStarted
                     .run();
         }
+    }
+
+    private void startInteractionDialogue(
+            Interactable interactable) {
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && interactable
+                        instanceof NPC npc) {
+
+            String name =
+                    npc.getName();
+
+            if ("Nilo".equalsIgnoreCase(
+                    name
+            )
+                    && chapterProgress
+                            .hasLearned(
+                                    KnowledgeTopic
+                                            .KNOW_CHARGE_SIGNS
+                            )) {
+
+                dialogueController
+                        .startDialogue(
+                                "NILO_REPEAT"
+                        );
+
+                return;
+            }
+
+            if (("Íon".equalsIgnoreCase(
+                    name
+            )
+                    || "Ion".equalsIgnoreCase(
+                            name
+                    ))
+                    && neutralIonMet) {
+
+                dialogueController
+                        .startDialogue(
+                                "ION_NEUTRAL_REPEAT"
+                        );
+
+                return;
+            }
+        }
+
+        dialogueController
+                .startDialogue(
+                        interactable
+                );
     }
 
     private void startMerchantQuiz(
@@ -684,24 +740,44 @@ public class ExplorationController {
                 hero.getY()
                 + TILE_SIZE / 2.0;
 
-        double targetCenterX =
-                interactable.getX()
-                + interactable
-                        .getWidth()
-                / 2.0;
+        double targetLeft =
+                interactable.getX();
 
-        double targetCenterY =
-                interactable.getY()
-                + interactable
-                        .getHeight()
-                / 2.0;
+        double targetTop =
+                interactable.getY();
+
+        double targetRight =
+                targetLeft
+                + interactable.getWidth();
+
+        double targetBottom =
+                targetTop
+                + interactable.getHeight();
+
+        double nearestX =
+                Math.max(
+                        targetLeft,
+                        Math.min(
+                                heroCenterX,
+                                targetRight
+                        )
+                );
+
+        double nearestY =
+                Math.max(
+                        targetTop,
+                        Math.min(
+                                heroCenterY,
+                                targetBottom
+                        )
+                );
 
         return Math.hypot(
                 heroCenterX
-                        - targetCenterX,
+                        - nearestX,
 
                 heroCenterY
-                        - targetCenterY
+                        - nearestY
         );
     }
 
@@ -722,6 +798,19 @@ public class ExplorationController {
                 instanceof NPC npc)) {
 
             return;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && ("Íon".equalsIgnoreCase(
+                        npc.getName()
+                )
+                    || "Ion".equalsIgnoreCase(
+                            npc.getName()
+                    ))) {
+
+            neutralIonMet =
+                    true;
         }
 
         KnowledgeTopic topic =
@@ -1102,10 +1191,22 @@ public class ExplorationController {
 
         if (nearest != null) {
 
-            hud.showInteractionPrompt(
-                    nearest
-                            .getInteractionName()
-            );
+            if (nearest
+                    instanceof SceneryInteractable) {
+
+                hud.showInteractionPrompt(
+                        "Examinar",
+                        nearest
+                                .getInteractionName()
+                );
+
+            } else {
+
+                hud.showInteractionPrompt(
+                        nearest
+                                .getInteractionName()
+                );
+            }
 
         } else {
 
