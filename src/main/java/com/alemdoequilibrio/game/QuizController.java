@@ -39,6 +39,8 @@ public class QuizController {
 
     private int correctAnswers;
 
+    private boolean showingResult;
+
     private IntConsumer onQuizFinished;
 
     public QuizController(
@@ -252,6 +254,8 @@ public class QuizController {
 
         correctAnswers = 0;
 
+        showingResult = false;
+
         quizBox.setVisible(
                 true
         );
@@ -301,6 +305,11 @@ public class QuizController {
 
             optionButtons[i]
                     .setVisible(
+                            true
+                    );
+
+            optionButtons[i]
+                    .setManaged(
                             true
                     );
         }
@@ -382,6 +391,23 @@ public class QuizController {
 
     private void goToNextQuestion() {
 
+        if (showingResult) {
+
+            IntConsumer callback =
+                    onQuizFinished;
+
+            int result =
+                    correctAnswers;
+
+            closeQuiz();
+
+            callback.accept(
+                    result
+            );
+
+            return;
+        }
+
         if (currentQuestionIndex
                 < currentQuestions.size() - 1) {
 
@@ -392,16 +418,61 @@ public class QuizController {
             return;
         }
 
-        IntConsumer callback =
-                onQuizFinished;
+        showResult();
+    }
 
-        int result =
-                correctAnswers;
+    private void showResult() {
 
-        closeQuiz();
+        showingResult = true;
 
-        callback.accept(
-                result
+        progressLabel.setText(
+                "Resultado final"
+        );
+
+        questionLabel.setText(
+                "Você acertou "
+                + correctAnswers
+                + " de "
+                + currentQuestions.size()
+                + " perguntas."
+        );
+
+        for (Button button
+                : optionButtons) {
+
+            button.setVisible(
+                    false
+            );
+
+            button.setManaged(
+                    false
+            );
+        }
+
+        if (correctAnswers >= 3) {
+
+            feedbackLabel.setText(
+                    "Você atingiu a pontuação necessária."
+            );
+
+        } else {
+
+            feedbackLabel.setText(
+                    "Você precisa acertar pelo menos 3 perguntas. "
+                    + "Converse com Íon novamente para tentar outra vez."
+            );
+        }
+
+        continueButton.setText(
+                "Continuar"
+        );
+
+        continueButton.setVisible(
+                true
+        );
+
+        continueButton.setManaged(
+                true
         );
     }
 
@@ -421,6 +492,8 @@ public class QuizController {
         currentQuestionIndex = 0;
 
         correctAnswers = 0;
+
+        showingResult = false;
 
         onQuizFinished = null;
     }
