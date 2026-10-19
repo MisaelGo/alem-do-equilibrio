@@ -183,7 +183,7 @@ public final class TileMapRenderer {
                 int exitEndRow = rows - 3;
 
                 boolean isEastWall =
-                        (col >= columns - 2)
+                        (col == columns - 1)
                         && (row < exitStartRow
                         || row > exitEndRow);
 
