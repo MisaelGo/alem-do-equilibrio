@@ -797,21 +797,58 @@ public class ZoneManager {
             visualNode = body;
         }
 
-        Label name =
-                new Label(
-                        npc.getName()
-                );
+        if (shouldShowNpcName(
+                npc.getName()
+        )) {
 
-        name.relocate(
-                npc.getX(),
-                npc.getY() - 25
-        );
+            Label name =
+                    new Label(
+                            npc.getName()
+                    );
+
+            name.relocate(
+                    npc.getX(),
+                    npc.getY() - 25
+            );
+
+            worldLayer
+                    .getChildren()
+                    .addAll(
+                            visualNode,
+                            name
+                    );
+
+            return;
+        }
 
         worldLayer
                 .getChildren()
-                .addAll(
-                        visualNode,
-                        name
+                .add(
+                        visualNode
+                );
+    }
+
+    private boolean shouldShowNpcName(
+            String name) {
+
+        if (name == null) {
+
+            return true;
+        }
+
+        String normalized =
+                name
+                        .trim()
+                        .toLowerCase();
+
+        return !normalized.equals(
+                "nilo"
+        )
+                && !normalized.equals(
+                        "íon"
+                )
+                && !normalized.equals(
+                        "ion"
                 );
     }
 
