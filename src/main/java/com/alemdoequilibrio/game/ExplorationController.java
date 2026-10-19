@@ -33,10 +33,10 @@ public class ExplorationController {
             ENEMY_RANGE = 70;
 
     private static final double
-            HERO_START_X = 220;
+            HERO_START_X = 176;
 
     private static final double
-            HERO_START_Y = 1040;
+            HERO_START_Y = 832;
 
     private final Hero hero;
 
@@ -385,8 +385,8 @@ public class ExplorationController {
 
             case NEUTRAL_BORDER ->
                 hero.setPosition(
-                        220,
-                        1040
+                        176,
+                        832
                 );
 
             case INSULATOR_TRAIL ->
