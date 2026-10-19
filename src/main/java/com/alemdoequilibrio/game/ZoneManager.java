@@ -34,6 +34,21 @@ public class ZoneManager {
     private static final double TILE_SIZE =
             40;
 
+    static final double NEUTRAL_HOUSE_X =
+            320;
+
+    static final double NEUTRAL_HOUSE_Y =
+            400;
+
+    static final double NEUTRAL_HOUSE_WIDTH =
+            280;
+
+    static final double NEUTRAL_HOUSE_HEIGHT =
+            280;
+
+    private static final String NEUTRAL_HOUSE_IMAGE =
+            "/images/house.png";
+
     private final Pane worldLayer;
 
     private final ResourceManager
@@ -158,6 +173,8 @@ public class ZoneManager {
                 "FRONTEIRA NEUTRA"
         );
 
+        addNeutralHouse();
+
         NPC nilo =
                 new NPC(
                         "Nilo",
@@ -196,6 +213,10 @@ public class ZoneManager {
                 1650
         );*/
 
+        /*
+         * Gatilho invisível de transição.
+         * Ocupa exatamente um tile na abertura leste.
+         */
         createExitArea(
                 "Trilha dos Isolantes",
                 1560,
@@ -620,6 +641,46 @@ public class ZoneManager {
         worldLayer
                 .getChildren()
                 .add(title);
+    }
+
+    private void addNeutralHouse() {
+
+        Image houseImage =
+                resourceManager.getImage(
+                        NEUTRAL_HOUSE_IMAGE
+                );
+
+        ImageView houseView =
+                new ImageView(
+                        houseImage
+                );
+
+        houseView.setFitWidth(
+                NEUTRAL_HOUSE_WIDTH
+        );
+
+        houseView.setFitHeight(
+                NEUTRAL_HOUSE_HEIGHT
+        );
+
+        houseView.setPreserveRatio(
+                true
+        );
+
+        houseView.setSmooth(
+                false
+        );
+
+        houseView.relocate(
+                NEUTRAL_HOUSE_X,
+                NEUTRAL_HOUSE_Y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        houseView
+                );
     }
 
     private void addNpc(
