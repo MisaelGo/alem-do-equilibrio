@@ -970,12 +970,7 @@ public class ZoneManager {
                 );
 
         exitArea.setFill(
-                Color.rgb(
-                        80,
-                        200,
-                        120,
-                        0.35
-                )
+                Color.TRANSPARENT
         );
 
         Label exitLabel =
