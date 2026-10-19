@@ -65,13 +65,17 @@ public class CollisionManager {
          */
         switch (zone) {
 
-            case NEUTRAL_BORDER ->
+            case NEUTRAL_BORDER -> {
+
                 addObstacle(
                         ZoneManager.NEUTRAL_HOUSE_X,
                         ZoneManager.NEUTRAL_HOUSE_Y,
                         ZoneManager.NEUTRAL_HOUSE_WIDTH,
                         ZoneManager.NEUTRAL_HOUSE_HEIGHT
                 );
+
+                addNeutralBorderSideCollisions();
+            }
 
             case INSULATOR_TRAIL ->
                 addObstacle(
@@ -87,6 +91,62 @@ public class CollisionManager {
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
             }
+        }
+    }
+
+    /**
+     * Adiciona colisão em todos os blocos da lateral direita
+     * da Fronteira Neutra, deixando livre somente a passagem
+     * onde a estrada atravessa a borda.
+     */
+    private void addNeutralBorderSideCollisions() {
+
+        double tileSize =
+                40;
+
+        int columns =
+                (int) (
+                        ZoneManager.NEUTRAL_BORDER_WIDTH
+                        / tileSize
+                );
+
+        int rows =
+                (int) (
+                        ZoneManager.NEUTRAL_BORDER_HEIGHT
+                        / tileSize
+                );
+
+        int rightColumn =
+                columns - 1;
+
+        double x =
+                rightColumn
+                * tileSize;
+
+        for (int row = 0;
+                row < rows;
+                row++) {
+
+            boolean isPath =
+                    TileMapRenderer
+                            .isNeutralBorderPathTile(
+                                    rightColumn,
+                                    row,
+                                    columns,
+                                    rows
+                            );
+
+            if (isPath) {
+
+                continue;
+            }
+
+            addObstacle(
+                    x,
+                    row * tileSize,
+                    tileSize,
+                    tileSize
+            );
         }
     }
 
