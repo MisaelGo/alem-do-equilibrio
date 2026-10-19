@@ -49,6 +49,33 @@ public class ZoneManager {
     private static final String NEUTRAL_HOUSE_IMAGE =
             "/images/house.png";
 
+    static final double NEUTRAL_TREE_X =
+            1120;
+
+    static final double NEUTRAL_TREE_Y =
+            280;
+
+    static final double NEUTRAL_TREE_WIDTH =
+            240;
+
+    static final double NEUTRAL_TREE_HEIGHT =
+            240;
+
+    static final double NEUTRAL_TREE_COLLISION_X =
+            NEUTRAL_TREE_X + 60;
+
+    static final double NEUTRAL_TREE_COLLISION_Y =
+            NEUTRAL_TREE_Y + 165;
+
+    static final double NEUTRAL_TREE_COLLISION_WIDTH =
+            120;
+
+    static final double NEUTRAL_TREE_COLLISION_HEIGHT =
+            75;
+
+    private static final String NEUTRAL_TREE_IMAGE =
+            "/images/tree.png";
+
     private final Pane worldLayer;
 
     private final ResourceManager
@@ -174,6 +201,8 @@ public class ZoneManager {
         );
 
         addNeutralHouse();
+
+        addNeutralTree();
 
         NPC nilo =
                 new NPC(
@@ -680,6 +709,46 @@ public class ZoneManager {
                 .getChildren()
                 .add(
                         houseView
+                );
+    }
+
+    private void addNeutralTree() {
+
+        Image treeImage =
+                resourceManager.getImage(
+                        NEUTRAL_TREE_IMAGE
+                );
+
+        ImageView treeView =
+                new ImageView(
+                        treeImage
+                );
+
+        treeView.setFitWidth(
+                NEUTRAL_TREE_WIDTH
+        );
+
+        treeView.setFitHeight(
+                NEUTRAL_TREE_HEIGHT
+        );
+
+        treeView.setPreserveRatio(
+                true
+        );
+
+        treeView.setSmooth(
+                false
+        );
+
+        treeView.relocate(
+                NEUTRAL_TREE_X,
+                NEUTRAL_TREE_Y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        treeView
                 );
     }
 
