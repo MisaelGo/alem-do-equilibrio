@@ -50,7 +50,7 @@ public class ZoneManager {
             "/images/house.png";
 
     static final double NEUTRAL_TREE_X =
-            1120;
+            1250;
 
     static final double NEUTRAL_TREE_Y =
             150;
@@ -80,10 +80,10 @@ public class ZoneManager {
             170;
 
     static final double NEUTRAL_BUSH_2_X =
-            830;
+            900;
 
     static final double NEUTRAL_BUSH_2_Y =
-            210;
+            350;
 
     private final Pane worldLayer;
 
