@@ -74,6 +74,13 @@ public class CollisionManager {
                         ZoneManager.NEUTRAL_HOUSE_HEIGHT
                 );
 
+                addObstacle(
+                        ZoneManager.NEUTRAL_TREE_COLLISION_X,
+                        ZoneManager.NEUTRAL_TREE_COLLISION_Y,
+                        ZoneManager.NEUTRAL_TREE_COLLISION_WIDTH,
+                        ZoneManager.NEUTRAL_TREE_COLLISION_HEIGHT
+                );
+
                 addNeutralBorderWallCollisions();
             }
 
