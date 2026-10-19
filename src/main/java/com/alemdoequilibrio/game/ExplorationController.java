@@ -35,6 +35,9 @@ public class ExplorationController {
             ENEMY_RANGE = 70;
 
     private static final double
+            NEUTRAL_ELECTRIC_RANGE = 90;
+
+    private static final double
             HERO_START_X = 176;
 
     private static final double
@@ -119,6 +122,9 @@ public class ExplorationController {
     
     private boolean
         neutralBorderIntroShown;
+
+    private boolean
+        neutralElectricNearScenery;
 
     public ExplorationController(
             ResourceManager resourceManager,
@@ -350,6 +356,9 @@ public class ExplorationController {
         neutralBorderIntroShown =
                 false;
 
+        neutralElectricNearScenery =
+                false;
+
         configureInput();
 
         gameLoop =
@@ -415,6 +424,11 @@ public class ExplorationController {
                 );
 
         resetKeys();
+
+        neutralElectricNearScenery =
+                false;
+
+        neutralElectricDischarge.stop();
 
         updateCamera();
     }
@@ -623,21 +637,6 @@ public class ExplorationController {
 
     private void startInteractionDialogue(
             Interactable interactable) {
-
-        if (zoneManager.getCurrentZone()
-                == ExplorationZone.NEUTRAL_BORDER
-                && interactable
-                        instanceof SceneryInteractable) {
-
-            try {
-
-                neutralElectricDischarge.play();
-
-            } catch (Exception exception) {
-
-                // A interação continua mesmo se o áudio estiver indisponível.
-            }
-        }
 
         if (zoneManager.getCurrentZone()
                 == ExplorationZone.NEUTRAL_BORDER
@@ -974,6 +973,8 @@ public class ExplorationController {
                         hero.getY()
                 );
 
+                updateNeutralElectricProximity();
+
                 updateInteractionPrompt();
 
                 handleCheckpoint();
@@ -1097,6 +1098,58 @@ public class ExplorationController {
                 );
             }
         }
+    }
+
+    private void updateNeutralElectricProximity() {
+
+        if (zoneManager.getCurrentZone()
+                != ExplorationZone.NEUTRAL_BORDER) {
+
+            neutralElectricNearScenery =
+                    false;
+
+            return;
+        }
+
+        boolean isNearChargedScenery =
+                false;
+
+        for (Interactable interactable
+                : zoneManager
+                        .getInteractables()) {
+
+            if (!(interactable
+                    instanceof SceneryInteractable)) {
+
+                continue;
+            }
+
+            if (distanceTo(
+                    interactable
+            ) <= NEUTRAL_ELECTRIC_RANGE) {
+
+                isNearChargedScenery =
+                        true;
+
+                break;
+            }
+        }
+
+        if (isNearChargedScenery
+                && !neutralElectricNearScenery) {
+
+            try {
+
+                neutralElectricDischarge.play();
+
+            } catch (Exception exception) {
+
+                // A exploração continua mesmo se o áudio estiver indisponível.
+            }
+        }
+
+        neutralElectricNearScenery =
+                isNearChargedScenery;
     }
 
     private boolean
