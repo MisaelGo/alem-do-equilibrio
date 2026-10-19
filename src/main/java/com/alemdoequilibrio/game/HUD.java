@@ -9,6 +9,7 @@ import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -98,23 +99,30 @@ public class HUD {
          * A barra e o valor permanecem componentes reais para
          * acompanhar dinamicamente a vida do personagem.
          */
+        Image statusImage =
+                resourceManager.getImage(
+                        HERO_LIFE_HUD_IMAGE
+                );
+
+        double statusWidth =
+                310;
+
+        double statusHeight =
+                statusWidth
+                * statusImage.getHeight()
+                / statusImage.getWidth();
+
         ImageView statusBackground =
                 new ImageView(
-                        resourceManager.getImage(
-                                HERO_LIFE_HUD_IMAGE
-                        )
+                        statusImage
                 );
 
         statusBackground.setFitWidth(
-                310
-        );
-
-        statusBackground.setFitHeight(
-                96
+                statusWidth
         );
 
         statusBackground.setPreserveRatio(
-                false
+                true
         );
 
         statusBackground.setSmooth(
@@ -131,13 +139,13 @@ public class HUD {
         );
 
         hpBar.setPrefSize(
-                155,
+                statusWidth * 0.50,
                 14
         );
 
         hpBar.relocate(
-                72,
-                58
+                statusWidth * 0.232,
+                statusHeight * 0.604
         );
 
         hpValueLabel =
@@ -150,8 +158,8 @@ public class HUD {
         );
 
         hpValueLabel.relocate(
-                237,
-                56
+                statusWidth * 0.765,
+                statusHeight * 0.583
         );
 
         statusCard =
@@ -162,8 +170,8 @@ public class HUD {
                 );
 
         statusCard.setPrefSize(
-                310,
-                96
+                statusWidth,
+                statusHeight
         );
 
         statusCard.relocate(
@@ -178,23 +186,30 @@ public class HUD {
          * apenas a ação e o alvo, permitindo reutilizar o mesmo HUD
          * para conversar, examinar e futuras interações.
          */
+        Image interactionImage =
+                resourceManager.getImage(
+                        PRESS_E_HUD_IMAGE
+                );
+
+        double interactionWidth =
+                280;
+
+        double interactionHeight =
+                interactionWidth
+                * interactionImage.getHeight()
+                / interactionImage.getWidth();
+
         ImageView interactionBackground =
                 new ImageView(
-                        resourceManager.getImage(
-                                PRESS_E_HUD_IMAGE
-                        )
+                        interactionImage
                 );
 
         interactionBackground.setFitWidth(
-                390
-        );
-
-        interactionBackground.setFitHeight(
-                92
+                interactionWidth
         );
 
         interactionBackground.setPreserveRatio(
-                false
+                true
         );
 
         interactionBackground.setSmooth(
@@ -211,12 +226,12 @@ public class HUD {
         );
 
         interactionLabel.setMaxWidth(
-                250
+                interactionWidth * 0.64
         );
 
         interactionLabel.relocate(
-                112,
-                34
+                interactionWidth * 0.287,
+                interactionHeight * 0.37
         );
 
         interactionPrompt =
@@ -226,12 +241,14 @@ public class HUD {
                 );
 
         interactionPrompt.setPrefSize(
-                390,
-                92
+                interactionWidth,
+                interactionHeight
         );
 
         interactionPrompt.setLayoutX(
-                (LOGICAL_WIDTH - 390) / 2.0
+                (LOGICAL_WIDTH
+                        - interactionWidth)
+                        / 2.0
         );
 
         interactionPrompt.setLayoutY(
