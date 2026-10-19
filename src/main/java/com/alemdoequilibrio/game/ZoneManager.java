@@ -198,10 +198,10 @@ public class ZoneManager {
 
         createExitArea(
                 "Trilha dos Isolantes",
-                1520,
-                560,
-                80,
-                320
+                1560,
+                640,
+                40,
+                40
         );
     }
 
