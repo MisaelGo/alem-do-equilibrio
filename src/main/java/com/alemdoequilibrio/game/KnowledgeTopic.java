@@ -7,6 +7,7 @@ public enum KnowledgeTopic {
 
     KNOW_CHARGE_SIGNS,
     KNOW_ELECTRIZATION,
+    KNOW_FACTION_CONFLICT,
     KNOW_COULOMB,
     KNOW_FIELD,
     KNOW_POTENTIAL

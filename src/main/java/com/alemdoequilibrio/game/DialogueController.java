@@ -126,17 +126,58 @@ public class DialogueController {
         );
     }
 
+    /**
+     * Inicia um diálogo associado
+     * a um objeto interagível.
+     */
     public void startDialogue(
             Interactable interactable) {
+
+        Objects.requireNonNull(
+                interactable
+        );
 
         currentInteractable =
                 interactable;
 
+        startDialogueById(
+                interactable
+                        .getDialogueId()
+        );
+    }
+
+    /**
+     * Inicia um diálogo diretamente pelo ID.
+     *
+     * É usado em cenas que não dependem
+     * de interação com NPC, como a introdução.
+     */
+    public void startDialogue(
+            String dialogueId) {
+
+        currentInteractable =
+                null;
+
+        startDialogueById(
+                dialogueId
+        );
+    }
+
+    private void startDialogueById(
+            String dialogueId) {
+
+        if (dialogueId == null
+                || dialogueId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "O ID do diálogo não pode ser vazio."
+            );
+        }
+
         currentLines =
                 dialogueRepository
                         .getDialogue(
-                                interactable
-                                        .getDialogueId()
+                                dialogueId
                         );
 
         currentLineIndex = 0;
@@ -158,6 +199,7 @@ public class DialogueController {
     public boolean advanceDialogue() {
 
         if (!isOpen()) {
+
             return false;
         }
 
@@ -190,6 +232,21 @@ public class DialogueController {
                         currentLineIndex
                 );
 
+        /*
+         * Linhas de narração aparecem
+         * sem "Narração:" na caixa.
+         */
+        if ("Narração".equalsIgnoreCase(
+                line.getSpeaker()
+        )) {
+
+            dialogueLabel.setText(
+                    line.getText()
+            );
+
+            return;
+        }
+
         dialogueLabel.setText(
                 line.getSpeaker()
                 + ": "
@@ -203,9 +260,11 @@ public class DialogueController {
                 false
         );
 
-        currentInteractable = null;
+        currentInteractable =
+                null;
 
-        currentLines = null;
+        currentLines =
+                null;
 
         currentLineIndex = 0;
     }

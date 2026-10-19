@@ -163,11 +163,11 @@ public class ZoneManager {
                 Color.GOLD
         );
 
-        addDecoration(
+        /*addDecoration(
                 "Entrada da Fronteira",
                 350,
                 1650
-        );
+        );*/
 
         createExitArea(
                 "Trilha dos Isolantes",

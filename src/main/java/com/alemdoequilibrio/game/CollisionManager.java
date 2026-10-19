@@ -65,13 +65,14 @@ public class CollisionManager {
          */
         switch (zone) {
 
-            case NEUTRAL_BORDER ->
-                addObstacle(
+            case NEUTRAL_BORDER -> {
+                /*addObstacle(
                         350,
                         1650,
                         70,
                         70
-                );
+                );*/
+            }
 
             case INSULATOR_TRAIL ->
                 addObstacle(

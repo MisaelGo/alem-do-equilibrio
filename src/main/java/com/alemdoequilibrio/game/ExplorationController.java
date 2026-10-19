@@ -93,6 +93,9 @@ public class ExplorationController {
     private double cameraX;
 
     private double cameraY;
+    
+    private boolean
+        neutralBorderIntroShown;
 
     public ExplorationController(
             ResourceManager resourceManager,
@@ -145,8 +148,8 @@ public class ExplorationController {
                 );
 
         heroView.setPosition(
-                HERO_START_X,
-                HERO_START_Y
+            HERO_START_X,
+            HERO_START_Y
         );
 
         worldLayer =
@@ -278,6 +281,9 @@ public class ExplorationController {
 
         keys =
                 new boolean[4];
+        
+        neutralBorderIntroShown =
+                false;
 
         configureInput();
 
@@ -328,9 +334,8 @@ public class ExplorationController {
                                 .getInteractables()
                 );
 
-        hero.setPosition(
-                HERO_START_X,
-                HERO_START_Y
+        positionHeroAtZoneStart(
+            zone
         );
 
         heroView.setPosition(
@@ -347,6 +352,55 @@ public class ExplorationController {
         resetKeys();
 
         updateCamera();
+    }
+    
+    private void positionHeroAtZoneStart(
+        ExplorationZone zone) {
+
+        switch (zone) {
+
+            case NEUTRAL_BORDER ->
+                hero.setPosition(
+                        365,
+                        1670
+                );
+
+            case INSULATOR_TRAIL ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FACTION_CROSSROADS ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case COULOMB_VALLEY ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FIELD_PLATEAU ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case EQUIPOTENTIAL_RUINS ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FRAGMENT_CHAMBER ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+        }
     }
 
     private void configureInput() {
@@ -978,6 +1032,46 @@ public class ExplorationController {
             hud.hideInteractionPrompt();
         }
     }
+    
+    private boolean
+        shouldStartNeutralBorderIntro() {
+
+        return !neutralBorderIntroShown
+                && zoneManager.getCurrentZone()
+                        == ExplorationZone
+                                .NEUTRAL_BORDER
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS
+                );
+    }
+
+    private void startNeutralBorderIntro() {
+
+        /*
+        * Marcamos antes de mudar para DIALOGUE.
+        *
+        * Quando o diálogo terminar, o jogo volta
+        * para EXPLORATION e start() será chamado
+        * novamente. Assim a introdução não reinicia.
+        */
+        neutralBorderIntroShown =
+                true;
+
+        dialogueController
+                .startDialogue(
+                        "INTRO_NEUTRAL_BORDER"
+                );
+
+        if (dialogueController
+                .isOpen()) {
+            
+                hud.hideInteractionPrompt();
+                
+                onDialogueStarted
+                        .run();
+        }
+    }
 
     public void start() {
 
@@ -991,6 +1085,18 @@ public class ExplorationController {
         );
 
         updateCamera();
+
+        /*
+        * Na primeira chegada à Fronteira Neutra,
+        * a cena inicial acontece antes de liberar
+        * o movimento do jogador.
+        */
+        if (shouldStartNeutralBorderIntro()) {
+        
+            startNeutralBorderIntro();
+
+            return;
+        }
 
         gameLoop.start();
     }
