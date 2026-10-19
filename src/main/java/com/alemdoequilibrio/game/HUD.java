@@ -208,6 +208,7 @@ public class HUD {
         return switch (topic) {
             case KNOW_CHARGE_SIGNS -> "Sinais das Cargas Elétricas (+ e −)";
             case KNOW_ELECTRIZATION -> "Processos de Eletrização";
+            case KNOW_FACTION_CONFLICT -> "Conflito das Facções e Propriedades da Carga";
             case KNOW_COULOMB -> "Lei de Coulomb e Força Eletrostática";
             case KNOW_FIELD -> "Campo Elétrico e Linhas de Força";
             case KNOW_POTENTIAL -> "Potencial Elétrico e Superfícies Equipotenciais";
