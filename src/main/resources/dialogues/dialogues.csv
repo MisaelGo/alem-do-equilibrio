@@ -85,28 +85,37 @@ MARA_CROSSROADS;Mara;Lembre-se da conservação nos seus combates: se um inimigo
 
 ELIA_CROSSROADS;Élia;A Mara pode ser teimosa, mas os dados dela batem com os meus. A anomalia é externa. Explore os arredores e veja o que consegue descobrir.
 
-ION_INTRO_I;Íon;Ora, ora... não é todo dia que alguém aparece por aqui com essa cara de quem caiu no lugar errado.
-ION_INTRO_I;Herói;Dá para perceber tão fácil assim?
-ION_INTRO_I;Íon;Para quem sabe observar, sim. Você olha para tudo como se estivesse vendo este lugar pela primeira vez.
-ION_INTRO_I;Herói;Talvez porque eu esteja.
-ION_INTRO_I;Íon;Imaginei.
-ION_INTRO_I;Herói;E você é...?
-ION_INTRO_I;Íon;Íon. Comerciante, estudioso e, quando encontro alguém que merece, fornecedor de algumas técnicas bastante úteis.
-ION_INTRO_I;Herói;Você também vai perguntar de onde eu vim?
-ION_INTRO_I;Íon;Não. Neste momento, estou mais interessado no que você aprendeu desde que chegou.
-ION_INTRO_I;Herói;Aprendi algumas coisas.
-ION_INTRO_I;Íon;Ótimo. Então talvez possamos fazer uma troca.
-ION_INTRO_I;Herói;Uma troca? Eu não tenho dinheiro daqui.
-ION_INTRO_I;Íon;Dinheiro?
-ION_INTRO_I;Íon;Por aqui, moeda compra ferramentas comuns. Mas o entendimento... ah, o entendimento compra técnica!
-ION_INTRO_I;Herói;Então você quer me testar?
-ION_INTRO_I;Íon;Exatamente.
-ION_INTRO_I;Íon;Se realmente compreendeu o que aprendeu, prove.
-ION_INTRO_I;Íon;Acerte pelo menos três das quatro perguntas e eu lhe ensino uma técnica que pode ser muito útil no caminho adiante.
-ION_INTRO_I;Herói;E se eu errar?
-ION_INTRO_I;Íon;Você estuda mais, volta aqui e tenta novamente.
-ION_INTRO_I;Herói;Justo.
-ION_INTRO_I;Íon;Então vamos ver se você estava mesmo prestando atenção.
+ION_FIRST_MEETING;Íon;Ora, ora... não é todo dia que alguém aparece por aqui com essa cara de quem caiu no lugar errado.
+ION_FIRST_MEETING;Herói;Dá para perceber tão fácil assim?
+ION_FIRST_MEETING;Íon;Para quem sabe observar, sim. Você olha para tudo como se estivesse vendo este lugar pela primeira vez.
+ION_FIRST_MEETING;Herói;Talvez porque eu esteja.
+ION_FIRST_MEETING;Íon;Imaginei.
+ION_FIRST_MEETING;Herói;E você é...?
+ION_FIRST_MEETING;Íon;Íon. Comerciante, estudioso e, quando encontro alguém que merece, fornecedor de algumas técnicas bastante úteis.
+ION_FIRST_MEETING;Herói;Fornecedor de técnicas?
+ION_FIRST_MEETING;Íon;Digamos que eu gosto de recompensar quem realmente entende o que aprende.
+ION_FIRST_MEETING;Herói;E vai me ensinar alguma coisa?
+ION_FIRST_MEETING;Íon;Ainda não.
+ION_FIRST_MEETING;Herói;Ainda?
+ION_FIRST_MEETING;Íon;Continue seu caminho. Se aprender o suficiente, é bem provável que nos encontremos novamente.
+ION_FIRST_MEETING;Herói;Você fala como se já soubesse disso.
+ION_FIRST_MEETING;Íon;Eu disse que sei observar.
+
+ION_QUIZ_I;Íon;Olha só... nos encontramos até que enfim.
+ION_QUIZ_I;Herói;Então você realmente sabia que eu chegaria até aqui.
+ION_QUIZ_I;Íon;Eu tinha um bom palpite.
+ION_QUIZ_I;Herói;E agora?
+ION_QUIZ_I;Íon;Agora você já teve tempo de aprender algumas coisas neste mundo.
+ION_QUIZ_I;Íon;E finalmente tem a chance de receber uma habilidade nova.
+ION_QUIZ_I;Herói;Finalmente?
+ION_QUIZ_I;Íon;Não entrego técnicas a qualquer um. Primeiro preciso saber se você realmente entendeu o que aprendeu.
+ION_QUIZ_I;Herói;Então é um teste.
+ION_QUIZ_I;Íon;Exatamente. Quatro perguntas.
+ION_QUIZ_I;Íon;Acerte pelo menos três e eu lhe ensino uma técnica.
+ION_QUIZ_I;Herói;E se eu errar?
+ION_QUIZ_I;Íon;Você aprende mais, volta e tenta novamente.
+ION_QUIZ_I;Herói;Certo. Pode começar.
+ION_QUIZ_I;Íon;Então vamos ver se você estava mesmo prestando atenção.
 
 ION_SUCCESS_I;Íon;Brilhante! Parece que você realmente entendeu.
 ION_SUCCESS_I;Herói;Então eu passei?
