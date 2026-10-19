@@ -13,6 +13,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -157,6 +158,14 @@ public class DialogueController {
                 Double.MAX_VALUE
         );
 
+        /*
+         * Mantém a altura necessária para todas as linhas
+         * quebradas e evita o "..." no fim de falas maiores.
+         */
+        dialogueLabel.setMinHeight(
+                Region.USE_PREF_SIZE
+        );
+
         dialogueLabel.setStyle(
                 "-fx-font-family: 'Courier New', monospace;"
                 + "-fx-font-size: 19px;"
@@ -232,7 +241,7 @@ public class DialogueController {
 
         dialogueBox.setPrefSize(
                 1050,
-                170
+                195
         );
 
         dialogueBox.setPadding(
@@ -252,7 +261,7 @@ public class DialogueController {
 
         dialogueBox.relocate(
                 115,
-                530
+                505
         );
 
         dialogueBox.setVisible(
