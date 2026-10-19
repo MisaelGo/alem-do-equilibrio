@@ -9,6 +9,7 @@ import com.alemdoequilibrio.game.ChapterCompleteView;
 import com.alemdoequilibrio.game.ChapterProgress;
 import com.alemdoequilibrio.game.Enemy;
 import com.alemdoequilibrio.game.ExplorationController;
+import com.alemdoequilibrio.game.PrologueController;
 
 import javafx.stage.Stage;
 
@@ -28,6 +29,9 @@ public class GameController {
 
     private final ChapterCompleteView
             chapterCompleteView;
+
+    private final PrologueController
+            prologueController;
 
     private GameState currentState;
 
@@ -59,6 +63,14 @@ public class GameController {
 
         chapterCompleteView =
                 new ChapterCompleteView(
+                        () -> changeState(
+                                GameState.EXPLORATION
+                        )
+                );
+
+        prologueController =
+                new PrologueController(
+                        resourceManager,
                         () -> changeState(
                                 GameState.EXPLORATION
                         )
@@ -116,12 +128,21 @@ public class GameController {
                     GameState.CHAPTER_COMPLETE
             );
 
-        } else {
+            return;
+        }
+
+        if (loaded) {
 
             changeState(
                     GameState.EXPLORATION
             );
+
+            return;
         }
+
+        changeState(
+                GameState.PROLOGUE
+        );
     }
 
     public void changeState(
@@ -157,6 +178,10 @@ public class GameController {
 
         switch (state) {
 
+            case PROLOGUE ->
+                prologueController
+                        .stop();
+
             case EXPLORATION ->
                 explorationController
                         .stop();
@@ -182,6 +207,9 @@ public class GameController {
 
         switch (state) {
 
+            case PROLOGUE ->
+                startPrologue();
+
             case EXPLORATION ->
                 startExploration();
 
@@ -200,6 +228,17 @@ public class GameController {
                  PAUSED -> {
             }
         }
+    }
+
+    private void startPrologue() {
+
+        sceneRouter.show(
+                prologueController
+                        .getScene()
+        );
+
+        prologueController
+                .start();
     }
 
     private void startExploration() {
