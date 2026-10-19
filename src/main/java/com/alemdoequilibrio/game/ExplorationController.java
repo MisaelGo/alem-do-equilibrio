@@ -749,7 +749,9 @@ public class ExplorationController {
             hero.updateMovement(
                 normalizedX,
                 0,
-                deltaTime,
+                deltaTime * Math.abs(
+                    normalizedX
+                ),
                 ZoneManager.WORLD_WIDTH
                     - TILE_SIZE,
                 ZoneManager.WORLD_HEIGHT
@@ -780,13 +782,16 @@ public class ExplorationController {
                     hero.getY();
 
             hero.updateMovement(
-                0,
-                normalizedY,
-                deltaTime,
-                ZoneManager.WORLD_WIDTH
-                    - TILE_SIZE,
-                ZoneManager.WORLD_HEIGHT
-                    - TILE_SIZE
+                    0,
+                    normalizedY,
+                    deltaTime
+                    * Math.abs(
+                            normalizedY
+                    ),
+                    ZoneManager.WORLD_WIDTH
+                            - TILE_SIZE,
+                    ZoneManager.WORLD_HEIGHT
+                            - TILE_SIZE
             );
 
             if (collisionManager
