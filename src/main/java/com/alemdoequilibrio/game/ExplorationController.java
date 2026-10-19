@@ -1222,7 +1222,7 @@ public class ExplorationController {
             String dialogueId) {
 
         hero.setPosition(
-                1520,
+                1550,
                 hero.getY()
         );
 
