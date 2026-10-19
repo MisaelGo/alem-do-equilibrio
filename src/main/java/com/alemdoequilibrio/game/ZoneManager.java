@@ -25,6 +25,12 @@ public class ZoneManager {
     public static final double WORLD_HEIGHT =
             1800;
 
+    public static final double NEUTRAL_BORDER_WIDTH =
+            2000;
+
+    public static final double NEUTRAL_BORDER_HEIGHT =
+            1200;
+
     private static final double TILE_SIZE =
             40;
 
@@ -39,6 +45,10 @@ public class ZoneManager {
             interactables;
 
     private ExplorationZone currentZone;
+
+    private double currentWorldWidth;
+
+    private double currentWorldHeight;
 
     private Rectangle exitArea;
 
@@ -63,6 +73,12 @@ public class ZoneManager {
 
         this.interactables =
                 new ArrayList<>();
+
+        currentWorldWidth =
+                WORLD_WIDTH;
+
+        currentWorldHeight =
+                WORLD_HEIGHT;
     }
 
     public void loadZone(
@@ -86,17 +102,27 @@ public class ZoneManager {
                 .getChildren()
                 .clear();
 
+        currentWorldWidth =
+                zone == ExplorationZone.NEUTRAL_BORDER
+                        ? NEUTRAL_BORDER_WIDTH
+                        : WORLD_WIDTH;
+
+        currentWorldHeight =
+                zone == ExplorationZone.NEUTRAL_BORDER
+                        ? NEUTRAL_BORDER_HEIGHT
+                        : WORLD_HEIGHT;
+
         worldLayer.setPrefSize(
-                WORLD_WIDTH,
-                WORLD_HEIGHT
+                currentWorldWidth,
+                currentWorldHeight
         );
 
         TileMapRenderer.renderZone(
                 worldLayer,
                 zone,
                 resourceManager,
-                WORLD_WIDTH,
-                WORLD_HEIGHT,
+                currentWorldWidth,
+                currentWorldHeight,
                 TILE_SIZE
         );
 
@@ -135,8 +161,8 @@ public class ZoneManager {
         NPC nilo =
                 new NPC(
                         "Nilo",
-                        600,
-                        1650,
+                        500,
+                        1030,
                         40,
                         50,
                         KnowledgeTopic
@@ -152,8 +178,8 @@ public class ZoneManager {
         NPC ion =
                 new NPC(
                         "Íon",
-                        1250,
-                        1650,
+                        1280,
+                        900,
                         40,
                         50,
                         "ION_FIRST_MEETING"
@@ -172,10 +198,10 @@ public class ZoneManager {
 
         createExitArea(
                 "Trilha dos Isolantes",
-                3000,
-                1450,
-                140,
-                300
+                1920,
+                800,
+                80,
+                320
         );
     }
 
@@ -586,7 +612,9 @@ public class ZoneManager {
 
         title.relocate(
                 80,
-                1200
+                currentZone == ExplorationZone.NEUTRAL_BORDER
+                        ? 520
+                        : 1200
         );
 
         worldLayer
@@ -1037,6 +1065,16 @@ public class ZoneManager {
     public ExplorationZone getCurrentZone() {
 
         return currentZone;
+    }
+
+    public double getCurrentWorldWidth() {
+
+        return currentWorldWidth;
+    }
+
+    public double getCurrentWorldHeight() {
+
+        return currentWorldHeight;
     }
 
     public List<Interactable>
