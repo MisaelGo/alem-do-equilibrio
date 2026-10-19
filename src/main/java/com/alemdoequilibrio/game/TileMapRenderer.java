@@ -176,8 +176,8 @@ public final class TileMapRenderer {
 
                 /*
                  * A abertura da borda leste acompanha o novo tamanho
-                 * compacto da Fronteira Neutra. Para 2000x1200,
-                 * corresponde às linhas 20..27 (y = 800..1120).
+                 * compacto da Fronteira Neutra. Para 1600x960,
+                 * corresponde às linhas 14..21 (y = 560..880).
                  */
                 int exitStartRow = rows - 10;
                 int exitEndRow = rows - 3;
