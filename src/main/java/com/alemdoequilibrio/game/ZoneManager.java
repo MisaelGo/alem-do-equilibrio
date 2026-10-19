@@ -35,10 +35,10 @@ public class ZoneManager {
             40;
 
     static final double NEUTRAL_HOUSE_X =
-            320;
+            450;
 
     static final double NEUTRAL_HOUSE_Y =
-            400;
+            420;
 
     static final double NEUTRAL_HOUSE_WIDTH =
             280;
@@ -219,10 +219,10 @@ public class ZoneManager {
          */
         createExitArea(
                 "Trilha dos Isolantes",
-                1560,
-                640,
-                40,
-                40
+                1595,
+                600,
+                5,
+                120
         );
     }
 
