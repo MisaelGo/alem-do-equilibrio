@@ -124,20 +124,6 @@ public class ZoneManager {
                 buildFragmentChamber();
         }
 
-        if (zone != ExplorationZone.FRAGMENT_CHAMBER) {
-            addNpc(
-                    new Merchant(
-                            "Íon",
-                            1250,
-                            1650,
-                            40,
-                            50,
-                            "",
-                            questionBank
-                    ),
-                    Color.GOLDENROD
-            );
-        }
     }
 
     private void buildNeutralBorder() {
@@ -161,6 +147,21 @@ public class ZoneManager {
         addNpc(
                 nilo,
                 Color.GOLD
+        );
+
+        NPC ion =
+                new NPC(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_FIRST_MEETING"
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
         );
 
         /*addDecoration(
@@ -250,6 +251,32 @@ public class ZoneManager {
         addNpc(
                 elia,
                 Color.LIGHTBLUE
+        );
+
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_QUIZ_I",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS,
+                        AbilityRegistry
+                                .REPULSION_PULSE_ID,
+                        "ION_SUCCESS_I",
+                        "ION_FAILURE_I",
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS,
+                        KnowledgeTopic
+                                .KNOW_ELECTRIZATION
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
         );
 
         createExitArea(
@@ -359,6 +386,32 @@ public class ZoneManager {
                 Color.LIGHTGREEN
         );
 
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_INTRO_II",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_FIELD,
+                        AbilityRegistry
+                                .FIELD_IMPULSE_ID,
+                        "",
+                        "",
+                        KnowledgeTopic
+                                .KNOW_COULOMB,
+                        KnowledgeTopic
+                                .KNOW_FIELD
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
+        );
+
         /*
          * A direção é indicada pela própria
          * geometria das setas e pelo símbolo E,
@@ -425,6 +478,30 @@ public class ZoneManager {
         addNpc(
                 sera,
                 Color.PLUM
+        );
+
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_INTRO_III",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_POTENTIAL,
+                        AbilityRegistry
+                                .EQUIPOTENTIAL_SHIELD_ID,
+                        "",
+                        "",
+                        KnowledgeTopic
+                                .KNOW_POTENTIAL
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
         );
 
         addEquipotentialRing(
