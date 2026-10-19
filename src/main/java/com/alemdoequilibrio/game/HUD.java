@@ -150,9 +150,37 @@ public class HUD {
      * @param targetName nome do personagem ou objeto interativo
      */
     public void showInteractionPrompt(String targetName) {
-        String name = (targetName != null && !targetName.isBlank()) ? targetName : "Interagir";
-        interactionLabel.setText("Conversar com " + name);
-        interactionPrompt.setVisible(true);
+        showInteractionPrompt(
+                "Conversar com",
+                targetName
+        );
+    }
+
+    public void showInteractionPrompt(
+            String action,
+            String targetName) {
+
+        String safeAction =
+                action != null
+                && !action.isBlank()
+                        ? action
+                        : "Interagir com";
+
+        String name =
+                targetName != null
+                && !targetName.isBlank()
+                        ? targetName
+                        : "objeto";
+
+        interactionLabel.setText(
+                safeAction
+                + " "
+                + name
+        );
+
+        interactionPrompt.setVisible(
+                true
+        );
     }
 
     /**
