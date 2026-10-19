@@ -26,10 +26,10 @@ public class ZoneManager {
             1800;
 
     public static final double NEUTRAL_BORDER_WIDTH =
-            2000;
+            1600;
 
     public static final double NEUTRAL_BORDER_HEIGHT =
-            1200;
+            960;
 
     private static final double TILE_SIZE =
             40;
@@ -161,8 +161,8 @@ public class ZoneManager {
         NPC nilo =
                 new NPC(
                         "Nilo",
-                        500,
-                        1030,
+                        400,
+                        824,
                         40,
                         50,
                         KnowledgeTopic
@@ -178,8 +178,8 @@ public class ZoneManager {
         NPC ion =
                 new NPC(
                         "Íon",
-                        1280,
-                        900,
+                        1024,
+                        720,
                         40,
                         50,
                         "ION_FIRST_MEETING"
@@ -198,8 +198,8 @@ public class ZoneManager {
 
         createExitArea(
                 "Trilha dos Isolantes",
-                1920,
-                800,
+                1520,
+                560,
                 80,
                 320
         );
@@ -613,7 +613,7 @@ public class ZoneManager {
         title.relocate(
                 80,
                 currentZone == ExplorationZone.NEUTRAL_BORDER
-                        ? 520
+                        ? 400
                         : 1200
         );
 
