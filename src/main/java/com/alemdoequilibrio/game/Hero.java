@@ -7,22 +7,33 @@ public class Hero extends GameCharacter
         implements Damageable, Movable {
 
     private double x;
+
     private double y;
+
     private double speed;
 
     private float health;
+
     private final float maxHealth;
-    private boolean equipotentialShieldActive;
+
+    private boolean
+            equipotentialShieldActive;
+
     private boolean unstable;
 
-    /* POO 1.3 - Enum: restringe a polaridade do Hero a valores conhecidos. */
+    /*
+     * POO 1.3 - Enum:
+     * restringe a polaridade do Hero
+     * a valores conhecidos.
+     */
     private ChargeType chargeType;
 
     /*
      * POO - Composicao:
      * o Hero cria e possui seu proprio AbilityBook.
      */
-    private final AbilityBook abilityBook;
+    private final AbilityBook
+            abilityBook;
 
     public Hero(
             double x,
@@ -53,20 +64,30 @@ public class Hero extends GameCharacter
         }
 
         this.x = x;
+
         this.y = y;
+
         this.speed = speed;
+
         this.health = health;
+
         this.maxHealth = health;
-        this.abilityBook = new AbilityBook();
-        this.chargeType = ChargeType.NEUTRAL;
+
+        this.abilityBook =
+                new AbilityBook();
+
+        this.chargeType =
+                ChargeType.NEUTRAL;
 
         if (!isAlive()) {
+
             deactivate();
         }
     }
 
     @Override
-    public void takeDamage(float damage) {
+    public void takeDamage(
+            float damage) {
 
         if (!Float.isFinite(damage)
                 || damage < 0.0f) {
@@ -77,22 +98,33 @@ public class Hero extends GameCharacter
             );
         }
 
-        float actualDamage = damage;
+        float actualDamage =
+                damage;
 
-        if (damage > 0.0f && unstable) {
-            actualDamage += 2.0f;
+        if (damage > 0.0f
+                && unstable) {
+
+            actualDamage +=
+                    2.0f;
+
             unstable = false;
         }
 
-        if (damage > 0.0f && equipotentialShieldActive) {
-            actualDamage *= 0.5f;
-            equipotentialShieldActive = false;
+        if (damage > 0.0f
+                && equipotentialShieldActive) {
+
+            actualDamage *=
+                    0.5f;
+
+            equipotentialShieldActive =
+                    false;
         }
 
         health =
                 Math.max(
                         0.0f,
-                        health - actualDamage
+                        health
+                                - actualDamage
                 );
 
         updateState();
@@ -100,6 +132,7 @@ public class Hero extends GameCharacter
 
     @Override
     public boolean isAlive() {
+
         return health > 0.0f;
     }
 
@@ -107,6 +140,7 @@ public class Hero extends GameCharacter
     public void updateState() {
 
         if (!isAlive()) {
+
             deactivate();
         }
     }
@@ -121,13 +155,16 @@ public class Hero extends GameCharacter
 
         double length =
                 Math.sqrt(
-                        directionX * directionX
-                        + directionY * directionY
+                        directionX
+                                * directionX
+                                + directionY
+                                * directionY
                 );
 
         if (length > 0) {
 
             directionX /= length;
+
             directionY /= length;
         }
 
@@ -143,133 +180,209 @@ public class Hero extends GameCharacter
                 * speed
                 * deltaTime;
 
-        x = Math.max(
-                0,
-                Math.min(
-                        newX,
-                        maxX
-                )
-        );
+        x =
+                Math.max(
+                        0,
+                        Math.min(
+                                newX,
+                                maxX
+                        )
+                );
 
-        y = Math.max(
-                0,
-                Math.min(
-                        newY,
-                        maxY
-                )
-        );
+        y =
+                Math.max(
+                        0,
+                        Math.min(
+                                newY,
+                                maxY
+                        )
+                );
     }
 
     public double getX() {
+
         return x;
     }
 
     public double getY() {
+
         return y;
     }
 
     public float getHealth() {
+
         return health;
     }
 
     public float getMaxHealth() {
+
         return maxHealth;
     }
 
     /**
-     * Recupera o Hero depois de uma derrota sem perder suas habilidades.
+     * Define a vida ao restaurar um save.
      */
-    public void restoreHealth() {
-        health = maxHealth;
+    public void setHealth(
+            float health) {
+
+        if (!Float.isFinite(health)
+                || health < 0.0f
+                || health > maxHealth) {
+
+            throw new IllegalArgumentException(
+                    "A vida deve estar entre 0 e "
+                    + maxHealth
+                    + "."
+            );
+        }
+
+        this.health = health;
+
         unstable = false;
-        equipotentialShieldActive = false;
+
+        equipotentialShieldActive =
+                false;
 
         if (isAlive()) {
+
+            activate();
+
+        } else {
+
+            deactivate();
+        }
+    }
+
+    /**
+     * Recupera o Hero depois de uma derrota
+     * sem perder suas habilidades.
+     */
+    public void restoreHealth() {
+
+        health = maxHealth;
+
+        unstable = false;
+
+        equipotentialShieldActive =
+                false;
+
+        if (isAlive()) {
+
             activate();
         }
     }
 
     void activateEquipotentialShield() {
-        equipotentialShieldActive = true;
+
+        equipotentialShieldActive =
+                true;
+
         unstable = false;
     }
 
     void expireEquipotentialShield() {
-        equipotentialShieldActive = false;
+
+        equipotentialShieldActive =
+                false;
     }
 
-    public boolean isEquipotentialShieldActive() {
+    public boolean
+            isEquipotentialShieldActive() {
+
         return equipotentialShieldActive;
     }
 
     public void markUnstable() {
+
         unstable = true;
     }
 
     public boolean isUnstable() {
+
         return unstable;
     }
 
-    public ChargeType getChargeType() {
+    public ChargeType
+            getChargeType() {
+
         return chargeType;
     }
 
-    public void setChargeType(ChargeType chargeType) {
+    public void setChargeType(
+            ChargeType chargeType) {
+
         if (chargeType == null) {
+
             throw new IllegalArgumentException(
                     "A carga do Hero nao pode ser nula."
             );
         }
 
-        this.chargeType = chargeType;
+        this.chargeType =
+                chargeType;
     }
 
-    /**
-     * Aprende uma habilidade sem equipa-la automaticamente.
-     *
-     * @param ability habilidade a aprender
-     */
-    public void learnAbility(Ability ability) {
-        abilityBook.addAbility(ability);
+    public void learnAbility(
+            Ability ability) {
+
+        abilityBook.addAbility(
+                ability
+        );
     }
 
-    /**
-     * Aprende uma habilidade e opcionalmente a equipa.
-     *
-     * POO - Sobrecarga: este metodo tem o mesmo nome do metodo acima, mas
-     * recebe um parametro adicional para decidir se a habilidade sera equipada.
-     *
-     * @param ability habilidade a aprender
-     * @param equipNow true para equipar a habilidade imediatamente
+    /*
+     * POO - Sobrecarga:
+     * mesmo nome do metodo anterior,
+     * mas com um parametro adicional.
      */
-    public void learnAbility(Ability ability, boolean equipNow) {
-        learnAbility(ability);
+    public void learnAbility(
+            Ability ability,
+            boolean equipNow) {
+
+        learnAbility(
+                ability
+        );
 
         if (equipNow) {
-            abilityBook.equipAbility(ability);
+
+            abilityBook
+                    .equipAbility(
+                            ability
+                    );
         }
     }
 
-    public AbilityBook getAbilityBook() {
+    public AbilityBook
+            getAbilityBook() {
+
         return abilityBook;
     }
-    
+
+    /**
+     * Utilizado pelo SaveManager antes
+     * de restaurar as habilidades.
+     */
+    public void clearAbilities() {
+
+        abilityBook.clear();
+    }
+
     public void setPosition(
-        double x,
-        double y) {
+            double x,
+            double y) {
 
         if (!Double.isFinite(x)
-            || !Double.isFinite(y)
-            || x < 0
-            || y < 0) {
+                || !Double.isFinite(y)
+                || x < 0
+                || y < 0) {
 
             throw new IllegalArgumentException(
-                    "A posição deve ser válida."
+                    "A posicao deve ser valida."
             );
         }
 
         this.x = x;
+
         this.y = y;
     }
-    
 }

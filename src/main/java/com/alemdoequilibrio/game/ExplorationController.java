@@ -1,7 +1,7 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Objects;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -18,25 +18,26 @@ import javafx.scene.shape.Rectangle;
 
 public class ExplorationController {
 
-    private static final double LOGICAL_WIDTH =
-            1280;
+    private static final double
+            LOGICAL_WIDTH = 1280;
 
-    private static final double LOGICAL_HEIGHT =
-            720;
+    private static final double
+            LOGICAL_HEIGHT = 720;
 
-    private static final double TILE_SIZE =
-            40;
+    private static final double
+            TILE_SIZE = 40;
 
-    private static final double INTERACTION_RANGE =
-            90;
+    private static final double
+            INTERACTION_RANGE = 90;
 
-    private static final double ENEMY_RANGE =
-            70;
+    private static final double
+            ENEMY_RANGE = 70;
 
-    private static final double HERO_START_X =
-            100;
+    private static final double
+            HERO_START_X = 100;
 
-    private static final double HERO_START_Y =
+    private static final double
+            HERO_START_Y =
             ZoneManager.WORLD_HEIGHT - 100;
 
     private final Hero hero;
@@ -57,12 +58,17 @@ public class ExplorationController {
 
     private final boolean[] keys;
 
-    private final AnimationTimer gameLoop;
+    private final AnimationTimer
+            gameLoop;
 
-    private final ZoneManager zoneManager;
+    private final ZoneManager
+            zoneManager;
 
     private final MapEnemySpawner
             mapEnemySpawner;
+
+    private final CollisionManager
+            collisionManager;
 
     private final ChapterProgress
             chapterProgress;
@@ -79,6 +85,9 @@ public class ExplorationController {
     private final Consumer<Enemy>
             onEnemyEncounter;
 
+    private final Runnable
+            onProgressChanged;
+
     private long lastTime;
 
     private double cameraX;
@@ -90,7 +99,8 @@ public class ExplorationController {
             ChapterProgress chapterProgress,
             Runnable onDialogueStarted,
             Runnable onDialogueFinished,
-            Consumer<Enemy> onEnemyEncounter) {
+            Consumer<Enemy> onEnemyEncounter,
+            Runnable onProgressChanged) {
 
         Objects.requireNonNull(
                 resourceManager
@@ -114,6 +124,11 @@ public class ExplorationController {
         this.onEnemyEncounter =
                 Objects.requireNonNull(
                         onEnemyEncounter
+                );
+
+        this.onProgressChanged =
+                Objects.requireNonNull(
+                        onProgressChanged
                 );
 
         hero =
@@ -142,10 +157,13 @@ public class ExplorationController {
                 ZoneManager.WORLD_HEIGHT
         );
 
-        QuestionBank questionBank = new QuestionBank();
-        questionBank.loadQuestionsFromFile(
-                "/questions/questions.csv"
-        );
+        QuestionBank questionBank =
+                new QuestionBank();
+
+        questionBank
+                .loadQuestionsFromFile(
+                        "/questions/questions.csv"
+                );
 
         zoneManager =
                 new ZoneManager(
@@ -158,6 +176,9 @@ public class ExplorationController {
                 new MapEnemySpawner(
                         worldLayer
                 );
+
+        collisionManager =
+                new CollisionManager();
 
         hudLayer =
                 new Pane();
@@ -175,7 +196,7 @@ public class ExplorationController {
 
         hud.updateHealth(
                 hero.getHealth(),
-                100.0f
+                hero.getMaxHealth()
         );
 
         DialogueRepository
@@ -283,9 +304,28 @@ public class ExplorationController {
                 zone
         );
 
-        mapEnemySpawner
-                .spawnForZone(
-                        zone
+        /*
+         * Se o boss ja foi derrotado,
+         * ele nao deve reaparecer ao carregar
+         * a Camara do Fragmento.
+         */
+        if (!(zone
+                == ExplorationZone
+                        .FRAGMENT_CHAMBER
+                && chapterProgress
+                        .isBossDefeated())) {
+
+            mapEnemySpawner
+                    .spawnForZone(
+                            zone
+                    );
+        }
+
+        collisionManager
+                .loadZone(
+                        zone,
+                        zoneManager
+                                .getInteractables()
                 );
 
         hero.setPosition(
@@ -392,7 +432,8 @@ public class ExplorationController {
 
     private void handleInteraction() {
 
-        if (dialogueController.isOpen()) {
+        if (dialogueController
+                .isOpen()) {
 
             boolean stillOpen =
                     dialogueController
@@ -400,7 +441,8 @@ public class ExplorationController {
 
             if (!stillOpen) {
 
-                onDialogueFinished.run();
+                onDialogueFinished
+                        .run();
 
                 updateInteractionPrompt();
             }
@@ -412,22 +454,56 @@ public class ExplorationController {
                 findNearestInteractable();
 
         if (interactable == null) {
+
             return;
         }
 
-        if (interactable instanceof Merchant merchant) {
-            Set<String> unlockedNames = new HashSet<>();
+        if (interactable
+                instanceof Merchant merchant) {
 
-            for (Ability ability : hero.getAbilityBook()
-                    .getAbilities()) {
-                unlockedNames.add(ability.getName());
+            Set<String> unlockedNames =
+                    new HashSet<>();
+
+            for (Ability ability
+                    : hero
+                            .getAbilityBook()
+                            .getAbilities()) {
+
+                unlockedNames.add(
+                        ability.getName()
+                );
             }
+
+            int previousAbilities =
+                    hero
+                            .getAbilityBook()
+                            .getAbilities()
+                            .size();
+
+            int previousQuizzes =
+                    chapterProgress
+                            .getCompletedQuizzes()
+                            .size();
 
             merchant.startQuiz(
                     hero,
                     chapterProgress,
                     unlockedNames
             );
+
+            if (hero
+                    .getAbilityBook()
+                    .getAbilities()
+                    .size()
+                    != previousAbilities
+                    || chapterProgress
+                            .getCompletedQuizzes()
+                            .size()
+                    != previousQuizzes) {
+
+                onProgressChanged
+                        .run();
+            }
 
             return;
         }
@@ -437,11 +513,13 @@ public class ExplorationController {
                         interactable
                 );
 
-        if (dialogueController.isOpen()) {
+        if (dialogueController
+                .isOpen()) {
 
             hud.hideInteractionPrompt();
 
-            onDialogueStarted.run();
+            onDialogueStarted
+                    .run();
         }
     }
 
@@ -492,20 +570,22 @@ public class ExplorationController {
 
         double targetCenterX =
                 interactable.getX()
-                + interactable.getWidth()
+                + interactable
+                        .getWidth()
                 / 2.0;
 
         double targetCenterY =
                 interactable.getY()
-                + interactable.getHeight()
+                + interactable
+                        .getHeight()
                 / 2.0;
 
         return Math.hypot(
                 heroCenterX
-                - targetCenterX,
+                        - targetCenterX,
 
                 heroCenterY
-                - targetCenterY
+                        - targetCenterY
         );
     }
 
@@ -522,11 +602,14 @@ public class ExplorationController {
                 npc.getKnowledgeTopic();
 
         if (topic == null) {
+
             return;
         }
 
         if (!chapterProgress
-                .hasLearned(topic)) {
+                .hasLearned(
+                        topic
+                )) {
 
             chapterProgress.learn(
                     topic
@@ -537,18 +620,23 @@ public class ExplorationController {
             );
 
             System.out.println(
-                    "Tópico aprendido: "
+                    "Topico aprendido: "
                     + topic
             );
+
+            onProgressChanged
+                    .run();
         }
     }
 
-    private AnimationTimer createGameLoop() {
+    private AnimationTimer
+            createGameLoop() {
 
         return new AnimationTimer() {
 
             @Override
-            public void handle(long now) {
+            public void handle(
+                    long now) {
 
                 if (lastTime == 0) {
 
@@ -564,32 +652,33 @@ public class ExplorationController {
                 lastTime = now;
 
                 double directionX = 0;
+
                 double directionY = 0;
 
                 if (keys[0]) {
+
                     directionY -= 1;
                 }
 
                 if (keys[1]) {
+
                     directionY += 1;
                 }
 
                 if (keys[2]) {
+
                     directionX -= 1;
                 }
 
                 if (keys[3]) {
+
                     directionX += 1;
                 }
 
-                hero.updateMovement(
+                moveHeroWithCollisions(
                         directionX,
                         directionY,
-                        deltaTime,
-                        ZoneManager.WORLD_WIDTH
-                                - TILE_SIZE,
-                        ZoneManager.WORLD_HEIGHT
-                                - TILE_SIZE
+                        deltaTime
                 );
 
                 heroView.update(
@@ -605,10 +694,12 @@ public class ExplorationController {
                 handleCheckpoint();
 
                 if (handleEnemyEncounter()) {
+
                     return;
                 }
 
                 if (handleZoneTransition()) {
+
                     return;
                 }
 
@@ -617,7 +708,105 @@ public class ExplorationController {
         };
     }
 
-    private boolean handleEnemyEncounter() {
+    /**
+     * Movimento com colisao separada por eixo.
+     *
+     * Isso permite que o Hero deslize ao longo
+     * de uma parede sem atravessa-la.
+     */
+    private void moveHeroWithCollisions(
+            double directionX,
+            double directionY,
+            double deltaTime) {
+
+        double length =
+                Math.hypot(
+                        directionX,
+                        directionY
+                );
+
+        if (length == 0) {
+
+            return;
+        }
+
+        double normalizedX =
+                directionX
+                / length;
+
+        double normalizedY =
+                directionY
+                / length;
+
+        if (normalizedX != 0) {
+
+            double previousX =
+                    hero.getX();
+
+            double previousY =
+                    hero.getY();
+
+            hero.updateMovement(
+                normalizedX,
+                0,
+                deltaTime,
+                ZoneManager.WORLD_WIDTH
+                    - TILE_SIZE,
+                ZoneManager.WORLD_HEIGHT
+                    - TILE_SIZE
+            );
+
+            if (collisionManager
+                    .collides(
+                            hero.getX(),
+                            hero.getY(),
+                            TILE_SIZE,
+                            TILE_SIZE
+                    )) {
+
+                hero.setPosition(
+                        previousX,
+                        previousY
+                );
+            }
+        }
+
+        if (normalizedY != 0) {
+
+            double previousX =
+                    hero.getX();
+
+            double previousY =
+                    hero.getY();
+
+            hero.updateMovement(
+                0,
+                normalizedY,
+                deltaTime,
+                ZoneManager.WORLD_WIDTH
+                    - TILE_SIZE,
+                ZoneManager.WORLD_HEIGHT
+                    - TILE_SIZE
+            );
+
+            if (collisionManager
+                    .collides(
+                            hero.getX(),
+                            hero.getY(),
+                            TILE_SIZE,
+                            TILE_SIZE
+                    )) {
+
+                hero.setPosition(
+                        previousX,
+                        previousY
+                );
+            }
+        }
+    }
+
+    private boolean
+            handleEnemyEncounter() {
 
         Enemy enemy =
                 mapEnemySpawner
@@ -628,6 +817,7 @@ public class ExplorationController {
                         );
 
         if (enemy == null) {
+
             return false;
         }
 
@@ -656,22 +846,29 @@ public class ExplorationController {
                         .getCurrentZone();
 
         if (chapterProgress
-                .reachCheckpoint(zone)) {
+                .reachCheckpoint(
+                        zone
+                )) {
 
             hero.restoreHealth();
+
             hud.updateHealth(
                     hero.getHealth(),
                     hero.getMaxHealth()
             );
 
             System.out.println(
-                    "Checkpoint alcançado: "
+                    "Checkpoint alcancado: "
                     + zone
             );
+
+            onProgressChanged
+                    .run();
         }
     }
 
-    private boolean handleZoneTransition() {
+    private boolean
+            handleZoneTransition() {
 
         if (!zoneManager
                 .intersectsExit(
@@ -689,6 +886,7 @@ public class ExplorationController {
                         .getNextZone();
 
         if (nextZone == null) {
+
             return false;
         }
 
@@ -752,7 +950,8 @@ public class ExplorationController {
 
     private void updateInteractionPrompt() {
 
-        if (dialogueController.isOpen()) {
+        if (dialogueController
+                .isOpen()) {
 
             hud.hideInteractionPrompt();
 
@@ -815,12 +1014,31 @@ public class ExplorationController {
                 );
     }
 
-    /**
-     * Reposiciona e recupera o Hero depois de uma derrota.
-     */
     public void respawnAtCheckpoint() {
+
         hero.restoreHealth();
-        loadZone(chapterProgress.getCheckpoint());
+
+        loadZone(
+                chapterProgress
+                        .getCheckpoint()
+        );
+
+        hud.updateHealth(
+                hero.getHealth(),
+                hero.getMaxHealth()
+        );
+    }
+
+    /**
+     * Utilizado apos carregar um save.
+     */
+    public void restoreAtCheckpoint() {
+
+        loadZone(
+                chapterProgress
+                        .getCheckpoint()
+        );
+
         hud.updateHealth(
                 hero.getHealth(),
                 hero.getMaxHealth()
@@ -832,7 +1050,8 @@ public class ExplorationController {
         return hero;
     }
 
-    public ExplorationZone getCurrentZone() {
+    public ExplorationZone
+            getCurrentZone() {
 
         return zoneManager
                 .getCurrentZone();

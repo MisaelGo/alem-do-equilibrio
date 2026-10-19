@@ -1,10 +1,12 @@
 package com.alemdoequilibrio.core;
 
+import java.io.IOException;
+
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
 import com.alemdoequilibrio.game.BossEnemy;
-import com.alemdoequilibrio.game.ChapterProgress;
 import com.alemdoequilibrio.game.ChapterCompleteView;
+import com.alemdoequilibrio.game.ChapterProgress;
 import com.alemdoequilibrio.game.Enemy;
 import com.alemdoequilibrio.game.ExplorationController;
 
@@ -21,7 +23,11 @@ public class GameController {
     private final ChapterProgress
             chapterProgress;
 
-    private final ChapterCompleteView chapterCompleteView;
+    private final SaveManager
+            saveManager;
+
+    private final ChapterCompleteView
+            chapterCompleteView;
 
     private GameState currentState;
 
@@ -48,9 +54,15 @@ public class GameController {
         chapterProgress =
                 new ChapterProgress();
 
-        chapterCompleteView = new ChapterCompleteView(
-                () -> changeState(GameState.EXPLORATION)
-        );
+        saveManager =
+                new SaveManager();
+
+        chapterCompleteView =
+                new ChapterCompleteView(
+                        () -> changeState(
+                                GameState.EXPLORATION
+                        )
+                );
 
         currentState =
                 GameState.MENU;
@@ -68,7 +80,9 @@ public class GameController {
                                 GameState.EXPLORATION
                         ),
 
-                        this::startBattle
+                        this::startBattle,
+
+                        this::saveProgress
                 );
     }
 
@@ -78,9 +92,28 @@ public class GameController {
                 "Além do Equilíbrio"
         );
 
-        changeState(
-                GameState.EXPLORATION
-        );
+        boolean loaded =
+                loadSavedProgress();
+
+        if (loaded) {
+
+            explorationController
+                    .restoreAtCheckpoint();
+        }
+
+        if (chapterProgress
+                .hasFragmentObtained()) {
+
+            changeState(
+                    GameState.CHAPTER_COMPLETE
+            );
+
+        } else {
+
+            changeState(
+                    GameState.EXPLORATION
+            );
+        }
     }
 
     public void changeState(
@@ -89,11 +122,13 @@ public class GameController {
         if (newState == null) {
 
             throw new IllegalArgumentException(
-                    "O novo estado não pode ser nulo."
+                    "O novo estado nao pode ser nulo."
             );
         }
 
-        if (currentState == newState) {
+        if (currentState
+                == newState) {
+
             return;
         }
 
@@ -143,7 +178,10 @@ public class GameController {
                 showBattle();
 
             case CHAPTER_COMPLETE ->
-                sceneRouter.show(chapterCompleteView.getScene());
+                sceneRouter.show(
+                        chapterCompleteView
+                                .getScene()
+                );
 
             case MENU,
                  DIALOGUE,
@@ -196,10 +234,11 @@ public class GameController {
 
     private void showBattle() {
 
-        if (currentBattleView == null) {
+        if (currentBattleView
+                == null) {
 
             throw new IllegalStateException(
-                    "Não existe batalha ativa."
+                    "Nao existe batalha ativa."
             );
         }
 
@@ -217,19 +256,33 @@ public class GameController {
             return;
         }
 
-        BattleController.BattleResult result =
+        BattleController.BattleResult
+                result =
                 currentBattleController
                         .getResult();
 
         if (result
                 == BattleController
-                        .BattleResult.VICTORY) {
+                        .BattleResult
+                        .VICTORY) {
 
-            boolean bossVictory = currentBattleController.getEnemy()
+            boolean bossVictory =
+                    currentBattleController
+                            .getEnemy()
                     instanceof BossEnemy;
 
             if (bossVictory) {
-                chapterProgress.markBossDefeated();
+
+                chapterProgress
+                        .markBossDefeated();
+
+                /*
+                 * C1-053:
+                 * o fragmento e obtido
+                 * ao derrotar o Guardiao.
+                 */
+                chapterProgress
+                        .markFragmentObtained();
             }
 
             explorationController
@@ -238,31 +291,131 @@ public class GameController {
                                     .getEnemy()
                     );
 
+            saveProgress();
+
             currentBattleController =
                     null;
 
             currentBattleView =
                     null;
 
-            changeState(bossVictory
-                    ? GameState.CHAPTER_COMPLETE
-                    : GameState.EXPLORATION);
+            changeState(
+                    bossVictory
+                            ? GameState
+                                    .CHAPTER_COMPLETE
+                            : GameState
+                                    .EXPLORATION
+            );
 
             return;
         }
 
         if (result
                 == BattleController
-                        .BattleResult.DEFEAT) {
-            currentBattleController = null;
-            currentBattleView = null;
+                        .BattleResult
+                        .DEFEAT) {
 
-            explorationController.respawnAtCheckpoint();
-            changeState(GameState.EXPLORATION);
+            currentBattleController =
+                    null;
+
+            currentBattleView =
+                    null;
+
+            explorationController
+                    .respawnAtCheckpoint();
+
+            saveProgress();
+
+            changeState(
+                    GameState.EXPLORATION
+            );
         }
     }
 
-    public GameState getCurrentState() {
+    /**
+     * Salva o progresso atual.
+     *
+     * IOException representa problema
+     * de acesso ao arquivo.
+     *
+     * SaveFormatException representa
+     * estado incompativel com o formato.
+     */
+    private void saveProgress() {
+
+        try {
+
+            saveManager.save(
+                    chapterProgress,
+                    explorationController
+                            .getHero()
+            );
+
+        } catch (IOException exception) {
+
+            System.err.println(
+                    "Nao foi possivel salvar o jogo: "
+                    + exception.getMessage()
+            );
+
+        } catch (SaveFormatException exception) {
+
+            System.err.println(
+                    "O progresso nao pode ser "
+                    + "convertido para o formato de save: "
+                    + exception.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Tenta recuperar um save existente.
+     *
+     * Um arquivo invalido nao derruba o jogo:
+     * o jogador simplesmente inicia com
+     * um estado novo.
+     */
+    private boolean loadSavedProgress() {
+
+        if (!saveManager.exists()) {
+
+            return false;
+        }
+
+        try {
+
+            saveManager.load(
+                    chapterProgress,
+                    explorationController
+                            .getHero()
+            );
+
+            System.out.println(
+                    "Save carregado com sucesso."
+            );
+
+            return true;
+
+        } catch (IOException exception) {
+
+            System.err.println(
+                    "Nao foi possivel ler o save: "
+                    + exception.getMessage()
+            );
+
+        } catch (SaveFormatException exception) {
+
+            System.err.println(
+                    "Save invalido ou incompativel: "
+                    + exception.getMessage()
+            );
+        }
+
+        return false;
+    }
+
+    public GameState
+            getCurrentState() {
 
         return currentState;
     }
