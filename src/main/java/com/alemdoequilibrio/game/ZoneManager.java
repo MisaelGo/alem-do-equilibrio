@@ -239,7 +239,7 @@ public class ZoneManager {
                 1595,
                 600,
                 5,
-                120
+                160
         );
     }
 
