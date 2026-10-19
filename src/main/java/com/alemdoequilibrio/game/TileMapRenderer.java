@@ -169,23 +169,27 @@ public final class TileMapRenderer {
                 double x = col * tileSize;
                 double y = row * tileSize;
 
+                /*
+                 * Calcula primeiro se o tile faz parte da estrada.
+                 * A borda leste usa essa informação para deixar
+                 * aberta somente a passagem exata do caminho.
+                 */
+                boolean isPath =
+                        isNeutralBorderPathTile(
+                                col,
+                                row,
+                                columns,
+                                rows
+                        );
+
                 // 1. Paredes e montanhas rochosas de limite do cenário
                 boolean isNorthWall = row <= 1;
                 boolean isSouthWall = row >= rows - 2;
                 boolean isWestWall = col == 0;
 
-                /*
-                 * A abertura da borda leste acompanha o novo tamanho
-                 * compacto da Fronteira Neutra. Para 1600x960,
-                 * corresponde às linhas 14..21 (y = 560..880).
-                 */
-                int exitStartRow = rows - 10;
-                int exitEndRow = rows - 3;
-
                 boolean isEastWall =
-                        (col == columns - 1)
-                        && (row < exitStartRow
-                        || row > exitEndRow);
+                        col == columns - 1
+                        && !isPath;
 
                 if (isNorthWall || isSouthWall || isWestWall || isEastWall) {
                     gc.drawImage(rockImg, x, y, tileSize, tileSize);
@@ -193,12 +197,7 @@ public final class TileMapRenderer {
                 }
 
                 // 2. Trilha original, comprimida para o novo tamanho do mapa
-                if (isNeutralBorderPathTile(
-                        col,
-                        row,
-                        columns,
-                        rows
-                )) {
+                if (isPath) {
                     gc.drawImage(pathImg, x, y, tileSize, tileSize);
                     continue;
                 }
