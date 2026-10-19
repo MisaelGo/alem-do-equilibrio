@@ -42,8 +42,8 @@ public class CollisionManager {
         obstacles.clear();
 
         /*
-         * NPCs e comerciantes passam a possuir
-         * colisao automaticamente.
+         * Todos os elementos interagíveis da zona
+         * passam a possuir colisão automaticamente.
          */
         for (Interactable interactable
                 : interactables) {
@@ -65,24 +65,8 @@ public class CollisionManager {
          */
         switch (zone) {
 
-            case NEUTRAL_BORDER -> {
-
-                addObstacle(
-                        ZoneManager.NEUTRAL_HOUSE_X,
-                        ZoneManager.NEUTRAL_HOUSE_Y,
-                        ZoneManager.NEUTRAL_HOUSE_WIDTH,
-                        ZoneManager.NEUTRAL_HOUSE_HEIGHT
-                );
-
-                addObstacle(
-                        ZoneManager.NEUTRAL_TREE_X,
-                        ZoneManager.NEUTRAL_TREE_Y,
-                        ZoneManager.NEUTRAL_TREE_WIDTH,
-                        ZoneManager.NEUTRAL_TREE_HEIGHT
-                );
-
+            case NEUTRAL_BORDER ->
                 addNeutralBorderWallCollisions();
-            }
 
             case INSULATOR_TRAIL ->
                 addObstacle(
