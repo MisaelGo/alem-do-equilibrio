@@ -170,7 +170,7 @@ public final class TileMapRenderer {
                 double y = row * tileSize;
 
                 // 1. Paredes e montanhas rochosas de limite do cenário
-                boolean isNorthWall = row <= 2;
+                boolean isNorthWall = row <= 1;
                 boolean isSouthWall = row >= rows - 2;
                 boolean isWestWall = col == 0;
 
@@ -295,7 +295,7 @@ public final class TileMapRenderer {
                 );
 
         int lastPathColumn =
-                columns - 3;
+                columns - 1;
 
         /*
          * Trecho inicial:
@@ -335,7 +335,7 @@ public final class TileMapRenderer {
 
         /*
          * Trecho final:
-         * aproxima-se da passagem da parede leste.
+         * atravessa a passagem da parede leste até o fim do mapa.
          */
         if (col > middleSectionEnd
                 && col <= lastPathColumn) {
