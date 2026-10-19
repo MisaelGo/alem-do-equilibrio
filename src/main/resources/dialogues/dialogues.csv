@@ -10,6 +10,10 @@ INTRO_NEUTRAL_BORDER;Herói;Espera... tem alguém ali.
 INTRO_NEUTRAL_BORDER;Herói;Quem é aquela pessoa? Talvez ela saiba onde eu estou.
 INTRO_NEUTRAL_BORDER;Herói;Vou até lá perguntar.
 
+HOUSE_NEUTRAL_INTERACTION;Herói;Estranho... alguma coisa está me repelindo. Essa casa deve estar carregada com o mesmo sinal que eu.
+TREE_NEUTRAL_INTERACTION;Herói;Que árvore estranha... Quanto mais tento me aproximar, mais parece que alguma coisa me empurra para longe. Deve estar carregada com o mesmo sinal que eu.
+
+
 NILO_CHARGE_SIGNS;Herói;Ei... com licença.
 NILO_CHARGE_SIGNS;Nilo;Hm? Quem é você?
 NILO_CHARGE_SIGNS;Herói;Eu ia perguntar praticamente a mesma coisa. Você pode me dizer onde eu estou?
@@ -63,6 +67,8 @@ NILO_CHARGE_SIGNS;Nilo;Acho que encontrará mais perguntas.
 NILO_CHARGE_SIGNS;Herói;Ótimo...
 NILO_CHARGE_SIGNS;Nilo;Mas cada resposta começa por alguma delas.
 
+NILO_REPEAT;Nilo;Boa sorte na sua viagem. E lembre-se: observe bem como as cargas ao seu redor se comportam.
+
 ELIA_ELECTRIZATION;Élia;Cuidado onde pisa, viajante! Essa estrutura metálica está acumulando energia de forma anormal. Se você encostar nela agora, vai tomar um choque e tanto.
 ELIA_ELECTRIZATION;Herói;Parece perigoso. Mas por que as faíscas só estão pulando pela parte de metal, e não na madeira ou na cerâmica aqui do lado?
 ELIA_ELECTRIZATION;Élia;É uma questão de material. O que se move com facilidade por estes condutores são cargas — em materiais comuns, o rearranjo costuma envolver os elétrons, que são mais livres para viajar.
@@ -100,6 +106,8 @@ ION_FIRST_MEETING;Herói;Ainda?
 ION_FIRST_MEETING;Íon;Continue seu caminho. Se aprender o suficiente, é bem provável que nos encontremos novamente.
 ION_FIRST_MEETING;Herói;Você fala como se já soubesse disso.
 ION_FIRST_MEETING;Íon;Eu disse que sei observar.
+
+ION_NEUTRAL_REPEAT;Íon;Continue seu caminho. Quando tiver aprendido o suficiente, nos encontraremos novamente.
 
 ION_QUIZ_I;Íon;Olha só... nos encontramos até que enfim.
 ION_QUIZ_I;Herói;Então você realmente sabia que eu chegaria até aqui.
