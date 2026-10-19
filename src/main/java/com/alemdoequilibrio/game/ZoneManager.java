@@ -983,6 +983,19 @@ public class ZoneManager {
                 y - 35
         );
 
+        if (currentZone
+                == ExplorationZone
+                        .NEUTRAL_BORDER) {
+
+            worldLayer
+                    .getChildren()
+                    .add(
+                            exitArea
+                    );
+
+            return;
+        }
+
         worldLayer
                 .getChildren()
                 .addAll(
