@@ -274,6 +274,10 @@ public class ExplorationController {
                         NEUTRAL_ELECTRIC_SFX
                 );
 
+        neutralElectricDischarge.setVolume(
+                0.55
+        );
+
         gameRoot =
                 new Pane();
 
