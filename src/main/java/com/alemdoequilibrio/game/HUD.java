@@ -175,7 +175,7 @@ public class HUD {
         );
 
         statusCard.relocate(
-                10,
+                40,
                 10
         );
 

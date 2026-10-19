@@ -28,7 +28,7 @@ public class ExplorationController {
             TILE_SIZE = 40;
 
     private static final double
-            INTERACTION_RANGE = 90;
+            INTERACTION_RANGE = 30;
 
     private static final double
             ENEMY_RANGE = 70;
