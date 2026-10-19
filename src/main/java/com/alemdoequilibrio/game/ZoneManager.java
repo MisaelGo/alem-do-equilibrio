@@ -232,7 +232,7 @@ public class ZoneManager {
 
         /*
          * Gatilho invisível de transição.
-         * Ocupa exatamente um tile na abertura leste.
+         * Cobre toda a abertura de quatro tiles na borda leste.
          */
         createExitArea(
                 "Trilha dos Isolantes",
