@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 
 public class ExplorationController {
@@ -37,6 +38,10 @@ public class ExplorationController {
 
     private static final double
             HERO_START_Y = 832;
+
+    private static final String
+            NEUTRAL_BORDER_MUSIC =
+                    "/audio/zone_neutral_suspense.mp3";
 
     private final Hero hero;
 
@@ -76,6 +81,9 @@ public class ExplorationController {
 
     private final QuizController
             quizController;
+
+    private final MediaPlayer
+            neutralBorderMusicPlayer;
 
     private final Runnable
             onDialogueStarted;
@@ -241,6 +249,21 @@ public class ExplorationController {
                         hudLayer
                 );
 
+        neutralBorderMusicPlayer =
+                new MediaPlayer(
+                        resourceManager.getMedia(
+                                NEUTRAL_BORDER_MUSIC
+                        )
+                );
+
+        neutralBorderMusicPlayer.setCycleCount(
+                MediaPlayer.INDEFINITE
+        );
+
+        neutralBorderMusicPlayer.setVolume(
+                0.35
+        );
+
         gameRoot =
                 new Pane();
 
@@ -341,6 +364,10 @@ public class ExplorationController {
                 zone
         );
 
+        updateZoneMusic(
+                zone
+        );
+
         /*
          * Se o boss ja foi derrotado,
          * ele nao deve reaparecer ao carregar
@@ -385,6 +412,21 @@ public class ExplorationController {
         updateCamera();
     }
     
+    private void updateZoneMusic(
+            ExplorationZone zone) {
+
+        if (zone
+                == ExplorationZone
+                        .NEUTRAL_BORDER) {
+
+            neutralBorderMusicPlayer.play();
+
+            return;
+        }
+
+        neutralBorderMusicPlayer.stop();
+    }
+
     private void positionHeroAtZoneStart(
         ExplorationZone zone) {
 
