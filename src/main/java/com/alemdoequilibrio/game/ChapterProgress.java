@@ -17,6 +17,8 @@ public class ChapterProgress {
 
     private boolean fragmentObtained;
 
+    private boolean neutralIonMet;
+
     public ChapterProgress() {
 
         learnedTopics =
@@ -36,6 +38,8 @@ public class ChapterProgress {
         bossDefeated = false;
 
         fragmentObtained = false;
+
+        neutralIonMet = false;
     }
 
     public void learn(
@@ -140,6 +144,38 @@ public class ChapterProgress {
         return fragmentObtained;
     }
 
+    public void markNeutralIonMet() {
+
+        neutralIonMet = true;
+    }
+
+    public boolean hasMetNeutralIon() {
+
+        return neutralIonMet;
+    }
+
+    /**
+     * Mantém compatibilidade com chamadas antigas que não
+     * armazenavam o encontro com Íon.
+     */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet) {
+
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                false
+        );
+    }
+
     /**
      * Restaura o progresso validado pelo SaveManager.
      */
@@ -179,5 +215,8 @@ public class ChapterProgress {
 
         this.fragmentObtained =
                 fragmentObtained;
+
+        this.neutralIonMet =
+                neutralIonMet;
     }
 }
