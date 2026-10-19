@@ -1,8 +1,7 @@
 package com.alemdoequilibrio.game;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import com.alemdoequilibrio.core.ResourceManager;
@@ -76,11 +75,20 @@ public class ExplorationController {
     private final DialogueController
             dialogueController;
 
+    private final QuizController
+            quizController;
+
     private final Runnable
             onDialogueStarted;
 
     private final Runnable
             onDialogueFinished;
+
+    private final Runnable
+            onQuizStarted;
+
+    private final Runnable
+            onQuizFinished;
 
     private final Consumer<Enemy>
             onEnemyEncounter;
@@ -102,6 +110,8 @@ public class ExplorationController {
             ChapterProgress chapterProgress,
             Runnable onDialogueStarted,
             Runnable onDialogueFinished,
+            Runnable onQuizStarted,
+            Runnable onQuizFinished,
             Consumer<Enemy> onEnemyEncounter,
             Runnable onProgressChanged) {
 
@@ -122,6 +132,16 @@ public class ExplorationController {
         this.onDialogueFinished =
                 Objects.requireNonNull(
                         onDialogueFinished
+                );
+
+        this.onQuizStarted =
+                Objects.requireNonNull(
+                        onQuizStarted
+                );
+
+        this.onQuizFinished =
+                Objects.requireNonNull(
+                        onQuizFinished
                 );
 
         this.onEnemyEncounter =
@@ -211,6 +231,11 @@ public class ExplorationController {
                         hudLayer,
                         dialogueRepository,
                         this::completeInteraction
+                );
+
+        quizController =
+                new QuizController(
+                        hudLayer
                 );
 
         gameRoot =
@@ -486,8 +511,16 @@ public class ExplorationController {
 
     private void handleInteraction() {
 
-        if (dialogueController
+        if (quizController
                 .isOpen()) {
+
+            return;
+        }
+
+        if (dialogueController
+                .isOpen()
+                || quizController
+                        .isOpen()) {
 
             boolean stillOpen =
                     dialogueController
@@ -495,8 +528,17 @@ public class ExplorationController {
 
             if (!stillOpen) {
 
-                onDialogueFinished
-                        .run();
+                if (quizController
+                        .isOpen()) {
+
+                    onQuizStarted
+                            .run();
+
+                } else {
+
+                    onDialogueFinished
+                            .run();
+                }
 
                 updateInteractionPrompt();
             }
@@ -508,56 +550,6 @@ public class ExplorationController {
                 findNearestInteractable();
 
         if (interactable == null) {
-
-            return;
-        }
-
-        if (interactable
-                instanceof Merchant merchant) {
-
-            Set<String> unlockedNames =
-                    new HashSet<>();
-
-            for (Ability ability
-                    : hero
-                            .getAbilityBook()
-                            .getAbilities()) {
-
-                unlockedNames.add(
-                        ability.getName()
-                );
-            }
-
-            int previousAbilities =
-                    hero
-                            .getAbilityBook()
-                            .getAbilities()
-                            .size();
-
-            int previousQuizzes =
-                    chapterProgress
-                            .getCompletedQuizzes()
-                            .size();
-
-            merchant.startQuiz(
-                    hero,
-                    chapterProgress,
-                    unlockedNames
-            );
-
-            if (hero
-                    .getAbilityBook()
-                    .getAbilities()
-                    .size()
-                    != previousAbilities
-                    || chapterProgress
-                            .getCompletedQuizzes()
-                            .size()
-                    != previousQuizzes) {
-
-                onProgressChanged
-                        .run();
-            }
 
             return;
         }
@@ -575,6 +567,78 @@ public class ExplorationController {
             onDialogueStarted
                     .run();
         }
+    }
+
+    private void startMerchantQuiz(
+            Merchant merchant) {
+
+        List<PhysicsQuestion> questions =
+                merchant.startQuiz(
+                        chapterProgress,
+                        4
+                );
+
+        if (questions.size() < 4) {
+
+            return;
+        }
+
+        hud.hideInteractionPrompt();
+
+        quizController.startQuiz(
+                questions,
+                correctAnswers ->
+                        finishMerchantQuiz(
+                                merchant,
+                                correctAnswers
+                        )
+        );
+    }
+
+    private void finishMerchantQuiz(
+            Merchant merchant,
+            int correctAnswers) {
+
+        boolean success =
+                merchant.completeQuiz(
+                        hero,
+                        chapterProgress,
+                        correctAnswers
+                );
+
+        if (success) {
+
+            onProgressChanged
+                    .run();
+        }
+
+        String resultDialogueId =
+                success
+                        ? merchant
+                                .getSuccessDialogueId()
+                        : merchant
+                                .getFailureDialogueId();
+
+        if (resultDialogueId != null
+                && !resultDialogueId.isBlank()) {
+
+            dialogueController
+                    .startDialogue(
+                            resultDialogueId
+                    );
+
+            if (dialogueController
+                    .isOpen()) {
+
+                onDialogueStarted
+                        .run();
+
+                return;
+            }
+        }
+
+        onQuizFinished
+                .run();
     }
 
     private Interactable
@@ -645,6 +709,16 @@ public class ExplorationController {
 
     private void completeInteraction(
             Interactable interactable) {
+
+        if (interactable
+                instanceof Merchant merchant) {
+
+            startMerchantQuiz(
+                    merchant
+            );
+
+            return;
+        }
 
         if (!(interactable
                 instanceof NPC npc)) {
@@ -1112,6 +1186,14 @@ public class ExplorationController {
 
         dialogueController
                 .closeDialogue();
+
+        updateInteractionPrompt();
+    }
+
+    public void closeQuiz() {
+
+        quizController
+                .closeQuiz();
 
         updateInteractionPrompt();
     }
