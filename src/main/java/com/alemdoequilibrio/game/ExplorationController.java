@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.AudioClip;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 
@@ -42,6 +43,10 @@ public class ExplorationController {
     private static final String
             NEUTRAL_BORDER_MUSIC =
                     "/audio/zone_neutral_suspense.mp3";
+
+    private static final String
+            NEUTRAL_ELECTRIC_SFX =
+                    "/audio/sfx_electric_discharge.wav";
 
     private final Hero hero;
 
@@ -85,6 +90,9 @@ public class ExplorationController {
     private final MediaPlayer
             neutralBorderMusicPlayer;
 
+    private final AudioClip
+            neutralElectricDischarge;
+
     private final Runnable
             onDialogueStarted;
 
@@ -111,9 +119,6 @@ public class ExplorationController {
     
     private boolean
         neutralBorderIntroShown;
-
-    private boolean
-        neutralIonMet;
 
     public ExplorationController(
             ResourceManager resourceManager,
@@ -264,6 +269,11 @@ public class ExplorationController {
                 0.35
         );
 
+        neutralElectricDischarge =
+                resourceManager.getAudioClip(
+                        NEUTRAL_ELECTRIC_SFX
+                );
+
         gameRoot =
                 new Pane();
 
@@ -336,9 +346,6 @@ public class ExplorationController {
         neutralBorderIntroShown =
                 false;
 
-        neutralIonMet =
-                false;
-
         configureInput();
 
         gameLoop =
@@ -361,10 +368,6 @@ public class ExplorationController {
         mapEnemySpawner.clear();
 
         zoneManager.loadZone(
-                zone
-        );
-
-        updateZoneMusic(
                 zone
         );
 
@@ -620,6 +623,21 @@ public class ExplorationController {
         if (zoneManager.getCurrentZone()
                 == ExplorationZone.NEUTRAL_BORDER
                 && interactable
+                        instanceof SceneryInteractable) {
+
+            try {
+
+                neutralElectricDischarge.play();
+
+            } catch (Exception exception) {
+
+                // A interação continua mesmo se o áudio estiver indisponível.
+            }
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && interactable
                         instanceof NPC npc) {
 
             String name =
@@ -648,7 +666,8 @@ public class ExplorationController {
                     || "Ion".equalsIgnoreCase(
                             name
                     ))
-                    && neutralIonMet) {
+                    && chapterProgress
+                            .hasMetNeutralIon()) {
 
                 dialogueController
                         .startDialogue(
@@ -849,10 +868,15 @@ public class ExplorationController {
                 )
                     || "Ion".equalsIgnoreCase(
                             npc.getName()
-                    ))) {
+                    ))
+                && !chapterProgress
+                        .hasMetNeutralIon()) {
 
-            neutralIonMet =
-                    true;
+            chapterProgress
+                    .markNeutralIonMet();
+
+            onProgressChanged
+                    .run();
         }
 
         KnowledgeTopic topic =
@@ -1147,6 +1171,29 @@ public class ExplorationController {
             return false;
         }
 
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER) {
+
+            if (!chapterProgress
+                    .hasLearned(
+                            KnowledgeTopic
+                                    .KNOW_CHARGE_SIGNS
+                    )) {
+
+                return blockNeutralBorderExit(
+                        "NEUTRAL_EXIT_NEED_NILO"
+                );
+            }
+
+            if (!chapterProgress
+                    .hasMetNeutralIon()) {
+
+                return blockNeutralBorderExit(
+                        "NEUTRAL_EXIT_NEED_ION"
+                );
+            }
+        }
+
         ExplorationZone nextZone =
                 zoneManager
                         .getNextZone();
@@ -1159,6 +1206,42 @@ public class ExplorationController {
         loadZone(
                 nextZone
         );
+
+        updateZoneMusic(
+                nextZone
+        );
+
+        return true;
+    }
+
+    private boolean blockNeutralBorderExit(
+            String dialogueId) {
+
+        hero.setPosition(
+                1520,
+                hero.getY()
+        );
+
+        heroView.setPosition(
+                hero.getX(),
+                hero.getY()
+        );
+
+        hud.hideInteractionPrompt();
+
+        dialogueController
+                .startDialogue(
+                        dialogueId
+                );
+
+        if (dialogueController
+                .isOpen()) {
+
+            onDialogueStarted
+                    .run();
+        }
+
+        updateCamera();
 
         return true;
     }
@@ -1308,6 +1391,11 @@ public class ExplorationController {
         );
 
         updateCamera();
+
+        updateZoneMusic(
+                zoneManager
+                        .getCurrentZone()
+        );
 
         /*
         * Na primeira chegada à Fronteira Neutra,
