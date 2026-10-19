@@ -228,6 +228,7 @@ public class ExplorationController {
         dialogueController =
                 new DialogueController(
                         hudLayer,
+                        resourceManager,
                         dialogueRepository,
                         this::completeInteraction
                 );
