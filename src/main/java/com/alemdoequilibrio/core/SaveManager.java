@@ -147,6 +147,12 @@ public class SaveManager {
                         .hasFragmentObtained()
         );
 
+        lines.add(
+                "neutralIonMet="
+                + progress
+                        .hasMetNeutralIon()
+        );
+
         Path absolutePath =
                 savePath
                         .toAbsolutePath();
@@ -304,6 +310,19 @@ public class SaveManager {
                         "fragmentObtained"
                 );
 
+        String neutralIonMetValue =
+                values.get(
+                        "neutralIonMet"
+                );
+
+        boolean neutralIonMet =
+                neutralIonMetValue != null
+                        ? parseBoolean(
+                                neutralIonMetValue,
+                                "neutralIonMet"
+                        )
+                        : false;
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -322,7 +341,8 @@ public class SaveManager {
                 learnedTopics,
                 completedQuizzes,
                 bossDefeated,
-                fragmentObtained
+                fragmentObtained,
+                neutralIonMet
         );
 
         hero.clearAbilities();
