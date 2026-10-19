@@ -74,7 +74,7 @@ public class CollisionManager {
                         ZoneManager.NEUTRAL_HOUSE_HEIGHT
                 );
 
-                addNeutralBorderSideCollisions();
+                addNeutralBorderWallCollisions();
             }
 
             case INSULATOR_TRAIL ->
@@ -95,11 +95,14 @@ public class CollisionManager {
     }
 
     /**
-     * Adiciona colisão em todos os blocos da lateral direita
-     * da Fronteira Neutra, deixando livre somente a passagem
-     * onde a estrada atravessa a borda.
+     * Adiciona colisão a todos os tiles de parede
+     * da Fronteira Neutra.
+     *
+     * A mesma regra usada para desenhar as bordas
+     * é reutilizada aqui para manter visual e física
+     * sempre sincronizados.
      */
-    private void addNeutralBorderSideCollisions() {
+    private void addNeutralBorderWallCollisions() {
 
         double tileSize =
                 40;
@@ -116,37 +119,35 @@ public class CollisionManager {
                         / tileSize
                 );
 
-        int rightColumn =
-                columns - 1;
-
-        double x =
-                rightColumn
-                * tileSize;
-
         for (int row = 0;
                 row < rows;
                 row++) {
 
-            boolean isPath =
-                    TileMapRenderer
-                            .isNeutralBorderPathTile(
-                                    rightColumn,
-                                    row,
-                                    columns,
-                                    rows
-                            );
+            for (int col = 0;
+                    col < columns;
+                    col++) {
 
-            if (isPath) {
+                boolean isWall =
+                        TileMapRenderer
+                                .isNeutralBorderWallTile(
+                                        col,
+                                        row,
+                                        columns,
+                                        rows
+                                );
 
-                continue;
+                if (!isWall) {
+
+                    continue;
+                }
+
+                addObstacle(
+                        col * tileSize,
+                        row * tileSize,
+                        tileSize,
+                        tileSize
+                );
             }
-
-            addObstacle(
-                    x,
-                    row * tileSize,
-                    tileSize,
-                    tileSize
-            );
         }
     }
 
