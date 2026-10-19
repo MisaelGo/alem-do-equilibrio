@@ -80,6 +80,14 @@ public class GameController {
                                 GameState.EXPLORATION
                         ),
 
+                        () -> changeState(
+                                GameState.QUIZ
+                        ),
+
+                        () -> changeState(
+                                GameState.EXPLORATION
+                        ),
+
                         this::startBattle,
 
                         this::saveProgress
@@ -157,9 +165,12 @@ public class GameController {
                 explorationController
                         .closeDialogue();
 
+            case QUIZ ->
+                explorationController
+                        .closeQuiz();
+
             case MENU,
                  BATTLE,
-                 QUIZ,
                  PAUSED,
                  CHAPTER_COMPLETE -> {
             }
