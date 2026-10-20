@@ -117,9 +117,6 @@ public class ExplorationController {
 
     private double cameraY;
     
-    private boolean
-        neutralBorderIntroShown;
-
     public ExplorationController(
             ResourceManager resourceManager,
             ChapterProgress chapterProgress,
@@ -347,9 +344,6 @@ public class ExplorationController {
         keys =
                 new boolean[4];
         
-        neutralBorderIntroShown =
-                false;
-
         configureInput();
 
         gameLoop =
@@ -1348,7 +1342,7 @@ public class ExplorationController {
     private boolean
         shouldStartNeutralBorderIntro() {
 
-        return !neutralBorderIntroShown
+        return !chapterProgress.hasSeenNeutralBorderIntro()
                 && zoneManager.getCurrentZone()
                         == ExplorationZone
                                 .NEUTRAL_BORDER
@@ -1367,8 +1361,8 @@ public class ExplorationController {
         * para EXPLORATION e start() será chamado
         * novamente. Assim a introdução não reinicia.
         */
-        neutralBorderIntroShown =
-                true;
+        chapterProgress.markNeutralBorderIntroSeen();
+        onProgressChanged.run();
 
         dialogueController
                 .startDialogue(

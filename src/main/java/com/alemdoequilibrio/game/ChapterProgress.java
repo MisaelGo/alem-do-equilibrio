@@ -19,6 +19,8 @@ public class ChapterProgress {
 
     private boolean neutralIonMet;
 
+    private boolean neutralBorderIntroSeen;
+
     public ChapterProgress() {
 
         learnedTopics =
@@ -40,6 +42,8 @@ public class ChapterProgress {
         fragmentObtained = false;
 
         neutralIonMet = false;
+
+        neutralBorderIntroSeen = false;
     }
 
     public void learn(
@@ -154,6 +158,14 @@ public class ChapterProgress {
         return neutralIonMet;
     }
 
+    public void markNeutralBorderIntroSeen() {
+        neutralBorderIntroSeen = true;
+    }
+
+    public boolean hasSeenNeutralBorderIntro() {
+        return neutralBorderIntroSeen;
+    }
+
     /**
      * Mantém compatibilidade com chamadas antigas que não
      * armazenavam o encontro com Íon.
@@ -185,6 +197,27 @@ public class ChapterProgress {
             boolean bossDefeated,
             boolean fragmentObtained,
             boolean neutralIonMet) {
+
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                neutralIonMet,
+                false
+        );
+    }
+
+    /** Inclui a introdução da Fronteira Neutra no progresso persistido. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen) {
 
         if (checkpoint == null
                 || learnedTopics == null
@@ -218,5 +251,8 @@ public class ChapterProgress {
 
         this.neutralIonMet =
                 neutralIonMet;
+
+        this.neutralBorderIntroSeen =
+                neutralBorderIntroSeen;
     }
 }

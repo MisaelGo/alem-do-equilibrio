@@ -12,7 +12,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
 
 /**
@@ -33,6 +33,9 @@ public class HUD {
     private static final String PRESS_E_HUD_IMAGE =
             "/images/press_E_hud.png";
 
+    private static final String CONCEPT_IMAGE =
+            "/images/conceito_registrado.png";
+
     private static final double LOGICAL_WIDTH =
             1280.0;
 
@@ -51,7 +54,7 @@ public class HUD {
 
     private final Label interactionLabel;
 
-    private final VBox conceptBanner;
+    private final Pane conceptBanner;
 
     private final Label conceptTitleLabel;
 
@@ -260,52 +263,38 @@ public class HUD {
         );
 
         /*
-         * Banner de conceito aprendido.
+         * A arte contém o título fixo e os símbolos + laterais.
+         * Somente o nome do conceito é desenhado dinamicamente.
+         * O viewport remove as margens transparentes do PNG.
          */
-        Label bannerHeader =
-                new Label(
-                        "★ NOVO CONCEITO REGISTRADO ★"
-                );
+        Image conceptImage = resourceManager.getImage(CONCEPT_IMAGE);
+        double conceptWidth = 720;
+        double conceptHeight = 160;
 
-        bannerHeader.getStyleClass().add(
-                "hud-concept-header"
-        );
+        ImageView conceptBackground = new ImageView(conceptImage);
+        conceptBackground.setViewport(new Rectangle2D(
+                conceptImage.getWidth() * 0.04,
+                conceptImage.getHeight() * 0.20,
+                conceptImage.getWidth() * 0.92,
+                conceptImage.getHeight() * 0.61
+        ));
+        conceptBackground.setFitWidth(conceptWidth);
+        conceptBackground.setFitHeight(conceptHeight);
+        conceptBackground.setPreserveRatio(false);
+        conceptBackground.setSmooth(false);
 
-        conceptTitleLabel =
-                new Label("");
+        conceptTitleLabel = new Label("");
+        conceptTitleLabel.getStyleClass().add("hud-concept-title");
+        conceptTitleLabel.setAlignment(javafx.geometry.Pos.CENTER);
+        conceptTitleLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        conceptTitleLabel.setWrapText(true);
+        conceptTitleLabel.setPrefSize(conceptWidth * 0.75, conceptHeight * 0.50);
+        conceptTitleLabel.relocate(conceptWidth * 0.125, conceptHeight * 0.45);
 
-        conceptTitleLabel.getStyleClass().add(
-                "hud-concept-title"
-        );
-
-        conceptBanner =
-                new VBox(
-                        bannerHeader,
-                        conceptTitleLabel
-                );
-
-        conceptBanner.getStyleClass().add(
-                "hud-concept-banner"
-        );
-
-        conceptBanner.setVisible(
-                false
-        );
-
-        conceptBanner
-                .layoutBoundsProperty()
-                .addListener(
-                        (obs, oldBounds, newBounds) ->
-                                conceptBanner.setLayoutX(
-                                        (LOGICAL_WIDTH
-                                                - newBounds.getWidth())
-                                                / 2.0
-                                )
-                );
-
-        conceptBanner.setLayoutY(
-                30.0
-        );
+        conceptBanner = new Pane(conceptBackground, conceptTitleLabel);
+        conceptBanner.setPrefSize(conceptWidth, conceptHeight);
+        conceptBanner.relocate((LOGICAL_WIDTH - conceptWidth) / 2.0, 25);
+        conceptBanner.setVisible(false);
 
         this.hudLayer
                 .getChildren()

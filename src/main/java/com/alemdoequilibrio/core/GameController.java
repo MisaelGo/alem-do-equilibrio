@@ -1,6 +1,11 @@
 package com.alemdoequilibrio.core;
 
 import java.io.IOException;
+import java.util.Objects;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
@@ -15,8 +20,13 @@ import javafx.stage.Stage;
 
 public class GameController {
 
+    private final Stage stage;
+
     private final SceneRouter
             sceneRouter;
+
+    private final MainMenuController
+            mainMenuController;
 
     private final ResourceManager
             resourceManager;
@@ -47,6 +57,14 @@ public class GameController {
     public GameController(
             Stage stage) {
 
+        this.stage = Objects.requireNonNull(stage);
+
+        mainMenuController = new MainMenuController(
+                this::playGame,
+                this::restartGame,
+                Platform::exit
+        );
+
         sceneRouter =
                 new SceneRouter(
                         stage
@@ -71,9 +89,7 @@ public class GameController {
         prologueController =
                 new PrologueController(
                         resourceManager,
-                        () -> changeState(
-                                GameState.EXPLORATION
-                        )
+                        this::finishPrologue
                 );
 
         currentState =
@@ -106,43 +122,69 @@ public class GameController {
                 );
     }
 
+    /** Abre sempre o menu antes de iniciar a partida. */
     public void startGame() {
+        sceneRouter.setTitle("Além do Equilíbrio");
+        sceneRouter.show(mainMenuController.getScene());
+    }
 
-        sceneRouter.setTitle(
-                "Além do Equilíbrio"
-        );
-
-        boolean loaded =
-                loadSavedProgress();
+    /** Continua o progresso salvo ou inicia o prólogo na primeira partida. */
+    private void playGame() {
+        boolean loaded = loadSavedProgress();
 
         if (loaded) {
-
-            explorationController
-                    .restoreAtCheckpoint();
+            explorationController.restoreAtCheckpoint();
         }
 
-        if (chapterProgress
-                .hasFragmentObtained()) {
+        if (chapterProgress.hasFragmentObtained()) {
+            changeState(GameState.CHAPTER_COMPLETE);
+        } else if (loaded) {
+            changeState(GameState.EXPLORATION);
+        } else {
+            changeState(GameState.PROLOGUE);
+        }
+    }
 
-            changeState(
-                    GameState.CHAPTER_COMPLETE
-            );
+    /** O prólogo foi concluído; registra o início da aventura no save. */
+    private void finishPrologue() {
+        saveProgress();
+        changeState(GameState.EXPLORATION);
+    }
 
+    /** Exclui o save e recria todos os controladores para reiniciar de verdade. */
+    private void restartGame() {
+        Alert confirmation = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Apagar o progresso salvo e recomeçar desde o prólogo?",
+                ButtonType.CANCEL,
+                ButtonType.OK
+        );
+        confirmation.initOwner(stage);
+        confirmation.setTitle("Reiniciar jogo");
+        confirmation.setHeaderText("Esta ação não poderá ser desfeita.");
+
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL)
+                != ButtonType.OK) {
             return;
         }
 
-        if (loaded) {
-
-            changeState(
-                    GameState.EXPLORATION
+        try {
+            saveManager.deleteSave();
+        } catch (IOException exception) {
+            Alert error = new Alert(
+                    Alert.AlertType.ERROR,
+                    "Não foi possível apagar o save: " + exception.getMessage(),
+                    ButtonType.OK
             );
-
+            error.initOwner(stage);
+            error.setTitle("Erro ao reiniciar");
+            error.showAndWait();
             return;
         }
 
-        changeState(
-                GameState.PROLOGUE
-        );
+        GameController freshGame = new GameController(stage);
+        freshGame.sceneRouter.setTitle("Além do Equilíbrio");
+        freshGame.changeState(GameState.PROLOGUE);
     }
 
     public void changeState(
@@ -222,8 +264,12 @@ public class GameController {
                                 .getScene()
                 );
 
-            case MENU,
-                 DIALOGUE,
+            case MENU ->
+                sceneRouter.show(
+                        mainMenuController.getScene()
+                );
+
+            case DIALOGUE,
                  QUIZ,
                  PAUSED -> {
             }
