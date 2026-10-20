@@ -14,14 +14,15 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 /**
  * Cena introdutoria exibida antes da primeira chegada a Eletéria.
  *
- * O prólogo usa apenas fundo preto, texto e áudio para manter
- * a abertura simples e atmosférica.
+ * A introdução combina texto, chuva, trovões, um breve clarão
+ * e silêncio. O fenômeno que transportou o herói segue misterioso.
  */
 public class PrologueController {
 
@@ -43,26 +44,47 @@ public class PrologueController {
             ELECTRIC_SHOCK_AUDIO =
                     "/audio/electric_shock.mp3";
 
+    /*
+     * Quatro momentos: tempestade, suspeita, clarão e silêncio.
+     * A origem da descarga permanece desconhecida para o jogador.
+     */
     private static final String[] LINES = {
-        "Era uma noite comum.",
-        "Chovia muito. Os trovões pareciam cada vez mais próximos.",
-        "Eu estava em casa quando ouvi um barulho vindo do lado de fora.",
-        "No começo, achei que fosse apenas mais um trovão.",
-        "Mas aquele som havia vindo de muito perto.",
-        "Levantei e fui até a porta.",
-        "Quando abri, tentei descobrir o que havia acontecido.",
-        "Foi quando tudo aconteceu.",
-        "Um estrondo.",
-        "Um clarão.",
-        "Não consegui nem reagir.",
-        "O raio me atingiu.",
-        "Depois disso...",
-        "...eu não me lembro de mais nada."
+        "Aquela parecia ser apenas mais uma noite de tempestade.",
+        "A chuva não dava trégua, e os trovões pareciam cada vez mais próximos.",
+        "Eu estava em casa quando ouvi um barulho estranho.",
+        "Não parecia um trovão.",
+        "Vinha de algum lugar lá fora.",
+
+        "Esperei alguns segundos, tentando entender o que havia escutado.",
+        "Então ouvi novamente.",
+        "Dessa vez, tive certeza de que vinha de perto da porta.",
+        "Não sei por que decidi investigar.",
+        "Talvez devesse ter ignorado.",
+
+        "Levantei e caminhei até a entrada.",
+        "Assim que abri a porta, uma luz intensa surgiu diante de mim.",
+        "Por um instante, tudo pareceu parar.",
+        "Não consegui me mover.",
+
+        "Não senti dor.",
+        "Não senti mais nada.",
+        "Só me lembro daquela luz...",
+        "...e da sensação de estar caindo.",
+        "Depois disso, tudo ficou escuro.",
+
+        "Quando abri os olhos novamente, já não estava em casa."
     };
+
+    private static final int DISTANT_THUNDER_LINE = 6;
+    private static final int RAIN_INTENSIFIES_LINE = 10;
+    private static final int IMPACT_AFTER_LINE = 13;
+    private static final int FINAL_REVEAL_LINE = LINES.length - 1;
 
     private final Scene scene;
 
     private final Label textLabel;
+
+    private final Rectangle flashOverlay;
 
     private final MediaPlayer rainPlayer;
 
@@ -122,9 +144,15 @@ public class PrologueController {
                 0.0
         );
 
+        // Clarão breve sobre o fundo preto, sem utilizar novas imagens.
+        flashOverlay = new Rectangle(WIDTH, HEIGHT, Color.WHITE);
+        flashOverlay.setOpacity(0.0);
+        flashOverlay.setMouseTransparent(true);
+
         StackPane root =
                 new StackPane(
-                        textLabel
+                        textLabel,
+                        flashOverlay
                 );
 
         root.setAlignment(
@@ -160,7 +188,7 @@ public class PrologueController {
         );
 
         rainPlayer.setVolume(
-                0.38
+                0.22
         );
 
         thunderSound =
@@ -202,6 +230,8 @@ public class PrologueController {
                 0.0
         );
 
+        flashOverlay.setOpacity(0.0);
+        rainPlayer.setVolume(0.22);
         rainPlayer.play();
 
         sequence =
@@ -299,20 +329,30 @@ public class PrologueController {
                     0.0
             );
 
+            if (i == FINAL_REVEAL_LINE) {
+                // Três segundos de silêncio antes da última revelação.
+                result.getChildren().add(
+                        new PauseTransition(Duration.seconds(3.0))
+                );
+            }
+
             result.getChildren().addAll(
                     prepareLine,
                     fadeIn,
                     hold,
                     fadeOut
             );
+
+            if (i == IMPACT_AFTER_LINE) {
+                result.getChildren().addAll(
+                        createImpactCue(),
+                        new PauseTransition(Duration.seconds(2.0))
+                );
+            }
         }
 
         result.getChildren().add(
-                new PauseTransition(
-                        Duration.seconds(
-                                1.0
-                        )
-                )
+                new PauseTransition(Duration.seconds(1.0))
         );
 
         result.setOnFinished(
@@ -327,26 +367,40 @@ public class PrologueController {
         return result;
     }
 
-    private void showLine(
-            int index) {
+    /** Descarga repentina, clarão rápido e corte imediato da chuva. */
+    private SequentialTransition createImpactCue() {
+        PauseTransition trigger =
+                new PauseTransition(Duration.millis(1));
 
-        textLabel.setText(
-                LINES[index]
-        );
-
-        if (index == 8) {
-
-            thunderSound.play();
-        }
-
-        if (index == 11) {
-
-            electricShockSound.play();
-        }
-
-        if (index == 12) {
-
+        trigger.setOnFinished(event -> {
             rainPlayer.stop();
+            thunderSound.stop();
+            thunderSound.play(0.95);
+            electricShockSound.play();
+            flashOverlay.setOpacity(0.90);
+        });
+
+        FadeTransition fadeFlash =
+                new FadeTransition(
+                        Duration.millis(480),
+                        flashOverlay
+                );
+        fadeFlash.setFromValue(0.90);
+        fadeFlash.setToValue(0.0);
+
+        return new SequentialTransition(trigger, fadeFlash);
+    }
+
+    private void showLine(int index) {
+        textLabel.setText(LINES[index]);
+
+        if (index == DISTANT_THUNDER_LINE) {
+            // O primeiro trovão deve soar distante.
+            thunderSound.play(0.40);
+        }
+
+        if (index == RAIN_INTENSIFIES_LINE) {
+            rainPlayer.setVolume(0.48);
         }
     }
 

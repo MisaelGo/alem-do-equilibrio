@@ -1,14 +1,13 @@
 ID;SPEAKER;TEXT
-INTRO_NEUTRAL_BORDER;Herói;Onde estou...?
-INTRO_NEUTRAL_BORDER;Herói;Que lugar é esse?
-INTRO_NEUTRAL_BORDER;Herói;Eu estava...
-INTRO_NEUTRAL_BORDER;Herói;Espera. Como eu vim parar aqui?
-INTRO_NEUTRAL_BORDER;Narração;Ele olha ao redor.
-INTRO_NEUTRAL_BORDER;Herói;Isso definitivamente não é onde eu estava antes.
-INTRO_NEUTRAL_BORDER;Narração;Ao longe, ele percebe alguém.
-INTRO_NEUTRAL_BORDER;Herói;Espera... tem alguém ali.
-INTRO_NEUTRAL_BORDER;Herói;Quem é aquela pessoa? Talvez ela saiba onde eu estou.
-INTRO_NEUTRAL_BORDER;Herói;Vou até lá perguntar.
+INTRO_NEUTRAL_BORDER;Herói;Onde... estou?
+INTRO_NEUTRAL_BORDER;Herói;Aquela luz... o que aconteceu comigo?
+INTRO_NEUTRAL_BORDER;Narração;Ele se levanta devagar e observa o lugar desconhecido.
+INTRO_NEUTRAL_BORDER;Herói;Isto não é a minha casa.
+INTRO_NEUTRAL_BORDER;Herói;Como vim parar aqui?
+INTRO_NEUTRAL_BORDER;Narração;Ao longe, ele percebe uma pessoa.
+INTRO_NEUTRAL_BORDER;Herói;Tem alguém ali.
+INTRO_NEUTRAL_BORDER;Herói;Talvez essa pessoa saiba onde estamos.
+INTRO_NEUTRAL_BORDER;Herói;Preciso descobrir o que aconteceu.
 
 HOUSE_NEUTRAL_INTERACTION;Herói;Estranho... alguma coisa está me repelindo. Essa casa deve estar carregada com o mesmo sinal que eu.
 TREE_NEUTRAL_INTERACTION;Herói;Que árvore estranha... Quanto mais tento me aproximar, mais parece que alguma coisa me empurra para longe. Deve estar carregada com o mesmo sinal que eu.
@@ -24,13 +23,17 @@ NILO_CHARGE_SIGNS;Herói;Eletéria?
 NILO_CHARGE_SIGNS;Nilo;É o nome deste mundo. Mais precisamente, estamos na Fronteira Neutra.
 NILO_CHARGE_SIGNS;Herói;Mundo...?
 NILO_CHARGE_SIGNS;Nilo;Sim. E, pela sua reação, imagino que esse nome não signifique absolutamente nada para você.
-NILO_CHARGE_SIGNS;Herói;Considerando que até alguns minutos atrás eu estava na minha casa... não.
+NILO_CHARGE_SIGNS;Herói;Até pouco tempo atrás, eu estava na minha casa. Então... não.
 NILO_CHARGE_SIGNS;Nilo;Na sua casa? Como você veio parar aqui?
-NILO_CHARGE_SIGNS;Herói;Essa é justamente a parte que eu gostaria de entender. Estava chovendo. Ouvi um barulho do lado de fora e fui olhar.
-NILO_CHARGE_SIGNS;Herói;Depois só lembro de um clarão... e de ser atingido por um raio.
-NILO_CHARGE_SIGNS;Nilo;Um raio?
-NILO_CHARGE_SIGNS;Herói;Quando acordei, estava aqui.
-NILO_CHARGE_SIGNS;Narração;Nilo fica em silêncio por alguns instantes.
+NILO_CHARGE_SIGNS;Herói;Estava chovendo muito. Ouvi um barulho estranho vindo de fora e fui investigar.
+NILO_CHARGE_SIGNS;Herói;Quando abri a porta, uma luz muito forte surgiu diante de mim.
+NILO_CHARGE_SIGNS;Nilo;Uma luz?
+NILO_CHARGE_SIGNS;Herói;Sim. Não sei explicar. Parecia uma descarga elétrica, mas havia algo estranho nela.
+NILO_CHARGE_SIGNS;Nilo;Estranho como?
+NILO_CHARGE_SIGNS;Herói;Por um instante, tive a sensação de que tudo havia parado. Depois, só me lembro da escuridão.
+NILO_CHARGE_SIGNS;Nilo;E quando despertou, estava aqui?
+NILO_CHARGE_SIGNS;Herói;Exatamente.
+NILO_CHARGE_SIGNS;Narração;Nilo permanece em silêncio por alguns instantes.
 NILO_CHARGE_SIGNS;Herói;Essa sua cara não está me deixando muito tranquilo.
 NILO_CHARGE_SIGNS;Nilo;Porque coisas estranhas vêm acontecendo em Eletéria há algum tempo.
 NILO_CHARGE_SIGNS;Herói;Que tipo de coisas?
@@ -38,7 +41,7 @@ NILO_CHARGE_SIGNS;Nilo;Descargas surgindo sem explicação. Objetos sendo atraí
 NILO_CHARGE_SIGNS;Herói;E agora eu apareço aqui do nada.
 NILO_CHARGE_SIGNS;Nilo;Exatamente.
 NILO_CHARGE_SIGNS;Herói;Você acha que existe uma ligação?
-NILO_CHARGE_SIGNS;Nilo;Não sei. Mas seria muita coincidência ignorar isso.
+NILO_CHARGE_SIGNS;Nilo;Não sei. Ainda não temos motivos para afirmar que sua chegada e as anomalias estejam ligadas.
 NILO_CHARGE_SIGNS;Herói;Então você sabe como eu volto para o meu mundo?
 NILO_CHARGE_SIGNS;Nilo;Não.
 NILO_CHARGE_SIGNS;Herói;...
@@ -49,11 +52,12 @@ NILO_CHARGE_SIGNS;Herói;Fragmento de quê?
 NILO_CHARGE_SIGNS;Nilo;Não sabemos exatamente. Sabemos apenas que ele estava ligado ao equilíbrio destas regiões.
 NILO_CHARGE_SIGNS;Herói;E depois que ele desapareceu, tudo isso começou?
 NILO_CHARGE_SIGNS;Nilo;Pouco depois.
-NILO_CHARGE_SIGNS;Herói;Então, se eu encontrar esse Fragmento, talvez descubra o que está causando as anomalias.
-NILO_CHARGE_SIGNS;Nilo;Talvez.
-NILO_CHARGE_SIGNS;Herói;E se a minha chegada tiver relação com elas, talvez eu descubra como voltar.
-NILO_CHARGE_SIGNS;Nilo;É exatamente o que estou pensando.
-NILO_CHARGE_SIGNS;Herói;Então já sei o que preciso procurar.
+NILO_CHARGE_SIGNS;Herói;Você acha que o desaparecimento desse Fragmento pode ter relação com o que aconteceu comigo?
+NILO_CHARGE_SIGNS;Nilo;Não faço ideia. Só sabemos que o equilíbrio de Eletéria começou a mudar depois que ele sumiu.
+NILO_CHARGE_SIGNS;Herói;Então procurar o Fragmento é um começo.
+NILO_CHARGE_SIGNS;Nilo;É uma pista. Não uma resposta.
+NILO_CHARGE_SIGNS;Herói;Talvez seja minha única chance de descobrir como voltar.
+NILO_CHARGE_SIGNS;Nilo;Talvez. Mas essa busca pode ser perigosa.
 NILO_CHARGE_SIGNS;Nilo;Antes de seguir, tem uma coisa que você precisa entender sobre este mundo.
 NILO_CHARGE_SIGNS;Herói;O quê?
 NILO_CHARGE_SIGNS;Nilo;Aqui, as cargas influenciam diretamente o comportamento de tudo ao seu redor.
