@@ -1,12 +1,81 @@
 ID;SPEAKER;TEXT
-NILO_CHARGE_SIGNS;Nilo;Olhe para eles, viajante. Prótons e Elétrons discutindo novamente. Aqui, todo mundo está olhando para o símbolo no peito do outro e chamando isso de culpa pela instabilidade da região.
-NILO_CHARGE_SIGNS;Herói;Eles parecem prestes a se atacar. O que significam esses símbolos de 'positivo' e 'negativo'?
-NILO_CHARGE_SIGNS;Nilo;São apenas sinais de uma propriedade física, e não julgamentos. O sinal 'positivo' não quer dizer bom, e o 'negativo' não quer dizer ruim.
-NILO_CHARGE_SIGNS;Nilo;Comece pelo que é observável: quando duas cargas têm o mesmo sinal, a interação natural tende a afastá-las. É o que chamamos de força de repulsão.
-NILO_CHARGE_SIGNS;Nilo;Por outro lado, quando os sinais são opostos, a interação tende a aproximá-las. Essa é a força de atração.
-NILO_CHARGE_SIGNS;Herói;Isso explica por que aquelas pequenas criaturas ali na frente estão se chocando violentamente ou fugindo umas das outras.
-NILO_CHARGE_SIGNS;Nilo;Exatamente. A instabilidade afeta a todos. Preste atenção aos sinais das Cargas Descontroladas que encontrar pelo caminho.
-NILO_CHARGE_SIGNS;Nilo;Reconhecer de relance quem atrai e quem repele quem será uma vantagem vital para você sobreviver em combate por aqui.
+INTRO_NEUTRAL_BORDER;Herói;Onde... estou?
+INTRO_NEUTRAL_BORDER;Herói;Aquela luz... o que aconteceu comigo?
+INTRO_NEUTRAL_BORDER;Narração;Ele se levanta devagar e observa o lugar desconhecido.
+INTRO_NEUTRAL_BORDER;Herói;Isto não é a minha casa.
+INTRO_NEUTRAL_BORDER;Herói;Como vim parar aqui?
+INTRO_NEUTRAL_BORDER;Narração;Ao longe, ele percebe uma pessoa.
+INTRO_NEUTRAL_BORDER;Herói;Tem alguém ali.
+INTRO_NEUTRAL_BORDER;Herói;Talvez essa pessoa saiba onde estamos.
+INTRO_NEUTRAL_BORDER;Herói;Preciso descobrir o que aconteceu.
+
+HOUSE_NEUTRAL_INTERACTION;Herói;Estranho... alguma coisa está me repelindo. Essa casa deve estar carregada com o mesmo sinal que eu.
+TREE_NEUTRAL_INTERACTION;Herói;Que árvore estranha... Quanto mais tento me aproximar, mais parece que alguma coisa me empurra para longe. Deve estar carregada com o mesmo sinal que eu.
+
+NEUTRAL_EXIT_NEED_NILO;Herói;Antes de seguir, eu deveria conversar com aquela pessoa que vi quando cheguei. Talvez ela saiba mais sobre este lugar.
+NEUTRAL_EXIT_NEED_ION;Herói;Aquele sujeito mais adiante parece saber bastante sobre este mundo. Melhor falar com ele antes de seguir.
+
+NILO_CHARGE_SIGNS;Herói;Ei... com licença.
+NILO_CHARGE_SIGNS;Nilo;Hm? Quem é você?
+NILO_CHARGE_SIGNS;Herói;Eu ia perguntar praticamente a mesma coisa. Você pode me dizer onde eu estou?
+NILO_CHARGE_SIGNS;Nilo;Você está em Eletéria.
+NILO_CHARGE_SIGNS;Herói;Eletéria?
+NILO_CHARGE_SIGNS;Nilo;É o nome deste mundo. Mais precisamente, estamos na Fronteira Neutra.
+NILO_CHARGE_SIGNS;Herói;Mundo...?
+NILO_CHARGE_SIGNS;Nilo;Sim. E, pela sua reação, imagino que esse nome não signifique absolutamente nada para você.
+NILO_CHARGE_SIGNS;Herói;Até pouco tempo atrás, eu estava na minha casa. Então... não.
+NILO_CHARGE_SIGNS;Nilo;Na sua casa? Como você veio parar aqui?
+NILO_CHARGE_SIGNS;Herói;Estava chovendo muito. Ouvi um barulho estranho vindo de fora e fui investigar.
+NILO_CHARGE_SIGNS;Herói;Quando abri a porta, uma luz muito forte surgiu diante de mim.
+NILO_CHARGE_SIGNS;Nilo;Uma luz?
+NILO_CHARGE_SIGNS;Herói;Sim. Não sei explicar. Parecia uma descarga elétrica, mas havia algo estranho nela.
+NILO_CHARGE_SIGNS;Nilo;Estranho como?
+NILO_CHARGE_SIGNS;Herói;Por um instante, tive a sensação de que tudo havia parado. Depois, só me lembro da escuridão.
+NILO_CHARGE_SIGNS;Nilo;E quando despertou, estava aqui?
+NILO_CHARGE_SIGNS;Herói;Exatamente.
+NILO_CHARGE_SIGNS;Narração;Nilo permanece em silêncio por alguns instantes.
+NILO_CHARGE_SIGNS;Herói;Essa sua cara não está me deixando muito tranquilo.
+NILO_CHARGE_SIGNS;Nilo;Porque coisas estranhas vêm acontecendo em Eletéria há algum tempo.
+NILO_CHARGE_SIGNS;Herói;Que tipo de coisas?
+NILO_CHARGE_SIGNS;Nilo;Descargas surgindo sem explicação. Objetos sendo atraídos ou repelidos de forma anormal. Regiões que antes eram estáveis estão mudando.
+NILO_CHARGE_SIGNS;Herói;E agora eu apareço aqui do nada.
+NILO_CHARGE_SIGNS;Nilo;Exatamente.
+NILO_CHARGE_SIGNS;Herói;Você acha que existe uma ligação?
+NILO_CHARGE_SIGNS;Nilo;Não sei. Ainda não temos motivos para afirmar que sua chegada e as anomalias estejam ligadas.
+NILO_CHARGE_SIGNS;Herói;Então você sabe como eu volto para o meu mundo?
+NILO_CHARGE_SIGNS;Nilo;Não.
+NILO_CHARGE_SIGNS;Herói;...
+NILO_CHARGE_SIGNS;Nilo;Mas talvez possamos descobrir.
+NILO_CHARGE_SIGNS;Herói;Como?
+NILO_CHARGE_SIGNS;Nilo;Pouco antes dessas anomalias começarem, um Fragmento desapareceu.
+NILO_CHARGE_SIGNS;Herói;Fragmento de quê?
+NILO_CHARGE_SIGNS;Nilo;Não sabemos exatamente. Sabemos apenas que ele estava ligado ao equilíbrio destas regiões.
+NILO_CHARGE_SIGNS;Herói;E depois que ele desapareceu, tudo isso começou?
+NILO_CHARGE_SIGNS;Nilo;Pouco depois.
+NILO_CHARGE_SIGNS;Herói;Você acha que o desaparecimento desse Fragmento pode ter relação com o que aconteceu comigo?
+NILO_CHARGE_SIGNS;Nilo;Não faço ideia. Só sabemos que o equilíbrio de Eletéria começou a mudar depois que ele sumiu.
+NILO_CHARGE_SIGNS;Herói;Então procurar o Fragmento é um começo.
+NILO_CHARGE_SIGNS;Nilo;É uma pista. Não uma resposta.
+NILO_CHARGE_SIGNS;Herói;Talvez seja minha única chance de descobrir como voltar.
+NILO_CHARGE_SIGNS;Nilo;Talvez. Mas essa busca pode ser perigosa.
+NILO_CHARGE_SIGNS;Nilo;Antes de seguir, tem uma coisa que você precisa entender sobre este mundo.
+NILO_CHARGE_SIGNS;Herói;O quê?
+NILO_CHARGE_SIGNS;Nilo;Aqui, as cargas influenciam diretamente o comportamento de tudo ao seu redor.
+NILO_CHARGE_SIGNS;Nilo;Cargas de mesmo sinal tendem a se repelir. Cargas de sinais opostos tendem a se atrair.
+NILO_CHARGE_SIGNS;Herói;Então algumas coisas vão se aproximar de mim e outras vão se afastar?
+NILO_CHARGE_SIGNS;Nilo;Exatamente. E com a instabilidade atual, isso pode se tornar perigoso.
+NILO_CHARGE_SIGNS;Nilo;Reconhecer de relance quais cargas se atraem e quais se repelem será uma vantagem importante para você sobreviver em combate por aqui.
+NILO_CHARGE_SIGNS;Herói;Entendi. Mesmo sinal repele. Sinais diferentes atraem.
+NILO_CHARGE_SIGNS;Nilo;Exatamente.
+NILO_CHARGE_SIGNS;Herói;E agora?
+NILO_CHARGE_SIGNS;Nilo;Continue pela Fronteira. O caminho adiante leva à Trilha dos Isolantes.
+NILO_CHARGE_SIGNS;Herói;Você acha que encontrarei respostas lá?
+NILO_CHARGE_SIGNS;Nilo;Acho que encontrará mais perguntas.
+NILO_CHARGE_SIGNS;Herói;Ótimo...
+NILO_CHARGE_SIGNS;Nilo;Mas cada resposta começa por alguma delas.
+
+NILO_REPEAT;Nilo;Boa sorte na sua viagem. E lembre-se: observe bem como as cargas ao seu redor se comportam.
+
 ELIA_ELECTRIZATION;Élia;Cuidado onde pisa, viajante! Essa estrutura metálica está acumulando energia de forma anormal. Se você encostar nela agora, vai tomar um choque e tanto.
 ELIA_ELECTRIZATION;Herói;Parece perigoso. Mas por que as faíscas só estão pulando pela parte de metal, e não na madeira ou na cerâmica aqui do lado?
 ELIA_ELECTRIZATION;Élia;É uma questão de material. O que se move com facilidade por estes condutores são cargas — em materiais comuns, o rearranjo costuma envolver os elétrons, que são mais livres para viajar.
@@ -16,6 +85,7 @@ ELIA_ELECTRIZATION;Élia;Não tenha tanta certeza! Nem sempre é preciso encosta
 ELIA_ELECTRIZATION;Élia;Chamamos isso de eletrização por indução. A energia anômala daquele fragmento está tão forte que afeta os metais mesmo a distância.
 ELIA_ELECTRIZATION;Élia;Use a cabeça para passar por aqui. Empurre os blocos de cerâmica isolante para bloquear os arcos elétricos e liberar a passagem.
 ELIA_ELECTRIZATION;Élia;E lembre-se disso nas próximas lutas: saber qual inimigo acumula energia como um condutor e como você pode usar isolantes a seu favor vai salvar sua pele.
+
 MARA_CROSSROADS;Mara;Atenção por onde anda, viajante. Se foram os Elétrons que te enviaram para nos investigar, saiba que não confiamos neles. Eles se movem rápido demais e escondem o que realmente causou tudo isso.
 MARA_CROSSROADS;Herói;Ninguém me enviou. Estou rastreando as anomalias, e a técnica Élia parecia estar sofrendo com as descargas tanto quanto vocês.
 MARA_CROSSROADS;Mara;Eles adoram culpar a nossa natureza pesada, o nosso núcleo positivo. Mas ignoram o princípio mais sagrado da nossa estrutura...
@@ -25,10 +95,60 @@ MARA_CROSSROADS;Mara;Exato. A soma total das cargas em um sistema isolado deve p
 MARA_CROSSROADS;Mara;Os nossos painéis registraram as anomalias exatamente nos mesmos horários que as passarelas dos Elétrons. O distúrbio afeta os dois lados de forma simultânea.
 MARA_CROSSROADS;Mara;Estou começando a separar a 'carga' da 'culpa'. Nenhuma das duas facções teria poder para violar a conservação de forma tão drástica. Há uma fonte de ruptura externa agindo aqui.
 MARA_CROSSROADS;Mara;Lembre-se da conservação nos seus combates: se um inimigo de repente perder sua carga, essa energia não sumiu. Ela certamente foi transferida para outra criatura ao lado. Adapte sua estratégia!
+
 ELIA_CROSSROADS;Élia;A Mara pode ser teimosa, mas os dados dela batem com os meus. A anomalia é externa. Explore os arredores e veja o que consegue descobrir.
-ION_INTRO_I;Íon;Saudações, viajante! Vejo que sobreviveu aos discursos afiados dos Prótons e dos Elétrons sem tomar nenhum choque mortal.
-ION_INTRO_I;Íon;Sabe, por aqui a moeda compra ferramentas comuns. Mas o entendimento... ah, o entendimento compra técnica!
-ION_INTRO_I;Íon;Se você realmente ouviu o pessoal desta região e entendeu os fenômenos locais, eu consigo te ensinar algo que vale muito mais numa luta. O que me diz de uma troca?
+
+ION_FIRST_MEETING;Íon;Ora, ora... não é todo dia que alguém aparece por aqui com essa cara de quem caiu no lugar errado.
+ION_FIRST_MEETING;Herói;Dá para perceber tão fácil assim?
+ION_FIRST_MEETING;Íon;Para quem sabe observar, sim. Você olha para tudo como se estivesse vendo este lugar pela primeira vez.
+ION_FIRST_MEETING;Herói;Talvez porque eu esteja.
+ION_FIRST_MEETING;Íon;Imaginei.
+ION_FIRST_MEETING;Herói;E você é...?
+ION_FIRST_MEETING;Íon;Íon. Comerciante, estudioso e, quando encontro alguém que merece, fornecedor de algumas técnicas bastante úteis.
+ION_FIRST_MEETING;Herói;Fornecedor de técnicas?
+ION_FIRST_MEETING;Íon;Digamos que eu gosto de recompensar quem realmente entende o que aprende.
+ION_FIRST_MEETING;Herói;E vai me ensinar alguma coisa?
+ION_FIRST_MEETING;Íon;Ainda não.
+ION_FIRST_MEETING;Herói;Ainda?
+ION_FIRST_MEETING;Íon;Continue seu caminho. Se aprender o suficiente, é bem provável que nos encontremos novamente.
+ION_FIRST_MEETING;Herói;Você fala como se já soubesse disso.
+ION_FIRST_MEETING;Íon;Eu disse que sei observar.
+
+ION_NEUTRAL_REPEAT;Íon;Continue seu caminho. Quando tiver aprendido o suficiente, nos encontraremos novamente.
+
+ION_QUIZ_I;Íon;Olha só... nos encontramos até que enfim.
+ION_QUIZ_I;Herói;Então você realmente sabia que eu chegaria até aqui.
+ION_QUIZ_I;Íon;Eu tinha um bom palpite.
+ION_QUIZ_I;Herói;E agora?
+ION_QUIZ_I;Íon;Agora você já teve tempo de aprender algumas coisas neste mundo.
+ION_QUIZ_I;Íon;E finalmente tem a chance de receber uma habilidade nova.
+ION_QUIZ_I;Herói;Finalmente?
+ION_QUIZ_I;Íon;Não entrego técnicas a qualquer um. Primeiro preciso saber se você realmente entendeu o que aprendeu.
+ION_QUIZ_I;Herói;Então é um teste.
+ION_QUIZ_I;Íon;Exatamente. Quatro perguntas.
+ION_QUIZ_I;Íon;Acerte pelo menos três e eu lhe ensino uma técnica.
+ION_QUIZ_I;Herói;E se eu errar?
+ION_QUIZ_I;Íon;Você aprende mais, volta e tenta novamente.
+ION_QUIZ_I;Herói;Certo. Pode começar.
+ION_QUIZ_I;Íon;Então vamos ver se você estava mesmo prestando atenção.
+
+ION_SUCCESS_I;Íon;Brilhante! Parece que você realmente entendeu.
+ION_SUCCESS_I;Herói;Então eu passei?
+ION_SUCCESS_I;Íon;Passou. E acordo é acordo.
+ION_SUCCESS_I;Íon;O conhecimento sobre repulsão pode ser transformado em algo muito mais interessante quando usado da maneira certa.
+ION_SUCCESS_I;Íon;Vou lhe ensinar o Pulso de Repulsão.
+ION_SUCCESS_I;Herói;Pulso de Repulsão?
+ION_SUCCESS_I;Íon;Uma técnica capaz de usar essa interação a seu favor em combate.
+ION_SUCCESS_I;Herói;Isso vai ser útil.
+ION_SUCCESS_I;Íon;Vai, se souber quando usar.
+ION_SUCCESS_I;Íon;Continue aprendendo. Se voltar até mim com novos conhecimentos, talvez eu tenha outras técnicas para lhe ensinar.
+
+ION_FAILURE_I;Íon;Hm... ainda não.
+ION_FAILURE_I;Herói;Fui tão mal assim?
+ION_FAILURE_I;Íon;Conhecer uma regra é diferente de entendê-la.
+ION_FAILURE_I;Íon;Volte quando estiver mais preparado. Eu estarei por aqui.
+ION_FAILURE_I;Herói;Certo. Vou tentar de novo.
+
 VECTOR_COULOMB;Vetor;Ah, um viajante! Venha ver isso, os padrões são fascinantes. As medições de interação entre estes marcos estão totalmente inconsistentes com uma sabotagem comum.
 VECTOR_COULOMB;Herói;Eles reagem de forma violenta de perto, mas se acalmam logo que a distância aumenta um pouco. Por que isso acontece?
 VECTOR_COULOMB;Vetor;Exatamente essa é a chave! Dobrar a distância entre duas cargas não reduz a força apenas pela metade. A dependência é muito mais forte.
@@ -38,6 +158,7 @@ VECTOR_COULOMB;Vetor;A intensidade da força elétrica que ele exerce sobre voc�
 VECTOR_COULOMB;Herói;Faz sentido. Mas o que acontece se eu for cercado por várias daquelas Cargas Descontroladas ao mesmo tempo?
 VECTOR_COULOMB;Vetor;Nesse caso, a força total sobre você será a soma vetorial de cada contribuição individual. Chamamos isso de princípio de superposição.
 VECTOR_COULOMB;Vetor;Aplique essa lógica nos seus combates neste vale: um passo para trás pode enfraquecer o golpe inimigo drasticamente. E jamais fique no ponto onde múltiplas forças se somam contra você!
+
 VECTOR_FIELD;Vetor;Viajante, olhe para o chão e para o ar! Veja como essas correntes de partículas não estão se movendo ao acaso. Elas desenham um mapa invisível em toda a região.
 VECTOR_FIELD;Herói;É como se houvesse uma 'correnteza' invisível puxando e empurrando a energia por caminhos específicos. O que é isso?
 VECTOR_FIELD;Vetor;Isso é o que chamamos de campo elétrico. Em cada ponto do espaço, ele indica que força, e em qual direção, uma carga de teste positiva sentiria se fosse colocada ali.
@@ -48,9 +169,11 @@ VECTOR_FIELD;Vetor;E se houver várias cargas no planalto, o campo elétrico em 
 VECTOR_FIELD;Herói;Então as linhas que convergem para aquelas ruínas ao longe... estão sendo causadas pela grande instabilidade?
 VECTOR_FIELD;Vetor;Exatamente. O epicentro do distúrbio está lá. Mas tenha cuidado redobrado nos seus próximos combates. Leia as setas e linhas de campo no chão da arena.
 VECTOR_FIELD;Vetor;Se você souber ler a direção do campo antes de agir, poderá prever o movimento da energia e ganhar a vantagem tática antes mesmo do golpe do inimigo!
+
 ION_INTRO_II;Íon;Ora, ora, o nosso viajante continua de pé! E vejo que já está a observar as correntes invisíveis que cruzam este planalto.
 ION_INTRO_II;Íon;Como já lhe disse, o conhecimento vale mais do que a moeda. Mostre-me que compreendeu a força invisível que rege as distâncias e as direções por aqui.
 ION_INTRO_II;Íon;Está pronto para uma nova troca? Tenho uma técnica de combate que se adequa perfeitamente a quem sabe ler o campo de batalha.
+
 SERA_POTENTIAL;Sera;Aproxime-se com reverência, viajante. Observe os anéis de luz gravados no piso deste santuário. Eles não são meros enfeites, mas a própria malha da estabilidade.
 SERA_POTENTIAL;Herói;Eles formam círculos perfeitos aqui nas bordas, mas estão completamente rompidos e distorcidos ali na frente. O que essas curvas representam?
 SERA_POTENTIAL;Sera;As setas do campo elétrico que você viu lá fora contam uma história de direção. O potencial elétrico, no entanto, conta outra: ele é uma grandeza escalar, um puro valor de energia sem direção própria.
@@ -59,8 +182,10 @@ SERA_POTENTIAL;Herói;Isso significa que, se eu caminhar exatamente por cima de 
 SERA_POTENTIAL;Sera;O seu potencial não muda. Caminhar ao longo de uma mesma equipotencial não exige esforço do campo, o que é muito diferente de atravessar bruscamente de uma para outra.
 SERA_POTENTIAL;Sera;Infelizmente, a distorção no centro das ruínas está rasgando esse equilíbrio. O Guardião da Ruptura aguarda logo adiante, envolto no caos.
 SERA_POTENTIAL;Sera;Lembre-se disto quando for enfrentá-lo: nem toda defesa precisa de força física. Criar um escudo que estabilize a diferença de potencial ao seu redor pode neutralizar ataques fatais.
+
 ION_INTRO_III;Íon;Chegamos ao coração da instabilidade, viajante. A tensão no ar é quase palpável. Você conversou com a Sera e viu as antigas marcas de estabilidade no chão do santuário?
 ION_INTRO_III;Íon;Antes de você mergulhar de cabeça nessa ruptura, vamos fazer nossa última troca. Se dominar as leis do potencial, tenho algo que vai garantir que você não seja despedaçado lá dentro.
+
 POST_BOSS_ENDING;Herói;Acabou. A criatura corrompida cedeu. A instabilidade estava sendo gerada por este fragmento central o tempo todo.
 POST_BOSS_ENDING;Élia;Minhas ferramentas confirmam. As descargas e o campo anômalo desapareceram. A perturbação emanava diretamente daqui, afetando os nossos condutores e as estruturas de vocês com a mesma intensidade.
 POST_BOSS_ENDING;Mara;Então... os registros batiam porque fomos todos atingidos pela mesma fonte externa. A culpa pela corrupção da região não foi dos Elétrons.

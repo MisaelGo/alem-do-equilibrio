@@ -25,8 +25,65 @@ public class ZoneManager {
     public static final double WORLD_HEIGHT =
             1800;
 
+    public static final double NEUTRAL_BORDER_WIDTH =
+            1600;
+
+    public static final double NEUTRAL_BORDER_HEIGHT =
+            960;
+
     private static final double TILE_SIZE =
             40;
+
+    static final double NEUTRAL_HOUSE_X =
+            450;
+
+    static final double NEUTRAL_HOUSE_Y =
+            420;
+
+    static final double NEUTRAL_HOUSE_WIDTH =
+            280;
+
+    static final double NEUTRAL_HOUSE_HEIGHT =
+            280;
+
+    private static final String NEUTRAL_HOUSE_IMAGE =
+            "/images/house.png";
+
+    static final double NEUTRAL_TREE_X =
+            1250;
+
+    static final double NEUTRAL_TREE_Y =
+            150;
+
+    static final double NEUTRAL_TREE_WIDTH =
+            240;
+
+    static final double NEUTRAL_TREE_HEIGHT =
+            240;
+
+    private static final String NEUTRAL_TREE_IMAGE =
+            "/images/tree.png";
+
+    private static final String NEUTRAL_BUSH_IMAGE =
+            "/images/arbusto.png";
+
+    static final double NEUTRAL_BUSH_WIDTH =
+            80;
+
+    static final double NEUTRAL_BUSH_HEIGHT =
+            120;
+
+    static final double NEUTRAL_BUSH_1_X =
+            210;
+
+    static final double NEUTRAL_BUSH_1_Y =
+            170;
+
+    static final double NEUTRAL_BUSH_2_X =
+            900;
+
+    static final double NEUTRAL_BUSH_2_Y =
+            350;
 
     private final Pane worldLayer;
 
@@ -39,6 +96,10 @@ public class ZoneManager {
             interactables;
 
     private ExplorationZone currentZone;
+
+    private double currentWorldWidth;
+
+    private double currentWorldHeight;
 
     private Rectangle exitArea;
 
@@ -63,6 +124,12 @@ public class ZoneManager {
 
         this.interactables =
                 new ArrayList<>();
+
+        currentWorldWidth =
+                WORLD_WIDTH;
+
+        currentWorldHeight =
+                WORLD_HEIGHT;
     }
 
     public void loadZone(
@@ -86,17 +153,27 @@ public class ZoneManager {
                 .getChildren()
                 .clear();
 
+        currentWorldWidth =
+                zone == ExplorationZone.NEUTRAL_BORDER
+                        ? NEUTRAL_BORDER_WIDTH
+                        : WORLD_WIDTH;
+
+        currentWorldHeight =
+                zone == ExplorationZone.NEUTRAL_BORDER
+                        ? NEUTRAL_BORDER_HEIGHT
+                        : WORLD_HEIGHT;
+
         worldLayer.setPrefSize(
-                WORLD_WIDTH,
-                WORLD_HEIGHT
+                currentWorldWidth,
+                currentWorldHeight
         );
 
         TileMapRenderer.renderZone(
                 worldLayer,
                 zone,
                 resourceManager,
-                WORLD_WIDTH,
-                WORLD_HEIGHT,
+                currentWorldWidth,
+                currentWorldHeight,
                 TILE_SIZE
         );
 
@@ -124,20 +201,6 @@ public class ZoneManager {
                 buildFragmentChamber();
         }
 
-        if (zone != ExplorationZone.FRAGMENT_CHAMBER) {
-            addNpc(
-                    new Merchant(
-                            "Íon",
-                            1250,
-                            1650,
-                            40,
-                            50,
-                            "",
-                            questionBank
-                    ),
-                    Color.GOLDENROD
-            );
-        }
     }
 
     private void buildNeutralBorder() {
@@ -146,11 +209,25 @@ public class ZoneManager {
                 "FRONTEIRA NEUTRA"
         );
 
+        addNeutralHouse();
+
+        addNeutralTree();
+
+        addNeutralBush(
+                NEUTRAL_BUSH_1_X,
+                NEUTRAL_BUSH_1_Y
+        );
+
+        addNeutralBush(
+                NEUTRAL_BUSH_2_X,
+                NEUTRAL_BUSH_2_Y
+        );
+
         NPC nilo =
                 new NPC(
                         "Nilo",
-                        600,
-                        1650,
+                        400,
+                        824,
                         40,
                         50,
                         KnowledgeTopic
@@ -163,18 +240,37 @@ public class ZoneManager {
                 Color.GOLD
         );
 
-        addDecoration(
+        NPC ion =
+                new NPC(
+                        "Íon",
+                        1024,
+                        720,
+                        40,
+                        50,
+                        "ION_FIRST_MEETING"
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
+        );
+
+        /*addDecoration(
                 "Entrada da Fronteira",
                 350,
                 1650
-        );
+        );*/
 
+        /*
+         * Gatilho invisível de transição.
+         * Cobre toda a abertura de quatro tiles na borda leste.
+         */
         createExitArea(
                 "Trilha dos Isolantes",
-                3000,
-                1450,
-                140,
-                300
+                1595,
+                600,
+                5,
+                160
         );
     }
 
@@ -250,6 +346,32 @@ public class ZoneManager {
         addNpc(
                 elia,
                 Color.LIGHTBLUE
+        );
+
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_QUIZ_I",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS,
+                        AbilityRegistry
+                                .REPULSION_PULSE_ID,
+                        "ION_SUCCESS_I",
+                        "ION_FAILURE_I",
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS,
+                        KnowledgeTopic
+                                .KNOW_ELECTRIZATION
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
         );
 
         createExitArea(
@@ -359,6 +481,32 @@ public class ZoneManager {
                 Color.LIGHTGREEN
         );
 
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_INTRO_II",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_FIELD,
+                        AbilityRegistry
+                                .FIELD_IMPULSE_ID,
+                        "",
+                        "",
+                        KnowledgeTopic
+                                .KNOW_COULOMB,
+                        KnowledgeTopic
+                                .KNOW_FIELD
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
+        );
+
         /*
          * A direção é indicada pela própria
          * geometria das setas e pelo símbolo E,
@@ -425,6 +573,30 @@ public class ZoneManager {
         addNpc(
                 sera,
                 Color.PLUM
+        );
+
+        Merchant ion =
+                new Merchant(
+                        "Íon",
+                        1250,
+                        1650,
+                        40,
+                        50,
+                        "ION_INTRO_III",
+                        questionBank,
+                        KnowledgeTopic
+                                .KNOW_POTENTIAL,
+                        AbilityRegistry
+                                .EQUIPOTENTIAL_SHIELD_ID,
+                        "",
+                        "",
+                        KnowledgeTopic
+                                .KNOW_POTENTIAL
+                );
+
+        addNpc(
+                ion,
+                Color.GOLDENROD
         );
 
         addEquipotentialRing(
@@ -509,12 +681,158 @@ public class ZoneManager {
 
         title.relocate(
                 80,
-                1200
+                currentZone == ExplorationZone.NEUTRAL_BORDER
+                        ? 400
+                        : 1200
         );
 
         worldLayer
                 .getChildren()
                 .add(title);
+    }
+
+    private void addNeutralHouse() {
+
+        Image houseImage =
+                resourceManager.getImage(
+                        NEUTRAL_HOUSE_IMAGE
+                );
+
+        ImageView houseView =
+                new ImageView(
+                        houseImage
+                );
+
+        houseView.setFitWidth(
+                NEUTRAL_HOUSE_WIDTH
+        );
+
+        houseView.setFitHeight(
+                NEUTRAL_HOUSE_HEIGHT
+        );
+
+        houseView.setPreserveRatio(
+                true
+        );
+
+        houseView.setSmooth(
+                false
+        );
+
+        houseView.relocate(
+                NEUTRAL_HOUSE_X,
+                NEUTRAL_HOUSE_Y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        houseView
+                );
+
+        interactables.add(
+                new SceneryInteractable(
+                        "a casa",
+                        "HOUSE_NEUTRAL_INTERACTION",
+                        NEUTRAL_HOUSE_X,
+                        NEUTRAL_HOUSE_Y,
+                        NEUTRAL_HOUSE_WIDTH,
+                        NEUTRAL_HOUSE_HEIGHT
+                )
+        );
+    }
+
+    private void addNeutralTree() {
+
+        Image treeImage =
+                resourceManager.getImage(
+                        NEUTRAL_TREE_IMAGE
+                );
+
+        ImageView treeView =
+                new ImageView(
+                        treeImage
+                );
+
+        treeView.setFitWidth(
+                NEUTRAL_TREE_WIDTH
+        );
+
+        treeView.setFitHeight(
+                NEUTRAL_TREE_HEIGHT
+        );
+
+        treeView.setPreserveRatio(
+                true
+        );
+
+        treeView.setSmooth(
+                false
+        );
+
+        treeView.relocate(
+                NEUTRAL_TREE_X,
+                NEUTRAL_TREE_Y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        treeView
+                );
+
+        interactables.add(
+                new SceneryInteractable(
+                        "a árvore",
+                        "TREE_NEUTRAL_INTERACTION",
+                        NEUTRAL_TREE_X,
+                        NEUTRAL_TREE_Y,
+                        NEUTRAL_TREE_WIDTH,
+                        NEUTRAL_TREE_HEIGHT
+                )
+        );
+    }
+
+    private void addNeutralBush(
+            double x,
+            double y) {
+
+        Image bushImage =
+                resourceManager.getImage(
+                        NEUTRAL_BUSH_IMAGE
+                );
+
+        ImageView bushView =
+                new ImageView(
+                        bushImage
+                );
+
+        bushView.setFitWidth(
+                NEUTRAL_BUSH_WIDTH
+        );
+
+        bushView.setFitHeight(
+                NEUTRAL_BUSH_HEIGHT
+        );
+
+        bushView.setPreserveRatio(
+                true
+        );
+
+        bushView.setSmooth(
+                false
+        );
+
+        bushView.relocate(
+                x,
+                y
+        );
+
+        worldLayer
+                .getChildren()
+                .add(
+                        bushView
+                );
     }
 
     private void addNpc(
@@ -552,21 +870,58 @@ public class ZoneManager {
             visualNode = body;
         }
 
-        Label name =
-                new Label(
-                        npc.getName()
-                );
+        if (shouldShowNpcName(
+                npc.getName()
+        )) {
 
-        name.relocate(
-                npc.getX(),
-                npc.getY() - 25
-        );
+            Label name =
+                    new Label(
+                            npc.getName()
+                    );
+
+            name.relocate(
+                    npc.getX(),
+                    npc.getY() - 25
+            );
+
+            worldLayer
+                    .getChildren()
+                    .addAll(
+                            visualNode,
+                            name
+                    );
+
+            return;
+        }
 
         worldLayer
                 .getChildren()
-                .addAll(
-                        visualNode,
-                        name
+                .add(
+                        visualNode
+                );
+    }
+
+    private boolean shouldShowNpcName(
+            String name) {
+
+        if (name == null) {
+
+            return true;
+        }
+
+        String normalized =
+                name
+                        .trim()
+                        .toLowerCase();
+
+        return !normalized.equals(
+                "nilo"
+        )
+                && !normalized.equals(
+                        "íon"
+                )
+                && !normalized.equals(
+                        "ion"
                 );
     }
 
@@ -865,12 +1220,7 @@ public class ZoneManager {
                 );
 
         exitArea.setFill(
-                Color.rgb(
-                        80,
-                        200,
-                        120,
-                        0.35
-                )
+                Color.TRANSPARENT
         );
 
         Label exitLabel =
@@ -882,6 +1232,19 @@ public class ZoneManager {
                 x - 40,
                 y - 35
         );
+
+        if (currentZone
+                == ExplorationZone
+                        .NEUTRAL_BORDER) {
+
+            worldLayer
+                    .getChildren()
+                    .add(
+                            exitArea
+                    );
+
+            return;
+        }
 
         worldLayer
                 .getChildren()
@@ -960,6 +1323,16 @@ public class ZoneManager {
     public ExplorationZone getCurrentZone() {
 
         return currentZone;
+    }
+
+    public double getCurrentWorldWidth() {
+
+        return currentWorldWidth;
+    }
+
+    public double getCurrentWorldHeight() {
+
+        return currentWorldHeight;
     }
 
     public List<Interactable>

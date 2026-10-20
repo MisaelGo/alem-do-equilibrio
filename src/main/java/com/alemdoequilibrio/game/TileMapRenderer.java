@@ -136,8 +136,8 @@ public final class TileMapRenderer {
      *
      * @param root contêiner do mundo onde o mapa é inserido
      * @param resourceManager gerenciador central para cache de imagens
-     * @param width largura total do mundo em pixels (3200px)
-     * @param height altura total do mundo em pixels (1800px)
+     * @param width largura total do mundo em pixels
+     * @param height altura total do mundo em pixels
      * @param tileSize tamanho de cada tile (40px)
      */
     public static void renderNeutralBorder(
@@ -169,20 +169,32 @@ public final class TileMapRenderer {
                 double x = col * tileSize;
                 double y = row * tileSize;
 
-                // 1. Paredes e montanhas rochosas de limite do cenário
-                boolean isNorthWall = row <= 2;
-                boolean isSouthWall = row >= rows - 2;
-                boolean isWestWall = col == 0;
-                // Deixa uma passagem na borda leste exatamente onde fica a área de saída (y: 1450..1750)
-                boolean isEastWall = (col >= columns - 2) && (row < 35 || row > 42);
+                /*
+                 * Calcula primeiro se o tile faz parte da estrada.
+                 * A borda leste usa essa informação para deixar
+                 * aberta somente a passagem exata do caminho.
+                 */
+                boolean isPath =
+                        isNeutralBorderPathTile(
+                                col,
+                                row,
+                                columns,
+                                rows
+                        );
 
-                if (isNorthWall || isSouthWall || isWestWall || isEastWall) {
+                // 1. Paredes e montanhas rochosas de limite do cenário
+                if (isNeutralBorderWallTile(
+                        col,
+                        row,
+                        columns,
+                        rows
+                )) {
                     gc.drawImage(rockImg, x, y, tileSize, tileSize);
                     continue;
                 }
 
-                // 2. Trilha que guia o jogador desde o início até a saída
-                if (isPathTile(col, row)) {
+                // 2. Trilha original, comprimida para o novo tamanho do mapa
+                if (isPath) {
                     gc.drawImage(pathImg, x, y, tileSize, tileSize);
                     continue;
                 }
@@ -202,7 +214,7 @@ public final class TileMapRenderer {
      */
     private static boolean isZonePathTile(ExplorationZone zone, int col, int row) {
         return switch (zone) {
-            case NEUTRAL_BORDER -> isPathTile(col, row);
+            case NEUTRAL_BORDER -> false;
 
             case INSULATOR_TRAIL ->
                 // Trilha de cerâmica vítrea sinuosa conduzindo até o leste
@@ -247,25 +259,128 @@ public final class TileMapRenderer {
     }
 
     /**
-     * Define o traçado da trilha de terra batida da Fronteira Neutra.
+     * Define se o tile pertence às paredes da Fronteira Neutra.
+     *
+     * A borda superior possui duas fileiras, a inferior duas,
+     * a esquerda uma coluna e a direita uma coluna. Na borda
+     * direita, os tiles da estrada permanecem livres.
      */
-    private static boolean isPathTile(int col, int row) {
-        // Início (spawn do herói e placa): col 2 a 18 na altura das linhas 40 a 42
-        if (row >= 40 && row <= 42 && col >= 2 && col <= 18) {
+    static boolean isNeutralBorderWallTile(
+            int col,
+            int row,
+            int columns,
+            int rows) {
+
+        boolean isPath =
+                isNeutralBorderPathTile(
+                        col,
+                        row,
+                        columns,
+                        rows
+                );
+
+        boolean isNorthWall =
+                row <= 1;
+
+        boolean isSouthWall =
+                row >= rows - 2;
+
+        boolean isWestWall =
+                col == 0;
+
+        boolean isEastWall =
+                col == columns - 1
+                && !isPath;
+
+        return isNorthWall
+                || isSouthWall
+                || isWestWall
+                || isEastWall;
+    }
+
+    /**
+     * Define o traçado da trilha de terra batida da Fronteira Neutra.
+     *
+     * O desenho preserva a sequência visual do mapa anterior:
+     * começa junto à borda inferior, sobe suavemente depois do Nilo
+     * e termina alinhado à abertura leste.
+     */
+    static boolean isNeutralBorderPathTile(
+            int col,
+            int row,
+            int columns,
+            int rows) {
+
+        int startCenterRow =
+                rows - 4;
+
+        int firstSectionEnd =
+                Math.max(
+                        12,
+                        (int) Math.round(
+                                columns * 0.26
+                        )
+                );
+
+        int middleSectionEnd =
+                Math.max(
+                        firstSectionEnd + 1,
+                        (int) Math.round(
+                                columns * 0.64
+                        )
+                );
+
+        int lastPathColumn =
+                columns - 1;
+
+        /*
+         * Trecho inicial:
+         * faixa horizontal próxima ao ponto de chegada.
+         */
+        if (col >= 2
+                && col <= firstSectionEnd
+                && row >= startCenterRow - 1
+                && row <= startCenterRow + 1) {
+
             return true;
         }
 
-        // Passa pelo Nilo (col 15..25) e começa a subir suavemente
-        if (col > 18 && col <= 45) {
-            int targetRow = 41 - (int) ((col - 18) * 0.12);
-            if (row >= targetRow - 1 && row <= targetRow + 1) {
-                return true;
-            }
+        /*
+         * Trecho central:
+         * mantém a subida suave da estrada original.
+         */
+        if (col > firstSectionEnd
+                && col <= middleSectionEnd) {
+
+            double progress =
+                    (col - firstSectionEnd)
+                    / (double) (
+                            middleSectionEnd
+                            - firstSectionEnd
+                    );
+
+            int targetRow =
+                    (int) Math.round(
+                            startCenterRow
+                            - 4 * progress
+                    );
+
+            return row >= targetRow - 1
+                    && row <= targetRow + 1;
         }
 
-        // Continua em direção à saída no extremo leste da fase (col 46 a 76 nas linhas 37 a 39)
-        if (col > 45 && col <= 76 && row >= 36 && row <= 39) {
-            return true;
+        /*
+         * Trecho final:
+         * atravessa a passagem da parede leste até o fim do mapa.
+         */
+        if (col > middleSectionEnd
+                && col <= lastPathColumn) {
+
+            int finalCenterRow =
+                    rows - 8;
+
+            return row >= finalCenterRow - 1
+                    && row <= finalCenterRow + 2;
         }
 
         return false;

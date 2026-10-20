@@ -9,6 +9,7 @@ package com.alemdoequilibrio.core;
  */
 public enum GameState {
     MENU,
+    PROLOGUE,
     EXPLORATION,
     DIALOGUE,
     BATTLE,

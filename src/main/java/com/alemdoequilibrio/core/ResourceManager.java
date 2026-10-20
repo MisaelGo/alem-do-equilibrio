@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javafx.scene.image.Image;
 import javafx.scene.media.AudioClip;
+import javafx.scene.media.Media;
 
 /**
  * Centraliza o carregamento de recursos do jogo.
@@ -39,6 +40,12 @@ public class ResourceManager {
     private final Map<String, AudioClip> audioCache;
 
     /*
+     * Cache das trilhas longas carregadas como Media.
+     * O MediaPlayer continua sendo controlado pelo sistema que toca a música.
+     */
+    private final Map<String, Media> mediaCache;
+
+    /*
      * Cache das URLs externas resolvidas para folhas de estilo CSS.
      *
      * Scene/Parent do JavaFX esperam uma String de URL (não um
@@ -57,6 +64,7 @@ public class ResourceManager {
     public ResourceManager() {
         this.imageCache = new HashMap<>();
         this.audioCache = new HashMap<>();
+        this.mediaCache = new HashMap<>();
         this.stylesheetCache = new HashMap<>();
     }
 
@@ -107,6 +115,35 @@ public class ResourceManager {
         audioCache.put(path, clip);
 
         return clip;
+    }
+
+    /**
+     * Retorna uma trilha longa carregada e cacheada.
+     *
+     * O MediaPlayer deve ser criado e controlado por quem define
+     * quando a trilha começa, para, ou entra em loop.
+     *
+     * @param path caminho do áudio dentro de resources
+     * @return mídia carregada e cacheada
+     */
+    public Media getMedia(String path) {
+
+        if (mediaCache.containsKey(path)) {
+            return mediaCache.get(path);
+        }
+
+        Media media =
+                new Media(
+                        resolveUrl(path)
+                                .toExternalForm()
+                );
+
+        mediaCache.put(
+                path,
+                media
+        );
+
+        return media;
     }
 
     /**

@@ -1,24 +1,38 @@
 package com.alemdoequilibrio.game;
 
-import javax.swing.JOptionPane;
-
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
- * Classe concreta que representa
- * o comerciante Íon no mundo do jogo.
+ * Representa o comerciante Íon.
  *
- * POO 7.3 - Subtipagem:
- * Merchant especializa NPC e implementa QuizProvider.
+ * O Merchant mantém as regras do quiz e da recompensa,
+ * enquanto a apresentação visual fica no QuizController.
  */
 public class Merchant extends NPC
         implements QuizProvider {
 
-    /*
-     * POO 5 - Associacao / Agregacao.
-     */
-    private QuestionBank questionBank;
+    private static final int
+            MIN_CORRECT_ANSWERS = 3;
+
+    private final QuestionBank
+            questionBank;
+
+    private final KnowledgeTopic
+            quizTopic;
+
+    private final String
+            rewardAbilityId;
+
+    private final String
+            successDialogueId;
+
+    private final String
+            failureDialogueId;
+
+    private final KnowledgeTopic[]
+            requiredTopics;
 
     public Merchant(
             String name,
@@ -27,7 +41,12 @@ public class Merchant extends NPC
             double width,
             double height,
             String dialogueId,
-            QuestionBank questionBank) {
+            QuestionBank questionBank,
+            KnowledgeTopic quizTopic,
+            String rewardAbilityId,
+            String successDialogueId,
+            String failureDialogueId,
+            KnowledgeTopic... requiredTopics) {
 
         super(
                 name,
@@ -39,267 +58,207 @@ public class Merchant extends NPC
         );
 
         this.questionBank =
-                questionBank;
+                Objects.requireNonNull(
+                        questionBank
+                );
+
+        this.quizTopic =
+                Objects.requireNonNull(
+                        quizTopic
+                );
+
+        if (rewardAbilityId == null
+                || rewardAbilityId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "O ID da recompensa não pode ser vazio."
+            );
+        }
+
+        this.rewardAbilityId =
+                rewardAbilityId;
+
+        this.successDialogueId =
+                successDialogueId;
+
+        this.failureDialogueId =
+                failureDialogueId;
+
+        if (requiredTopics == null
+                || requiredTopics.length == 0) {
+
+            this.requiredTopics =
+                    new KnowledgeTopic[] {
+                        quizTopic
+                    };
+
+        } else {
+
+            this.requiredTopics =
+                    Arrays.copyOf(
+                            requiredTopics,
+                            requiredTopics.length
+                    );
+        }
     }
 
     @Override
-    public void startQuiz(
-            Hero hero,
-            ChapterProgress progress,
-            Set<String> unlockedAbilities) {
+    public boolean canStartQuiz(
+            ChapterProgress progress) {
 
-        KnowledgeTopic currentTopic =
-                determineAvailableQuizTopic(
-                        progress,
-                        unlockedAbilities
-                );
-
-        if (currentTopic == null) {
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Íon: Volte quando tiver "
-                    + "explorado as ruínas "
-                    + "e aprendido algo novo.",
-                    "Íon, o Comerciante",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-
-            return;
-        }
-
-        ArrayList<PhysicsQuestion>
-                quizQuestions =
-                questionBank
-                        .getQuestionsForQuiz(
-                                currentTopic,
-                                4
-                        );
-
-        if (quizQuestions.size()
-                < 4) {
-
-            System.err.println(
-                    "Erro: Questoes insuficientes "
-                    + "para a prova de "
-                    + currentTopic.name()
-            );
-
-            return;
-        }
-
-        int correctAnswers = 0;
-
-        JOptionPane.showMessageDialog(
-                null,
-                "Íon: Muito bem! Vamos ver "
-                + "se o que você aprendeu "
-                + "se sustenta na prática.",
-                "Prova de Física",
-                JOptionPane.INFORMATION_MESSAGE
+        Objects.requireNonNull(
+                progress
         );
 
-        for (PhysicsQuestion question
-                : quizQuestions) {
+        if (progress.hasCompletedQuiz(
+                quizTopic
+        )) {
 
-            int choice =
-                    JOptionPane.showOptionDialog(
-                            null,
-                            question.getPrompt(),
-                            "Teste: "
-                            + question
-                                    .getTopic()
-                                    .name(),
-                            JOptionPane.DEFAULT_OPTION,
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            question.getOptions(),
-                            question.getOptions()[0]
-                    );
+            return false;
+        }
 
-            if (choice
-                    == JOptionPane.CLOSED_OPTION) {
+        for (KnowledgeTopic topic
+                : requiredTopics) {
 
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Íon: Evitando a pergunta? "
-                        + "A física não espera "
-                        + "por ninguém.",
-                        "Aviso",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            if (!progress.hasLearned(
+                    topic
+            )) {
 
-                return;
-            }
-
-            String feedback =
-                    question
-                            .getFeedbackForOption(
-                                    choice
-                            );
-
-            if (question
-                    .isCorrect(choice)) {
-
-                correctAnswers++;
-
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Correto!\n\n"
-                        + feedback,
-                        "Íon - Resultado",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-
-            } else {
-
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Incorreto.\n\n"
-                        + feedback,
-                        "Íon - Resultado",
-                        JOptionPane.ERROR_MESSAGE
-                );
+                return false;
             }
         }
 
-        deliverReward(
-                hero,
-                progress,
-                unlockedAbilities,
-                currentTopic,
-                correctAnswers
-        );
+        return true;
     }
 
-    private KnowledgeTopic
-            determineAvailableQuizTopic(
-                    ChapterProgress progress,
-                    Set<String> unlockedAbilities) {
+    @Override
+    public List<PhysicsQuestion> startQuiz(
+            ChapterProgress progress,
+            int amount) {
 
-        if (progress.hasLearned(
-                    KnowledgeTopic.KNOW_POTENTIAL
-                )
-                && !progress.hasCompletedQuiz(
-                        KnowledgeTopic.KNOW_POTENTIAL
-                )
-                && !unlockedAbilities.contains(
-                        "Escudo Equipotencial"
-                )) {
+        if (!canStartQuiz(
+                progress
+        )) {
 
-            return KnowledgeTopic
-                    .KNOW_POTENTIAL;
+            return List.of();
         }
 
-        if (progress.hasLearned(
-                    KnowledgeTopic.KNOW_FIELD
-                )
-                && !progress.hasCompletedQuiz(
-                        KnowledgeTopic.KNOW_FIELD
-                )
-                && !unlockedAbilities.contains(
-                        "Impulso de Campo"
-                )) {
+        if (amount <= 0) {
 
-            return KnowledgeTopic
-                    .KNOW_FIELD;
+            throw new IllegalArgumentException(
+                    "A quantidade de questões deve ser positiva."
+            );
         }
 
-        if (progress.hasLearned(
-                    KnowledgeTopic
-                            .KNOW_CHARGE_SIGNS
-                )
-                && !progress.hasCompletedQuiz(
-                        KnowledgeTopic
-                                .KNOW_CHARGE_SIGNS
-                )
-                && !unlockedAbilities.contains(
-                        "Pulso de Repulsão"
-                )) {
-
-            return KnowledgeTopic
-                    .KNOW_CHARGE_SIGNS;
-        }
-
-        return null;
+        return questionBank
+                .getQuestionsForQuiz(
+                        quizTopic,
+                        amount
+                );
     }
 
-    private void deliverReward(
+    /**
+     * Finaliza uma tentativa.
+     *
+     * @return true quando o jogador atingiu a nota mínima
+     * e recebeu a habilidade.
+     */
+    public boolean completeQuiz(
             Hero hero,
             ChapterProgress progress,
-            Set<String> unlockedAbilities,
-            KnowledgeTopic topic,
             int correctAnswers) {
 
-        if (correctAnswers >= 3) {
+        Objects.requireNonNull(
+                hero
+        );
 
-            String rewardMsg =
-                    "Brilhante! O seu entendimento "
-                    + "compra esta técnica:\n";
+        Objects.requireNonNull(
+                progress
+        );
 
-            /*
-             * C1-043:
-             * a recompensa vem do registro
-             * de habilidades do jogo.
-             */
-            Ability reward =
-                    AbilityRegistry.get(
-                            getRewardId(topic)
-                    );
+        if (correctAnswers
+                < MIN_CORRECT_ANSWERS) {
 
-            boolean equipNow =
-                    hero.getAbilityBook()
-                            .getEquippedAbility()
-                    == null;
+            return false;
+        }
 
-            if (equipNow) {
+        if (progress.hasCompletedQuiz(
+                quizTopic
+        )) {
 
-                hero.learnAbility(
-                        reward,
-                        true
+            return true;
+        }
+
+        Ability reward =
+                AbilityRegistry.get(
+                        rewardAbilityId
                 );
 
-            } else {
+        boolean equipNow =
+                hero.getAbilityBook()
+                        .getEquippedAbility()
+                == null;
 
-                hero.learnAbility(
-                        reward
-                );
-            }
+        if (equipNow) {
 
-            unlockedAbilities.add(
-                    reward.getName()
-            );
-
-            progress.completeQuiz(
-                    topic
-            );
-
-            rewardMsg +=
-                    "-> Nova Habilidade Adquirida: "
-                    + reward.getName()
-                    + "!";
-
-            JOptionPane.showMessageDialog(
-                    null,
-                    rewardMsg,
-                    "Sucesso",
-                    JOptionPane.INFORMATION_MESSAGE
+            hero.learnAbility(
+                    reward,
+                    true
             );
 
         } else {
 
-            JOptionPane.showMessageDialog(
-                    null,
-                    "Íon: Você acertou "
-                    + correctAnswers
-                    + " de 4.\n"
-                    + "As faíscas ainda confundem "
-                    + "a sua mente. "
-                    + "Tente novamente mais tarde.",
-                    "Falha",
-                    JOptionPane.ERROR_MESSAGE
+            hero.learnAbility(
+                    reward
             );
         }
+
+        progress.completeQuiz(
+                quizTopic
+        );
+
+        return true;
+    }
+
+    public boolean isQuizCompleted(
+            ChapterProgress progress) {
+
+        Objects.requireNonNull(
+                progress
+        );
+
+        return progress.hasCompletedQuiz(
+                quizTopic
+        );
+    }
+
+    public KnowledgeTopic getQuizTopic() {
+
+        return quizTopic;
+    }
+
+    public String getSuccessDialogueId() {
+
+        return successDialogueId;
+    }
+
+    public String getFailureDialogueId() {
+
+        return failureDialogueId;
+    }
+
+    /*
+     * Mantido porque CombatScenarioChecks
+     * utiliza este método.
+     */
+    static Ability createReward(
+            KnowledgeTopic topic) {
+
+        return AbilityRegistry.get(
+                getRewardId(
+                        topic
+                )
+        );
     }
 
     private static String getRewardId(
@@ -308,7 +267,7 @@ public class Merchant extends NPC
         if (topic == null) {
 
             throw new IllegalArgumentException(
-                    "O topico nao pode ser nulo."
+                    "O tópico não pode ser nulo."
             );
         }
 
@@ -327,18 +286,11 @@ public class Merchant extends NPC
             case KNOW_POTENTIAL ->
                     AbilityRegistry
                             .EQUIPOTENTIAL_SHIELD_ID;
+
+            case KNOW_FACTION_CONFLICT ->
+                    throw new IllegalArgumentException(
+                            "O quiz das facções ainda não possui recompensa definida."
+                    );
         };
-    }
-
-    /*
-     * Mantido porque CombatScenarioChecks
-     * ainda utiliza este metodo.
-     */
-    static Ability createReward(
-            KnowledgeTopic topic) {
-
-        return AbilityRegistry.get(
-                getRewardId(topic)
-        );
     }
 }

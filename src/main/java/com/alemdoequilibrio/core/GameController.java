@@ -1,6 +1,14 @@
 package com.alemdoequilibrio.core;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import javafx.application.Platform;
 
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
@@ -9,13 +17,19 @@ import com.alemdoequilibrio.game.ChapterCompleteView;
 import com.alemdoequilibrio.game.ChapterProgress;
 import com.alemdoequilibrio.game.Enemy;
 import com.alemdoequilibrio.game.ExplorationController;
+import com.alemdoequilibrio.game.PrologueController;
 
 import javafx.stage.Stage;
 
 public class GameController {
 
+    private final Stage stage;
+
     private final SceneRouter
             sceneRouter;
+
+    private final MainMenuController
+            mainMenuController;
 
     private final ResourceManager
             resourceManager;
@@ -28,6 +42,9 @@ public class GameController {
 
     private final ChapterCompleteView
             chapterCompleteView;
+
+    private final PrologueController
+            prologueController;
 
     private GameState currentState;
 
@@ -42,6 +59,14 @@ public class GameController {
 
     public GameController(
             Stage stage) {
+
+        this.stage = Objects.requireNonNull(stage);
+
+        mainMenuController = new MainMenuController(
+                this::playGame,
+                this::restartGame,
+                Platform::exit
+        );
 
         sceneRouter =
                 new SceneRouter(
@@ -64,6 +89,12 @@ public class GameController {
                         )
                 );
 
+        prologueController =
+                new PrologueController(
+                        resourceManager,
+                        this::finishPrologue
+                );
+
         currentState =
                 GameState.MENU;
 
@@ -80,38 +111,128 @@ public class GameController {
                                 GameState.EXPLORATION
                         ),
 
+                        () -> changeState(
+                                GameState.QUIZ
+                        ),
+
+                        () -> changeState(
+                                GameState.EXPLORATION
+                        ),
+
                         this::startBattle,
 
                         this::saveProgress
                 );
     }
 
+    /** Abre sempre o menu antes de iniciar a partida. */
     public void startGame() {
+        sceneRouter.setTitle("Além do Equilíbrio");
+        sceneRouter.show(mainMenuController.getScene());
+    }
 
-        sceneRouter.setTitle(
-                "Além do Equilíbrio"
-        );
-
-        boolean loaded =
-                loadSavedProgress();
+    /** Continua o progresso salvo ou inicia o prólogo na primeira partida. */
+    private void playGame() {
+        boolean loaded = loadSavedProgress();
 
         if (loaded) {
-
-            explorationController
-                    .restoreAtCheckpoint();
+            explorationController.restoreAtCheckpoint();
         }
 
-        if (chapterProgress
-                .hasFragmentObtained()) {
-
-            changeState(
-                    GameState.CHAPTER_COMPLETE
-            );
-
+        if (chapterProgress.hasFragmentObtained()) {
+            changeState(GameState.CHAPTER_COMPLETE);
+        } else if (loaded) {
+            changeState(GameState.EXPLORATION);
         } else {
+            changeState(GameState.PROLOGUE);
+        }
+    }
 
-            changeState(
-                    GameState.EXPLORATION
+    /** O prólogo foi concluído; registra o início da aventura no save. */
+    private void finishPrologue() {
+        saveProgress();
+        changeState(GameState.EXPLORATION);
+    }
+
+    /**
+     * Solicita confirmação com JOptionPane (Swing) e apaga o save.
+     * Os componentes Swing precisam rodar na Event Dispatch Thread.
+     */
+    private void restartGame() {
+        if (!confirmRestartWithJOptionPane()) {
+            return;
+        }
+
+        try {
+            saveManager.deleteSave();
+        } catch (IOException exception) {
+            showRestartErrorWithJOptionPane(exception.getMessage());
+            return;
+        }
+
+        GameController freshGame = new GameController(stage);
+        freshGame.sceneRouter.setTitle("Além do Equilíbrio");
+        freshGame.changeState(GameState.PROLOGUE);
+    }
+
+    /** Confirmação síncrona na EDT, mantendo a operação modal. */
+    private boolean confirmRestartWithJOptionPane() {
+        AtomicInteger selection =
+                new AtomicInteger(JOptionPane.CLOSED_OPTION);
+
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                Object[] options = {"Reiniciar", "Cancelar"};
+
+                int answer = JOptionPane.showOptionDialog(
+                        null,
+                        "Apagar o progresso salvo e recomeçar desde o prólogo?\n"
+                        + "Esta ação não poderá ser desfeita.",
+                        "Reiniciar jogo",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[1]
+                );
+
+                selection.set(answer);
+            });
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            System.err.println("Confirmação de reinício interrompida.");
+            return false;
+        } catch (InvocationTargetException exception) {
+            System.err.println(
+                    "Não foi possível abrir o JOptionPane: "
+                    + exception.getCause()
+            );
+            return false;
+        }
+
+        return selection.get() == JOptionPane.YES_OPTION;
+    }
+
+    /** Exibe falhas de exclusão do save também usando JOptionPane. */
+    private void showRestartErrorWithJOptionPane(String message) {
+        try {
+            SwingUtilities.invokeAndWait(() ->
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Não foi possível apagar o save: " + message,
+                            "Erro ao reiniciar",
+                            JOptionPane.ERROR_MESSAGE
+                    )
+            );
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            System.err.println("Aviso de erro interrompido: " + message);
+        } catch (InvocationTargetException exception) {
+            System.err.println(
+                    "Falha ao exibir aviso do JOptionPane: "
+                    + exception.getCause()
+                    + ". Erro original: "
+                    + message
             );
         }
     }
@@ -149,6 +270,10 @@ public class GameController {
 
         switch (state) {
 
+            case PROLOGUE ->
+                prologueController
+                        .stop();
+
             case EXPLORATION ->
                 explorationController
                         .stop();
@@ -157,9 +282,12 @@ public class GameController {
                 explorationController
                         .closeDialogue();
 
+            case QUIZ ->
+                explorationController
+                        .closeQuiz();
+
             case MENU,
                  BATTLE,
-                 QUIZ,
                  PAUSED,
                  CHAPTER_COMPLETE -> {
             }
@@ -170,6 +298,9 @@ public class GameController {
             GameState state) {
 
         switch (state) {
+
+            case PROLOGUE ->
+                startPrologue();
 
             case EXPLORATION ->
                 startExploration();
@@ -183,12 +314,27 @@ public class GameController {
                                 .getScene()
                 );
 
-            case MENU,
-                 DIALOGUE,
+            case MENU ->
+                sceneRouter.show(
+                        mainMenuController.getScene()
+                );
+
+            case DIALOGUE,
                  QUIZ,
                  PAUSED -> {
             }
         }
+    }
+
+    private void startPrologue() {
+
+        sceneRouter.show(
+                prologueController
+                        .getScene()
+        );
+
+        prologueController
+                .start();
     }
 
     private void startExploration() {

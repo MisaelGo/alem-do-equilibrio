@@ -7,12 +7,12 @@ import com.alemdoequilibrio.core.ResourceManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
-import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.layout.HBox;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
 
 /**
@@ -24,193 +24,494 @@ import javafx.util.Duration;
  */
 public class HUD {
 
-    private static final String HUD_CSS_PATH = "/css/hud.css";
+    private static final String HUD_CSS_PATH =
+            "/css/hud.css";
 
-    /*
-     * POO 1.1 - Encapsulamento:
-     * todos os componentes gráficos e referências internas são privados;
-     * outras classes interagem apenas por métodos de apresentação.
-     */
+    private static final String HERO_LIFE_HUD_IMAGE =
+            "/images/hero_life_hud.png";
+
+    private static final String PRESS_E_HUD_IMAGE =
+            "/images/press_E_hud.png";
+
+    private static final String CONCEPT_IMAGE =
+            "/images/conceito_registrado.png";
+
+    private static final double LOGICAL_WIDTH =
+            1280.0;
+
     private final Pane hudLayer;
-    private final ResourceManager resourceManager;
-    private final VBox statusCard;
+
+    private final ResourceManager
+            resourceManager;
+
+    private final Pane statusCard;
+
     private final ProgressBar hpBar;
+
     private final Label hpValueLabel;
-    private final HBox interactionPrompt;
+
+    private final Pane interactionPrompt;
+
     private final Label interactionLabel;
-    private final VBox conceptBanner;
+
+    private final Pane conceptBanner;
+
     private final Label conceptTitleLabel;
 
-    private SequentialTransition conceptAnimation;
+    private SequentialTransition
+            conceptAnimation;
 
-    /**
-     * POO 3 - Construtores:
-     * Construtor concreto que inicializa todos os elementos visuais do HUD,
-     * registra as classes de estilo e aplica a folha CSS centralizada.
-     *
-     * @param hudLayer camada gráfica onde os componentes visuais são fixados
-     * @param resourceManager gerenciador de recursos para obter o CSS compartilhado
-     */
-    public HUD(Pane hudLayer, ResourceManager resourceManager) {
-        this.hudLayer = Objects.requireNonNull(
-                hudLayer,
-                "A camada hudLayer não pode ser nula."
-        );
-        this.resourceManager = Objects.requireNonNull(
-                resourceManager,
-                "O ResourceManager não pode ser nulo."
-        );
+    public HUD(
+            Pane hudLayer,
+            ResourceManager resourceManager) {
 
-        // Aplica folha de estilo CSS do HUD evitando setStyle inline
-        String stylesheetUrl = resourceManager.getStylesheet(HUD_CSS_PATH);
-        if (!hudLayer.getStylesheets().contains(stylesheetUrl)) {
-            hudLayer.getStylesheets().add(stylesheetUrl);
+        this.hudLayer =
+                Objects.requireNonNull(
+                        hudLayer,
+                        "A camada hudLayer não pode ser nula."
+                );
+
+        this.resourceManager =
+                Objects.requireNonNull(
+                        resourceManager,
+                        "O ResourceManager não pode ser nulo."
+                );
+
+        String stylesheetUrl =
+                resourceManager.getStylesheet(
+                        HUD_CSS_PATH
+                );
+
+        if (!hudLayer
+                .getStylesheets()
+                .contains(
+                        stylesheetUrl
+                )) {
+
+            hudLayer
+                    .getStylesheets()
+                    .add(
+                            stylesheetUrl
+                    );
         }
 
-        // --- 1. Cartão de Status do Jogador (HP) ---
-        Label playerTitle = new Label("Herói Neutro");
-        playerTitle.getStyleClass().add("hud-player-title");
+        /*
+         * HUD de vida.
+         *
+         * A arte já contém "Herói Neutro" e "HP".
+         * A barra e o valor permanecem componentes reais para
+         * acompanhar dinamicamente a vida do personagem.
+         */
+        Image statusImage =
+                resourceManager.getImage(
+                        HERO_LIFE_HUD_IMAGE
+                );
 
-        Label hpIcon = new Label("HP");
-        hpIcon.getStyleClass().add("hud-hp-label");
+        double statusWidth =
+                310;
 
-        this.hpBar = new ProgressBar(1.0);
-        this.hpBar.getStyleClass().add("hud-progress-bar");
+        double statusHeight =
+                statusWidth
+                * statusImage.getHeight()
+                / statusImage.getWidth();
 
-        this.hpValueLabel = new Label("100 / 100");
-        this.hpValueLabel.getStyleClass().add("hud-hp-value");
+        ImageView statusBackground =
+                new ImageView(
+                        statusImage
+                );
 
-        HBox hpBox = new HBox(hpIcon, hpBar, hpValueLabel);
-        hpBox.getStyleClass().add("hud-hp-box");
-
-        this.statusCard = new VBox(playerTitle, hpBox);
-        this.statusCard.getStyleClass().add("hud-status-card");
-        this.statusCard.relocate(20, 20);
-
-        // --- 2. Prompt Dinâmico de Interação ([E] Interagir com ...) ---
-        Label keyBadge = new Label("E");
-        keyBadge.getStyleClass().add("hud-interaction-key");
-
-        this.interactionLabel = new Label("Interagir");
-        this.interactionLabel.getStyleClass().add("hud-interaction-text");
-
-        this.interactionPrompt = new HBox(keyBadge, interactionLabel);
-        this.interactionPrompt.getStyleClass().add("hud-interaction-prompt");
-        this.interactionPrompt.setVisible(false);
-
-        // Centraliza horizontalmente o prompt quando a largura for calculada
-        this.interactionPrompt.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            interactionPrompt.setLayoutX((1280.0 - newBounds.getWidth()) / 2.0);
-        });
-        this.interactionPrompt.setLayoutY(500.0);
-
-        // --- 3. Banner de Notificação de Conceito Aprendido ---
-        Label bannerHeader = new Label("★ NOVO CONCEITO REGISTRADO ★");
-        bannerHeader.getStyleClass().add("hud-concept-header");
-
-        this.conceptTitleLabel = new Label("");
-        this.conceptTitleLabel.getStyleClass().add("hud-concept-title");
-
-        this.conceptBanner = new VBox(bannerHeader, conceptTitleLabel);
-        this.conceptBanner.getStyleClass().add("hud-concept-banner");
-        this.conceptBanner.setVisible(false);
-
-        // Centraliza no topo da tela
-        this.conceptBanner.layoutBoundsProperty().addListener((obs, oldBounds, newBounds) -> {
-            conceptBanner.setLayoutX((1280.0 - newBounds.getWidth()) / 2.0);
-        });
-        this.conceptBanner.setLayoutY(30.0);
-
-        // Adiciona à camada gráfica de interface
-        this.hudLayer.getChildren().addAll(
-                statusCard,
-                interactionPrompt,
-                conceptBanner
+        statusBackground.setFitWidth(
+                statusWidth
         );
+
+        statusBackground.setPreserveRatio(
+                true
+        );
+
+        statusBackground.setSmooth(
+                false
+        );
+
+        hpBar =
+                new ProgressBar(
+                        1.0
+                );
+
+        hpBar.getStyleClass().add(
+                "hud-progress-bar"
+        );
+
+        hpBar.setPrefSize(
+                statusWidth * 0.50,
+                14
+        );
+
+        hpBar.relocate(
+                statusWidth * 0.232,
+                statusHeight * 0.604
+        );
+
+        hpValueLabel =
+                new Label(
+                        "100 / 100"
+                );
+
+        hpValueLabel.getStyleClass().add(
+                "hud-hp-value"
+        );
+
+        hpValueLabel.relocate(
+                statusWidth * 0.765,
+                statusHeight * 0.583
+        );
+
+        statusCard =
+                new Pane(
+                        statusBackground,
+                        hpBar,
+                        hpValueLabel
+                );
+
+        statusCard.setPrefSize(
+                statusWidth,
+                statusHeight
+        );
+
+        statusCard.relocate(
+                40,
+                10
+        );
+
+        /*
+         * Prompt de interação.
+         *
+         * A tecla E faz parte da própria arte. O programa escreve
+         * apenas a ação e o alvo, permitindo reutilizar o mesmo HUD
+         * para conversar, examinar e futuras interações.
+         */
+        Image interactionImage =
+                resourceManager.getImage(
+                        PRESS_E_HUD_IMAGE
+                );
+
+        double interactionWidth =
+                280;
+
+        double interactionHeight =
+                interactionWidth
+                * interactionImage.getHeight()
+                / interactionImage.getWidth();
+
+        ImageView interactionBackground =
+                new ImageView(
+                        interactionImage
+                );
+
+        interactionBackground.setFitWidth(
+                interactionWidth
+        );
+
+        interactionBackground.setPreserveRatio(
+                true
+        );
+
+        interactionBackground.setSmooth(
+                false
+        );
+
+        interactionLabel =
+                new Label(
+                        "Interagir"
+                );
+
+        interactionLabel.getStyleClass().add(
+                "hud-interaction-text"
+        );
+
+        interactionLabel.setMaxWidth(
+                interactionWidth * 0.64
+        );
+
+        interactionLabel.relocate(
+                interactionWidth * 0.287,
+                interactionHeight * 0.37
+        );
+
+        interactionPrompt =
+                new Pane(
+                        interactionBackground,
+                        interactionLabel
+                );
+
+        interactionPrompt.setPrefSize(
+                interactionWidth,
+                interactionHeight
+        );
+
+        interactionPrompt.setLayoutX(
+                (LOGICAL_WIDTH
+                        - interactionWidth)
+                        / 2.0
+        );
+
+        interactionPrompt.setLayoutY(
+                500
+        );
+
+        interactionPrompt.setVisible(
+                false
+        );
+
+        /*
+         * A arte contém o título fixo e os símbolos + laterais.
+         * Somente o nome do conceito é desenhado dinamicamente.
+         * O viewport remove as margens transparentes do PNG.
+         */
+        Image conceptImage = resourceManager.getImage(CONCEPT_IMAGE);
+        // Próximo dos 280 px do aviso "Conversar com Nilo".
+        double conceptWidth = 380;
+        double conceptHeight = 86;
+
+        ImageView conceptBackground = new ImageView(conceptImage);
+        conceptBackground.setViewport(new Rectangle2D(
+                conceptImage.getWidth() * 0.04,
+                conceptImage.getHeight() * 0.20,
+                conceptImage.getWidth() * 0.92,
+                conceptImage.getHeight() * 0.61
+        ));
+        conceptBackground.setFitWidth(conceptWidth);
+        conceptBackground.setFitHeight(conceptHeight);
+        conceptBackground.setPreserveRatio(false);
+        conceptBackground.setSmooth(false);
+
+        conceptTitleLabel = new Label("");
+        conceptTitleLabel.getStyleClass().add("hud-concept-title");
+        conceptTitleLabel.setAlignment(javafx.geometry.Pos.CENTER);
+        conceptTitleLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
+        conceptTitleLabel.setWrapText(true);
+        // Área central preserva os símbolos + das laterais da arte.
+        conceptTitleLabel.setPrefSize(conceptWidth * 0.82, conceptHeight * 0.50);
+        conceptTitleLabel.relocate(conceptWidth * 0.09, conceptHeight * 0.38);
+
+        conceptBanner = new Pane(conceptBackground, conceptTitleLabel);
+        conceptBanner.setPrefSize(conceptWidth, conceptHeight);
+        conceptBanner.relocate((LOGICAL_WIDTH - conceptWidth) / 2.0, 25);
+        conceptBanner.setVisible(false);
+
+        this.hudLayer
+                .getChildren()
+                .addAll(
+                        statusCard,
+                        interactionPrompt,
+                        conceptBanner
+                );
     }
 
     /**
      * Atualiza os pontos de vida exibidos e a barra proporcional.
-     *
-     * @param currentHealth vida atual do herói
-     * @param maxHealth vida máxima do herói
      */
-    public void updateHealth(float currentHealth, float maxHealth) {
-        float safeMax = maxHealth > 0.0f ? maxHealth : 100.0f;
-        float clamped = Math.max(0.0f, Math.min(currentHealth, safeMax));
-        double progress = clamped / (double) safeMax;
+    public void updateHealth(
+            float currentHealth,
+            float maxHealth) {
 
-        hpBar.setProgress(progress);
-        hpValueLabel.setText(String.format("%.0f / %.0f", clamped, safeMax));
+        float safeMax =
+                maxHealth > 0.0f
+                        ? maxHealth
+                        : 100.0f;
+
+        float clamped =
+                Math.max(
+                        0.0f,
+                        Math.min(
+                                currentHealth,
+                                safeMax
+                        )
+                );
+
+        double progress =
+                clamped
+                / (double) safeMax;
+
+        hpBar.setProgress(
+                progress
+        );
+
+        hpValueLabel.setText(
+                String.format(
+                        "%.0f / %.0f",
+                        clamped,
+                        safeMax
+                )
+        );
     }
 
     /**
-     * Exibe o aviso contextual de interação para o elemento próximo.
-     *
-     * @param targetName nome do personagem ou objeto interativo
+     * Exibe o aviso contextual para conversar com um personagem.
      */
-    public void showInteractionPrompt(String targetName) {
-        String name = (targetName != null && !targetName.isBlank()) ? targetName : "Interagir";
-        interactionLabel.setText("Conversar com " + name);
-        interactionPrompt.setVisible(true);
+    public void showInteractionPrompt(
+            String targetName) {
+
+        showInteractionPrompt(
+                "Conversar com",
+                targetName
+        );
     }
 
     /**
-     * Oculta o aviso de interação.
+     * Exibe o aviso contextual usando a mesma arte para qualquer ação.
      */
+    public void showInteractionPrompt(
+            String action,
+            String targetName) {
+
+        String safeAction =
+                action != null
+                && !action.isBlank()
+                        ? action
+                        : "Interagir com";
+
+        String name =
+                targetName != null
+                && !targetName.isBlank()
+                        ? targetName
+                        : "objeto";
+
+        interactionLabel.setText(
+                safeAction
+                + " "
+                + name
+        );
+
+        interactionPrompt.setVisible(
+                true
+        );
+    }
+
     public void hideInteractionPrompt() {
-        interactionPrompt.setVisible(false);
+
+        interactionPrompt.setVisible(
+                false
+        );
     }
 
-    /**
-     * Exibe notificação visual de conceito de Física aprendido com animação.
-     *
-     * @param topic tópico de conhecimento aprendido
-     */
-    public void showConceptLearned(KnowledgeTopic topic) {
+    public void showConceptLearned(
+            KnowledgeTopic topic) {
+
         if (topic == null) {
+
             return;
         }
 
         if (conceptAnimation != null) {
+
             conceptAnimation.stop();
         }
 
-        conceptTitleLabel.setText(getTopicDisplayName(topic));
-        conceptBanner.setOpacity(0.0);
-        conceptBanner.setVisible(true);
+        conceptTitleLabel.setText(
+                getTopicDisplayName(
+                        topic
+                )
+        );
+
+        conceptBanner.setOpacity(
+                0.0
+        );
+
+        conceptBanner.setVisible(
+                true
+        );
 
         try {
-            resourceManager.getAudioClip("/audio/sfx_quiz_correct.wav").play();
+
+            resourceManager
+                    .getAudioClip(
+                            "/audio/sfx_quiz_correct.wav"
+                    )
+                    .play();
+
         } catch (Exception e) {
-            // Se áudio estiver desabilitado no ambiente, continua silenciosamente
+
+            // Se áudio estiver indisponível, a notificação segue normalmente.
         }
 
-        FadeTransition fadeIn = new FadeTransition(Duration.millis(350), conceptBanner);
-        fadeIn.setFromValue(0.0);
-        fadeIn.setToValue(1.0);
+        FadeTransition fadeIn =
+                new FadeTransition(
+                        Duration.millis(
+                                350
+                        ),
+                        conceptBanner
+                );
 
-        PauseTransition stay = new PauseTransition(Duration.seconds(3.5));
+        fadeIn.setFromValue(
+                0.0
+        );
 
-        FadeTransition fadeOut = new FadeTransition(Duration.millis(600), conceptBanner);
-        fadeOut.setFromValue(1.0);
-        fadeOut.setToValue(0.0);
-        fadeOut.setOnFinished(e -> conceptBanner.setVisible(false));
+        fadeIn.setToValue(
+                1.0
+        );
 
-        conceptAnimation = new SequentialTransition(fadeIn, stay, fadeOut);
+        PauseTransition stay =
+                new PauseTransition(
+                        Duration.seconds(
+                                3.5
+                        )
+                );
+
+        FadeTransition fadeOut =
+                new FadeTransition(
+                        Duration.millis(
+                                600
+                        ),
+                        conceptBanner
+                );
+
+        fadeOut.setFromValue(
+                1.0
+        );
+
+        fadeOut.setToValue(
+                0.0
+        );
+
+        fadeOut.setOnFinished(
+                e ->
+                        conceptBanner.setVisible(
+                                false
+                        )
+        );
+
+        conceptAnimation =
+                new SequentialTransition(
+                        fadeIn,
+                        stay,
+                        fadeOut
+                );
+
         conceptAnimation.play();
     }
 
-    /**
-     * Traduz o enum de tópico para o título legível em português.
-     */
-    private String getTopicDisplayName(KnowledgeTopic topic) {
+    private String getTopicDisplayName(
+            KnowledgeTopic topic) {
+
         return switch (topic) {
-            case KNOW_CHARGE_SIGNS -> "Sinais das Cargas Elétricas (+ e −)";
-            case KNOW_ELECTRIZATION -> "Processos de Eletrização";
-            case KNOW_COULOMB -> "Lei de Coulomb e Força Eletrostática";
-            case KNOW_FIELD -> "Campo Elétrico e Linhas de Força";
-            case KNOW_POTENTIAL -> "Potencial Elétrico e Superfícies Equipotenciais";
+
+            case KNOW_CHARGE_SIGNS ->
+                    "Sinais das Cargas Elétricas (+ e −)";
+
+            case KNOW_ELECTRIZATION ->
+                    "Processos de Eletrização";
+
+            case KNOW_FACTION_CONFLICT ->
+                    "Conflito das Facções e Propriedades da Carga";
+
+            case KNOW_COULOMB ->
+                    "Lei de Coulomb e Força Eletrostática";
+
+            case KNOW_FIELD ->
+                    "Campo Elétrico e Linhas de Força";
+
+            case KNOW_POTENTIAL ->
+                    "Potencial Elétrico e Superfícies Equipotenciais";
         };
     }
 }

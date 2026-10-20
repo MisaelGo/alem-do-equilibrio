@@ -69,6 +69,11 @@ public class SaveManager {
         );
     }
 
+    /** Remove apenas o arquivo de progresso do jogo. */
+    public void deleteSave() throws IOException {
+        Files.deleteIfExists(savePath);
+    }
+
     public void save(
             ChapterProgress progress,
             Hero hero)
@@ -145,6 +150,17 @@ public class SaveManager {
                 "fragmentObtained="
                 + progress
                         .hasFragmentObtained()
+        );
+
+        lines.add(
+                "neutralIonMet="
+                + progress
+                        .hasMetNeutralIon()
+        );
+
+        lines.add(
+                "neutralBorderIntroSeen="
+                + progress.hasSeenNeutralBorderIntro()
         );
 
         Path absolutePath =
@@ -304,6 +320,24 @@ public class SaveManager {
                         "fragmentObtained"
                 );
 
+        String neutralIonMetValue =
+                values.get(
+                        "neutralIonMet"
+                );
+
+        boolean neutralIonMet =
+                neutralIonMetValue != null
+                        ? parseBoolean(
+                                neutralIonMetValue,
+                                "neutralIonMet"
+                        )
+                        : false;
+
+        String introValue = values.get("neutralBorderIntroSeen");
+        boolean neutralBorderIntroSeen = introValue != null
+                ? parseBoolean(introValue, "neutralBorderIntroSeen")
+                : false;
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -322,7 +356,9 @@ public class SaveManager {
                 learnedTopics,
                 completedQuizzes,
                 bossDefeated,
-                fragmentObtained
+                fragmentObtained,
+                neutralIonMet,
+                neutralBorderIntroSeen
         );
 
         hero.clearAbilities();

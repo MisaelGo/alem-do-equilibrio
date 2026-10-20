@@ -42,8 +42,8 @@ public class CollisionManager {
         obstacles.clear();
 
         /*
-         * NPCs e comerciantes passam a possuir
-         * colisao automaticamente.
+         * Todos os elementos interagíveis da zona
+         * passam a possuir colisão automaticamente.
          */
         for (Interactable interactable
                 : interactables) {
@@ -65,13 +65,10 @@ public class CollisionManager {
          */
         switch (zone) {
 
-            case NEUTRAL_BORDER ->
-                addObstacle(
-                        350,
-                        1650,
-                        70,
-                        70
-                );
+            case NEUTRAL_BORDER -> {
+                addNeutralBorderWallCollisions();
+                addNeutralBushCollisions();
+            }
 
             case INSULATOR_TRAIL ->
                 addObstacle(
@@ -86,6 +83,80 @@ public class CollisionManager {
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
+            }
+        }
+    }
+
+    private void addNeutralBushCollisions() {
+
+        addObstacle(
+                ZoneManager.NEUTRAL_BUSH_1_X,
+                ZoneManager.NEUTRAL_BUSH_1_Y,
+                ZoneManager.NEUTRAL_BUSH_WIDTH,
+                ZoneManager.NEUTRAL_BUSH_HEIGHT
+        );
+
+        addObstacle(
+                ZoneManager.NEUTRAL_BUSH_2_X,
+                ZoneManager.NEUTRAL_BUSH_2_Y,
+                ZoneManager.NEUTRAL_BUSH_WIDTH,
+                ZoneManager.NEUTRAL_BUSH_HEIGHT
+        );
+    }
+
+    /**
+     * Adiciona colisão a todos os tiles de parede
+     * da Fronteira Neutra.
+     *
+     * A mesma regra usada para desenhar as bordas
+     * é reutilizada aqui para manter visual e física
+     * sempre sincronizados.
+     */
+    private void addNeutralBorderWallCollisions() {
+
+        double tileSize =
+                40;
+
+        int columns =
+                (int) (
+                        ZoneManager.NEUTRAL_BORDER_WIDTH
+                        / tileSize
+                );
+
+        int rows =
+                (int) (
+                        ZoneManager.NEUTRAL_BORDER_HEIGHT
+                        / tileSize
+                );
+
+        for (int row = 0;
+                row < rows;
+                row++) {
+
+            for (int col = 0;
+                    col < columns;
+                    col++) {
+
+                boolean isWall =
+                        TileMapRenderer
+                                .isNeutralBorderWallTile(
+                                        col,
+                                        row,
+                                        columns,
+                                        rows
+                                );
+
+                if (!isWall) {
+
+                    continue;
+                }
+
+                addObstacle(
+                        col * tileSize,
+                        row * tileSize,
+                        tileSize,
+                        tileSize
+                );
             }
         }
     }

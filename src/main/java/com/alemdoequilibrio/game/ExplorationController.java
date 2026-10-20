@@ -1,8 +1,7 @@
 package com.alemdoequilibrio.game;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import com.alemdoequilibrio.core.ResourceManager;
@@ -14,6 +13,8 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
 
 public class ExplorationController {
@@ -28,17 +29,24 @@ public class ExplorationController {
             TILE_SIZE = 40;
 
     private static final double
-            INTERACTION_RANGE = 90;
+            INTERACTION_RANGE = 30;
 
     private static final double
             ENEMY_RANGE = 70;
 
     private static final double
-            HERO_START_X = 100;
+            HERO_START_X = 176;
 
     private static final double
-            HERO_START_Y =
-            ZoneManager.WORLD_HEIGHT - 100;
+            HERO_START_Y = 832;
+
+    private static final String
+            NEUTRAL_BORDER_MUSIC =
+                    "/audio/zone_neutral_suspense.mp3";
+
+    private static final String
+            NEUTRAL_ELECTRIC_SFX =
+                    "/audio/electric_shock.mp3";
 
     private final Hero hero;
 
@@ -76,11 +84,26 @@ public class ExplorationController {
     private final DialogueController
             dialogueController;
 
+    private final QuizController
+            quizController;
+
+    private final MediaPlayer
+            neutralBorderMusicPlayer;
+
+    private final AudioClip
+            neutralElectricShock;
+
     private final Runnable
             onDialogueStarted;
 
     private final Runnable
             onDialogueFinished;
+
+    private final Runnable
+            onQuizStarted;
+
+    private final Runnable
+            onQuizFinished;
 
     private final Consumer<Enemy>
             onEnemyEncounter;
@@ -93,12 +116,14 @@ public class ExplorationController {
     private double cameraX;
 
     private double cameraY;
-
+    
     public ExplorationController(
             ResourceManager resourceManager,
             ChapterProgress chapterProgress,
             Runnable onDialogueStarted,
             Runnable onDialogueFinished,
+            Runnable onQuizStarted,
+            Runnable onQuizFinished,
             Consumer<Enemy> onEnemyEncounter,
             Runnable onProgressChanged) {
 
@@ -119,6 +144,16 @@ public class ExplorationController {
         this.onDialogueFinished =
                 Objects.requireNonNull(
                         onDialogueFinished
+                );
+
+        this.onQuizStarted =
+                Objects.requireNonNull(
+                        onQuizStarted
+                );
+
+        this.onQuizFinished =
+                Objects.requireNonNull(
+                        onQuizFinished
                 );
 
         this.onEnemyEncounter =
@@ -145,16 +180,16 @@ public class ExplorationController {
                 );
 
         heroView.setPosition(
-                HERO_START_X,
-                HERO_START_Y
+            HERO_START_X,
+            HERO_START_Y
         );
 
         worldLayer =
                 new Pane();
 
         worldLayer.setPrefSize(
-                ZoneManager.WORLD_WIDTH,
-                ZoneManager.WORLD_HEIGHT
+                ZoneManager.NEUTRAL_BORDER_WIDTH,
+                ZoneManager.NEUTRAL_BORDER_HEIGHT
         );
 
         QuestionBank questionBank =
@@ -206,9 +241,39 @@ public class ExplorationController {
         dialogueController =
                 new DialogueController(
                         hudLayer,
+                        resourceManager,
                         dialogueRepository,
                         this::completeInteraction
                 );
+
+        quizController =
+                new QuizController(
+                        hudLayer
+                );
+
+        neutralBorderMusicPlayer =
+                new MediaPlayer(
+                        resourceManager.getMedia(
+                                NEUTRAL_BORDER_MUSIC
+                        )
+                );
+
+        neutralBorderMusicPlayer.setCycleCount(
+                MediaPlayer.INDEFINITE
+        );
+
+        neutralBorderMusicPlayer.setVolume(
+                0.35
+        );
+
+        neutralElectricShock =
+                resourceManager.getAudioClip(
+                        NEUTRAL_ELECTRIC_SFX
+                );
+
+        neutralElectricShock.setVolume(
+                0.55
+        );
 
         gameRoot =
                 new Pane();
@@ -278,7 +343,7 @@ public class ExplorationController {
 
         keys =
                 new boolean[4];
-
+        
         configureInput();
 
         gameLoop =
@@ -328,9 +393,8 @@ public class ExplorationController {
                                 .getInteractables()
                 );
 
-        hero.setPosition(
-                HERO_START_X,
-                HERO_START_Y
+        positionHeroAtZoneStart(
+            zone
         );
 
         heroView.setPosition(
@@ -346,7 +410,73 @@ public class ExplorationController {
 
         resetKeys();
 
+        neutralElectricShock.stop();
+
         updateCamera();
+    }
+    
+    private void updateZoneMusic(
+            ExplorationZone zone) {
+
+        if (zone
+                == ExplorationZone
+                        .NEUTRAL_BORDER) {
+
+            neutralBorderMusicPlayer.play();
+
+            return;
+        }
+
+        neutralBorderMusicPlayer.stop();
+    }
+
+    private void positionHeroAtZoneStart(
+        ExplorationZone zone) {
+
+        switch (zone) {
+
+            case NEUTRAL_BORDER ->
+                hero.setPosition(
+                        176,
+                        832
+                );
+
+            case INSULATOR_TRAIL ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FACTION_CROSSROADS ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case COULOMB_VALLEY ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FIELD_PLATEAU ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case EQUIPOTENTIAL_RUINS ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+
+            case FRAGMENT_CHAMBER ->
+                hero.setPosition(
+                        100,
+                        1700
+                );
+        }
     }
 
     private void configureInput() {
@@ -432,6 +562,12 @@ public class ExplorationController {
 
     private void handleInteraction() {
 
+        if (quizController
+                .isOpen()) {
+
+            return;
+        }
+
         if (dialogueController
                 .isOpen()) {
 
@@ -441,8 +577,17 @@ public class ExplorationController {
 
             if (!stillOpen) {
 
-                onDialogueFinished
-                        .run();
+                if (quizController
+                        .isOpen()) {
+
+                    onQuizStarted
+                            .run();
+
+                } else {
+
+                    onDialogueFinished
+                            .run();
+                }
 
                 updateInteractionPrompt();
             }
@@ -458,60 +603,9 @@ public class ExplorationController {
             return;
         }
 
-        if (interactable
-                instanceof Merchant merchant) {
-
-            Set<String> unlockedNames =
-                    new HashSet<>();
-
-            for (Ability ability
-                    : hero
-                            .getAbilityBook()
-                            .getAbilities()) {
-
-                unlockedNames.add(
-                        ability.getName()
-                );
-            }
-
-            int previousAbilities =
-                    hero
-                            .getAbilityBook()
-                            .getAbilities()
-                            .size();
-
-            int previousQuizzes =
-                    chapterProgress
-                            .getCompletedQuizzes()
-                            .size();
-
-            merchant.startQuiz(
-                    hero,
-                    chapterProgress,
-                    unlockedNames
-            );
-
-            if (hero
-                    .getAbilityBook()
-                    .getAbilities()
-                    .size()
-                    != previousAbilities
-                    || chapterProgress
-                            .getCompletedQuizzes()
-                            .size()
-                    != previousQuizzes) {
-
-                onProgressChanged
-                        .run();
-            }
-
-            return;
-        }
-
-        dialogueController
-                .startDialogue(
-                        interactable
-                );
+        startInteractionDialogue(
+                interactable
+        );
 
         if (dialogueController
                 .isOpen()) {
@@ -521,6 +615,145 @@ public class ExplorationController {
             onDialogueStarted
                     .run();
         }
+    }
+
+    private void startInteractionDialogue(
+            Interactable interactable) {
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && interactable
+                        instanceof SceneryInteractable) {
+
+            try {
+
+                neutralElectricShock.play();
+
+            } catch (Exception exception) {
+
+                // A interação continua mesmo se o áudio estiver indisponível.
+            }
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && interactable
+                        instanceof NPC npc) {
+
+            String name =
+                    npc.getName();
+
+            if ("Nilo".equalsIgnoreCase(
+                    name
+            )
+                    && chapterProgress
+                            .hasLearned(
+                                    KnowledgeTopic
+                                            .KNOW_CHARGE_SIGNS
+                            )) {
+
+                dialogueController
+                        .startDialogue(
+                                "NILO_REPEAT"
+                        );
+
+                return;
+            }
+
+            if (("Íon".equalsIgnoreCase(
+                    name
+            )
+                    || "Ion".equalsIgnoreCase(
+                            name
+                    ))
+                    && chapterProgress
+                            .hasMetNeutralIon()) {
+
+                dialogueController
+                        .startDialogue(
+                                "ION_NEUTRAL_REPEAT"
+                        );
+
+                return;
+            }
+        }
+
+        dialogueController
+                .startDialogue(
+                        interactable
+                );
+    }
+
+    private void startMerchantQuiz(
+            Merchant merchant) {
+
+        List<PhysicsQuestion> questions =
+                merchant.startQuiz(
+                        chapterProgress,
+                        4
+                );
+
+        if (questions.size() < 4) {
+
+            return;
+        }
+
+        hud.hideInteractionPrompt();
+
+        quizController.startQuiz(
+                questions,
+                correctAnswers ->
+                        finishMerchantQuiz(
+                                merchant,
+                                correctAnswers
+                        )
+        );
+    }
+
+    private void finishMerchantQuiz(
+            Merchant merchant,
+            int correctAnswers) {
+
+        boolean success =
+                merchant.completeQuiz(
+                        hero,
+                        chapterProgress,
+                        correctAnswers
+                );
+
+        if (success) {
+
+            onProgressChanged
+                    .run();
+        }
+
+        String resultDialogueId =
+                success
+                        ? merchant
+                                .getSuccessDialogueId()
+                        : merchant
+                                .getFailureDialogueId();
+
+        if (resultDialogueId != null
+                && !resultDialogueId.isBlank()) {
+
+            dialogueController
+                    .startDialogue(
+                            resultDialogueId
+                    );
+
+            if (dialogueController
+                    .isOpen()) {
+
+                onDialogueStarted
+                        .run();
+
+                return;
+            }
+        }
+
+        onQuizFinished
+                .run();
     }
 
     private Interactable
@@ -568,34 +801,82 @@ public class ExplorationController {
                 hero.getY()
                 + TILE_SIZE / 2.0;
 
-        double targetCenterX =
-                interactable.getX()
-                + interactable
-                        .getWidth()
-                / 2.0;
+        double targetLeft =
+                interactable.getX();
 
-        double targetCenterY =
-                interactable.getY()
-                + interactable
-                        .getHeight()
-                / 2.0;
+        double targetTop =
+                interactable.getY();
+
+        double targetRight =
+                targetLeft
+                + interactable.getWidth();
+
+        double targetBottom =
+                targetTop
+                + interactable.getHeight();
+
+        double nearestX =
+                Math.max(
+                        targetLeft,
+                        Math.min(
+                                heroCenterX,
+                                targetRight
+                        )
+                );
+
+        double nearestY =
+                Math.max(
+                        targetTop,
+                        Math.min(
+                                heroCenterY,
+                                targetBottom
+                        )
+                );
 
         return Math.hypot(
                 heroCenterX
-                        - targetCenterX,
+                        - nearestX,
 
                 heroCenterY
-                        - targetCenterY
+                        - nearestY
         );
     }
 
     private void completeInteraction(
             Interactable interactable) {
 
+        if (interactable
+                instanceof Merchant merchant) {
+
+            startMerchantQuiz(
+                    merchant
+            );
+
+            return;
+        }
+
         if (!(interactable
                 instanceof NPC npc)) {
 
             return;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER
+                && ("Íon".equalsIgnoreCase(
+                        npc.getName()
+                )
+                    || "Ion".equalsIgnoreCase(
+                            npc.getName()
+                    ))
+                && !chapterProgress
+                        .hasMetNeutralIon()) {
+
+            chapterProgress
+                    .markNeutralIonMet();
+
+            onProgressChanged
+                    .run();
         }
 
         KnowledgeTopic topic =
@@ -752,9 +1033,11 @@ public class ExplorationController {
                 deltaTime * Math.abs(
                     normalizedX
                 ),
-                ZoneManager.WORLD_WIDTH
+                zoneManager
+                        .getCurrentWorldWidth()
                     - TILE_SIZE,
-                ZoneManager.WORLD_HEIGHT
+                zoneManager
+                        .getCurrentWorldHeight()
                     - TILE_SIZE
             );
 
@@ -788,9 +1071,11 @@ public class ExplorationController {
                     * Math.abs(
                             normalizedY
                     ),
-                    ZoneManager.WORLD_WIDTH
+                    zoneManager
+                            .getCurrentWorldWidth()
                             - TILE_SIZE,
-                    ZoneManager.WORLD_HEIGHT
+                    zoneManager
+                            .getCurrentWorldHeight()
                             - TILE_SIZE
             );
 
@@ -886,6 +1171,29 @@ public class ExplorationController {
             return false;
         }
 
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.NEUTRAL_BORDER) {
+
+            if (!chapterProgress
+                    .hasLearned(
+                            KnowledgeTopic
+                                    .KNOW_CHARGE_SIGNS
+                    )) {
+
+                return blockNeutralBorderExit(
+                        "NEUTRAL_EXIT_NEED_NILO"
+                );
+            }
+
+            if (!chapterProgress
+                    .hasMetNeutralIon()) {
+
+                return blockNeutralBorderExit(
+                        "NEUTRAL_EXIT_NEED_ION"
+                );
+            }
+        }
+
         ExplorationZone nextZone =
                 zoneManager
                         .getNextZone();
@@ -898,6 +1206,42 @@ public class ExplorationController {
         loadZone(
                 nextZone
         );
+
+        updateZoneMusic(
+                nextZone
+        );
+
+        return true;
+    }
+
+    private boolean blockNeutralBorderExit(
+            String dialogueId) {
+
+        hero.setPosition(
+                1550,
+                hero.getY()
+        );
+
+        heroView.setPosition(
+                hero.getX(),
+                hero.getY()
+        );
+
+        hud.hideInteractionPrompt();
+
+        dialogueController
+                .startDialogue(
+                        dialogueId
+                );
+
+        if (dialogueController
+                .isOpen()) {
+
+            onDialogueStarted
+                    .run();
+        }
+
+        updateCamera();
 
         return true;
     }
@@ -919,7 +1263,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetX,
-                                ZoneManager.WORLD_WIDTH
+                                zoneManager
+                                        .getCurrentWorldWidth()
                                         - LOGICAL_WIDTH
                         )
                 );
@@ -929,7 +1274,8 @@ public class ExplorationController {
                         0,
                         Math.min(
                                 targetY,
-                                ZoneManager.WORLD_HEIGHT
+                                zoneManager
+                                        .getCurrentWorldHeight()
                                         - LOGICAL_HEIGHT
                         )
                 );
@@ -956,7 +1302,9 @@ public class ExplorationController {
     private void updateInteractionPrompt() {
 
         if (dialogueController
-                .isOpen()) {
+                .isOpen()
+                || quizController
+                        .isOpen()) {
 
             hud.hideInteractionPrompt();
 
@@ -968,14 +1316,66 @@ public class ExplorationController {
 
         if (nearest != null) {
 
-            hud.showInteractionPrompt(
-                    nearest
-                            .getInteractionName()
-            );
+            if (nearest
+                    instanceof SceneryInteractable) {
+
+                hud.showInteractionPrompt(
+                        "Examinar",
+                        nearest
+                                .getInteractionName()
+                );
+
+            } else {
+
+                hud.showInteractionPrompt(
+                        nearest
+                                .getInteractionName()
+                );
+            }
 
         } else {
 
             hud.hideInteractionPrompt();
+        }
+    }
+    
+    private boolean
+        shouldStartNeutralBorderIntro() {
+
+        return !chapterProgress.hasSeenNeutralBorderIntro()
+                && zoneManager.getCurrentZone()
+                        == ExplorationZone
+                                .NEUTRAL_BORDER
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic
+                                .KNOW_CHARGE_SIGNS
+                );
+    }
+
+    private void startNeutralBorderIntro() {
+
+        /*
+        * Marcamos antes de mudar para DIALOGUE.
+        *
+        * Quando o diálogo terminar, o jogo volta
+        * para EXPLORATION e start() será chamado
+        * novamente. Assim a introdução não reinicia.
+        */
+        chapterProgress.markNeutralBorderIntroSeen();
+        onProgressChanged.run();
+
+        dialogueController
+                .startDialogue(
+                        "INTRO_NEUTRAL_BORDER"
+                );
+
+        if (dialogueController
+                .isOpen()) {
+            
+                hud.hideInteractionPrompt();
+                
+                onDialogueStarted
+                        .run();
         }
     }
 
@@ -992,6 +1392,23 @@ public class ExplorationController {
 
         updateCamera();
 
+        updateZoneMusic(
+                zoneManager
+                        .getCurrentZone()
+        );
+
+        /*
+        * Na primeira chegada à Fronteira Neutra,
+        * a cena inicial acontece antes de liberar
+        * o movimento do jogador.
+        */
+        if (shouldStartNeutralBorderIntro()) {
+        
+            startNeutralBorderIntro();
+
+            return;
+        }
+
         gameLoop.start();
     }
 
@@ -1006,6 +1423,14 @@ public class ExplorationController {
 
         dialogueController
                 .closeDialogue();
+
+        updateInteractionPrompt();
+    }
+
+    public void closeQuiz() {
+
+        quizController
+                .closeQuiz();
 
         updateInteractionPrompt();
     }
