@@ -94,8 +94,9 @@
 /* O fundo, a borda, o título e os + são desenhados pelo PNG. */
 .hud-concept-title {
   -fx-text-fill: #f6f2e7;
-  -fx-font-family: "Consolas", "Courier New", monospace;
-  -fx-font-size: 12px;
+  /* Fonte proporcional para aumentar a leitura sem ocupar os + laterais. */
+  -fx-font-family: "Segoe UI", "Arial", sans-serif;
+  -fx-font-size: 18px;
   -fx-font-weight: bold;
   -fx-effect: dropshadow(one-pass-box, #080d12, 1, 0, 1, 1);
 }
