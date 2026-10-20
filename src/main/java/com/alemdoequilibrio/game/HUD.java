@@ -291,7 +291,7 @@ public class HUD {
         conceptTitleLabel.setWrapText(true);
         // Área central preserva os símbolos + das laterais da arte.
         conceptTitleLabel.setPrefSize(conceptWidth * 0.82, conceptHeight * 0.50);
-        conceptTitleLabel.relocate(conceptWidth * 0.09, conceptHeight * 0.46);
+        conceptTitleLabel.relocate(conceptWidth * 0.09, conceptHeight * 0.38);
 
         conceptBanner = new Pane(conceptBackground, conceptTitleLabel);
         conceptBanner.setPrefSize(conceptWidth, conceptHeight);
