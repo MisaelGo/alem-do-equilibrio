@@ -1,11 +1,14 @@
 package com.alemdoequilibrio.core;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
@@ -151,40 +154,87 @@ public class GameController {
         changeState(GameState.EXPLORATION);
     }
 
-    /** Exclui o save e recria todos os controladores para reiniciar de verdade. */
+    /**
+     * Solicita confirmação com JOptionPane (Swing) e apaga o save.
+     * Os componentes Swing precisam rodar na Event Dispatch Thread.
+     */
     private void restartGame() {
-        Alert confirmation = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "Apagar o progresso salvo e recomeçar desde o prólogo?",
-                ButtonType.CANCEL,
-                ButtonType.OK
-        );
-        confirmation.initOwner(stage);
-        confirmation.setTitle("Reiniciar jogo");
-        confirmation.setHeaderText("Esta ação não poderá ser desfeita.");
-
-        if (confirmation.showAndWait().orElse(ButtonType.CANCEL)
-                != ButtonType.OK) {
+        if (!confirmRestartWithJOptionPane()) {
             return;
         }
 
         try {
             saveManager.deleteSave();
         } catch (IOException exception) {
-            Alert error = new Alert(
-                    Alert.AlertType.ERROR,
-                    "Não foi possível apagar o save: " + exception.getMessage(),
-                    ButtonType.OK
-            );
-            error.initOwner(stage);
-            error.setTitle("Erro ao reiniciar");
-            error.showAndWait();
+            showRestartErrorWithJOptionPane(exception.getMessage());
             return;
         }
 
         GameController freshGame = new GameController(stage);
         freshGame.sceneRouter.setTitle("Além do Equilíbrio");
         freshGame.changeState(GameState.PROLOGUE);
+    }
+
+    /** Confirmação síncrona na EDT, mantendo a operação modal. */
+    private boolean confirmRestartWithJOptionPane() {
+        AtomicInteger selection =
+                new AtomicInteger(JOptionPane.CLOSED_OPTION);
+
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                Object[] options = {"Reiniciar", "Cancelar"};
+
+                int answer = JOptionPane.showOptionDialog(
+                        null,
+                        "Apagar o progresso salvo e recomeçar desde o prólogo?\n"
+                        + "Esta ação não poderá ser desfeita.",
+                        "Reiniciar jogo",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[1]
+                );
+
+                selection.set(answer);
+            });
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            System.err.println("Confirmação de reinício interrompida.");
+            return false;
+        } catch (InvocationTargetException exception) {
+            System.err.println(
+                    "Não foi possível abrir o JOptionPane: "
+                    + exception.getCause()
+            );
+            return false;
+        }
+
+        return selection.get() == JOptionPane.YES_OPTION;
+    }
+
+    /** Exibe falhas de exclusão do save também usando JOptionPane. */
+    private void showRestartErrorWithJOptionPane(String message) {
+        try {
+            SwingUtilities.invokeAndWait(() ->
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Não foi possível apagar o save: " + message,
+                            "Erro ao reiniciar",
+                            JOptionPane.ERROR_MESSAGE
+                    )
+            );
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            System.err.println("Aviso de erro interrompido: " + message);
+        } catch (InvocationTargetException exception) {
+            System.err.println(
+                    "Falha ao exibir aviso do JOptionPane: "
+                    + exception.getCause()
+                    + ". Erro original: "
+                    + message
+            );
+        }
     }
 
     public void changeState(

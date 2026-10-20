@@ -268,8 +268,9 @@ public class HUD {
          * O viewport remove as margens transparentes do PNG.
          */
         Image conceptImage = resourceManager.getImage(CONCEPT_IMAGE);
-        double conceptWidth = 720;
-        double conceptHeight = 160;
+        // Próximo dos 280 px do aviso "Conversar com Nilo".
+        double conceptWidth = 380;
+        double conceptHeight = 86;
 
         ImageView conceptBackground = new ImageView(conceptImage);
         conceptBackground.setViewport(new Rectangle2D(
@@ -288,8 +289,9 @@ public class HUD {
         conceptTitleLabel.setAlignment(javafx.geometry.Pos.CENTER);
         conceptTitleLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         conceptTitleLabel.setWrapText(true);
-        conceptTitleLabel.setPrefSize(conceptWidth * 0.75, conceptHeight * 0.50);
-        conceptTitleLabel.relocate(conceptWidth * 0.125, conceptHeight * 0.45);
+        // Área central preserva os símbolos + das laterais da arte.
+        conceptTitleLabel.setPrefSize(conceptWidth * 0.82, conceptHeight * 0.50);
+        conceptTitleLabel.relocate(conceptWidth * 0.09, conceptHeight * 0.46);
 
         conceptBanner = new Pane(conceptBackground, conceptTitleLabel);
         conceptBanner.setPrefSize(conceptWidth, conceptHeight);

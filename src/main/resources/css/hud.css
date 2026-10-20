@@ -95,7 +95,7 @@
 .hud-concept-title {
   -fx-text-fill: #f6f2e7;
   -fx-font-family: "Consolas", "Courier New", monospace;
-  -fx-font-size: 21px;
+  -fx-font-size: 12px;
   -fx-font-weight: bold;
   -fx-effect: dropshadow(one-pass-box, #080d12, 1, 0, 1, 1);
 }
