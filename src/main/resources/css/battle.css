@@ -5,6 +5,7 @@
      - Próton: #B4473D (coral/vermelho com símbolo "+")
      - Elétron: #356D9A (azul/ciano com símbolo "−")
      - Nêutron: #607D72 (verde acinzentado com símbolo "0")
+     - Instabilidade/Ruptura: #735A8D (violeta magenta)
      - Conhecimento/Ouro: #D9A441
    ========================================================================== */
 
@@ -77,6 +78,55 @@
     -fx-text-fill: #FFFFFF;
 }
 
+.polarity-rupture {
+    -fx-background-color: #735A8D;
+    -fx-border-color: #A488C2;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* SELETOR DE CARGA DO HERÓI (COMBOBOX) */
+.charge-combo {
+    -fx-background-color: #191820;
+    -fx-border-color: #443f50;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 1px 6px;
+    -fx-font-family: "Consolas", "Arial", sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.charge-combo:hover {
+    -fx-border-color: #D9A441;
+    -fx-background-color: #24222e;
+}
+
+.charge-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #EAE4D8;
+    -fx-padding: 2px 6px;
+}
+
+.charge-combo-popup .list-view {
+    -fx-background-color: #14131a;
+    -fx-border-color: #D9A441;
+    -fx-border-width: 1.5px;
+}
+
+.charge-combo-popup .list-view .list-cell {
+    -fx-background-color: #14131a;
+    -fx-text-fill: #DDD7CE;
+    -fx-padding: 6px 10px;
+}
+
+.charge-combo-popup .list-view .list-cell:hover,
+.charge-combo-popup .list-view .list-cell:filled:selected {
+    -fx-background-color: #2c2838;
+    -fx-text-fill: #D9A441;
+}
+
 /* BARRAS DE VIDA (HP) */
 .hp-track {
     -fx-background-color: #1a1920;
@@ -103,6 +153,23 @@
     -fx-font-weight: bold;
 }
 
+/* NÚMEROS DE DANO FLUTUANTES */
+.damage-number-hero,
+.damage-number-enemy {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 5, 0.5, 0, 2);
+}
+
+.damage-number-hero {
+    -fx-text-fill: #E05353;
+}
+
+.damage-number-enemy {
+    -fx-text-fill: #D9A441;
+}
+
 /* PAINÉIS INFERIORES (COMANDOS & STATUS) */
 .panel-box {
     -fx-background-color: rgba(14, 14, 18, 0.94);
@@ -110,19 +177,19 @@
     -fx-border-width: 2px;
     -fx-border-radius: 2px;
     -fx-background-radius: 2px;
-    -fx-padding: 16px;
+    -fx-padding: 12px 16px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 12, 0.4, 0, 4);
 }
 
 .panel-header {
     -fx-text-fill: #9d9585;
     -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-letter-spacing: 2px;
     -fx-border-color: transparent transparent #2e2b38 transparent;
     -fx-border-width: 0 0 1px 0;
-    -fx-padding: 0 0 8px 0;
+    -fx-padding: 0 0 6px 0;
 }
 
 /* BOTÕES DE COMANDO (ESTILO FEAR & HUNGER) */
@@ -134,14 +201,15 @@
     -fx-background-radius: 2px;
     -fx-text-fill: #DDD7CE;
     -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 15px;
+    -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-padding: 10px 16px;
+    -fx-padding: 7px 14px;
     -fx-alignment: CENTER_LEFT;
     -fx-cursor: hand;
 }
 
-.command-btn:hover {
+.command-btn:hover,
+.command-btn:focused {
     -fx-background-color: #272533;
     -fx-border-color: #D9A441;
     -fx-text-fill: #FFF7EB;
@@ -159,6 +227,19 @@
     -fx-cursor: default;
 }
 
+.command-btn-synergy {
+    -fx-border-color: #D9A441;
+    -fx-background-color: #211e29;
+    -fx-text-fill: #F5E6C8;
+}
+
+.command-hint-text {
+    -fx-text-fill: #B5ADA0;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-padding: 2px 0 0 0;
+}
+
 /* STATUS DO HERÓI */
 .hero-name {
     -fx-text-fill: #EAE4D8;
@@ -172,6 +253,20 @@
     -fx-font-family: "Georgia", "Times New Roman", serif;
     -fx-font-size: 14px;
     -fx-font-style: italic;
+}
+
+.hero-condition-shield {
+    -fx-text-fill: #66D18F;
+    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.hero-condition-unstable {
+    -fx-text-fill: #E27B72;
+    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
 
 /* OVERLAYS DE VITÓRIA E DERROTA */
@@ -208,4 +303,3 @@
     -fx-font-weight: bold;
     -fx-letter-spacing: 3px;
 }
-

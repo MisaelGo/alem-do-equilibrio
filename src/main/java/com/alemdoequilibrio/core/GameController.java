@@ -9,6 +9,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import javafx.application.Platform;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 import com.alemdoequilibrio.game.BattleController;
 import com.alemdoequilibrio.game.BattleView;
@@ -22,6 +24,8 @@ import com.alemdoequilibrio.game.PrologueController;
 import javafx.stage.Stage;
 
 public class GameController {
+
+    private static final double BATTLE_RESULT_SCREEN_DURATION_MILLIS = 4000.0;
 
     private final Stage stage;
 
@@ -56,6 +60,8 @@ public class GameController {
 
     private BattleView
             currentBattleView;
+
+    private boolean battleResultTransitionScheduled;
 
     public GameController(
             Stage stage) {
@@ -286,8 +292,13 @@ public class GameController {
                 explorationController
                         .closeQuiz();
 
+            case BATTLE -> {
+                if (currentBattleView != null) {
+                    currentBattleView.stopAudio();
+                }
+            }
+
             case MENU,
-                 BATTLE,
                  PAUSED,
                  CHAPTER_COMPLETE -> {
             }
@@ -368,9 +379,12 @@ public class GameController {
                         this::finishBattle
                 );
 
+        battleResultTransitionScheduled = false;
+
         currentBattleView =
                 new BattleView(
-                        currentBattleController
+                        currentBattleController,
+                        resourceManager
                 );
 
         changeState(
@@ -401,6 +415,31 @@ public class GameController {
 
             return;
         }
+
+        if (battleResultTransitionScheduled) {
+            return;
+        }
+
+        battleResultTransitionScheduled = true;
+
+        PauseTransition resultScreenDuration =
+                new PauseTransition(
+                        Duration.millis(
+                                BATTLE_RESULT_SCREEN_DURATION_MILLIS
+                        )
+                );
+
+        resultScreenDuration.setOnFinished(
+                event -> completeBattleTransition()
+        );
+
+        resultScreenDuration.play();
+    }
+
+    /**
+     * Retorna ao fluxo de exploração depois que a tela de resultado foi vista.
+     */
+    private void completeBattleTransition() {
 
         BattleController.BattleResult
                 result =
@@ -439,11 +478,17 @@ public class GameController {
 
             saveProgress();
 
+            if (currentBattleView != null) {
+                currentBattleView.stopAudio();
+            }
+
             currentBattleController =
                     null;
 
             currentBattleView =
                     null;
+
+            battleResultTransitionScheduled = false;
 
             changeState(
                     bossVictory
@@ -461,11 +506,17 @@ public class GameController {
                         .BattleResult
                         .DEFEAT) {
 
+            if (currentBattleView != null) {
+                currentBattleView.stopAudio();
+            }
+
             currentBattleController =
                     null;
 
             currentBattleView =
                     null;
+
+            battleResultTransitionScheduled = false;
 
             explorationController
                     .respawnAtCheckpoint();
