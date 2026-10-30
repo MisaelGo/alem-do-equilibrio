@@ -443,9 +443,10 @@ public class ExplorationController {
                 );
 
             case INSULATOR_TRAIL ->
+                // Ponto seguro: acima da nova parede sul, na cerâmica.
                 hero.setPosition(
-                        100,
-                        1700
+                        160,
+                        1560
                 );
 
             case FACTION_CROSSROADS ->

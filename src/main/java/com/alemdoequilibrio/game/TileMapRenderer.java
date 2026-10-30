@@ -109,7 +109,10 @@ public final class TileMapRenderer {
                 boolean hasEastExit = (zone != ExplorationZone.FRAGMENT_CHAMBER);
                 boolean isEastWall = (col >= columns - 2) && (!hasEastExit || (row < 35 || row > 42));
 
-                if (isNorthWall || isSouthWall || isWestWall || isEastWall) {
+                boolean isWall = zone == ExplorationZone.INSULATOR_TRAIL
+                        ? InsulatorTrailLayout.isWallTile(col, row, columns, rows)
+                        : isNorthWall || isSouthWall || isWestWall || isEastWall;
+                if (isWall) {
                     gc.drawImage(theme.wall, x, y, tileSize, tileSize);
                     continue;
                 }
@@ -217,10 +220,7 @@ public final class TileMapRenderer {
             case NEUTRAL_BORDER -> false;
 
             case INSULATOR_TRAIL ->
-                // Trilha de cerâmica vítrea sinuosa conduzindo até o leste
-                (row >= 39 && row <= 42 && col >= 2 && col <= 24)
-                || (col > 24 && col <= 50 && row >= (41 - (int)((col - 24) * 0.15) - 1) && row <= (41 - (int)((col - 24) * 0.15) + 1))
-                || (col > 50 && col <= 77 && row >= 36 && row <= 39);
+                InsulatorTrailLayout.isCeramicTile(col, row);
 
             case FACTION_CROSSROADS ->
                 // Encruzilhada: via horizontal principal e grande avenida perpendicular

@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import com.alemdoequilibrio.core.ResourceManager;
 
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -275,40 +276,179 @@ public class ZoneManager {
     }
 
     private void buildInsulatorTrail() {
+        addZoneTitle("TRILHA DOS ISOLANTES");
 
-        addZoneTitle(
-                "TRILHA DOS ISOLANTES"
+        // Elementos da etapa visual: paredes e cerâmica estão no tilemap.
+        addInsulatorHouse();
+        addCeramicPile();
+        addMetalBridge();
+        addInsulatorMonolith();
+
+        NPC elia = new NPC(
+                "Élia",
+                500,
+                1580,
+                40,
+                50,
+                KnowledgeTopic.KNOW_ELECTRIZATION,
+                "ELIA_ELECTRIZATION"
         );
+        addNpc(elia, Color.LIGHTBLUE);
 
-        NPC elia =
-                new NPC(
-                        "Élia",
-                        650,
-                        1650,
-                        40,
-                        50,
-                        KnowledgeTopic
-                                .KNOW_ELECTRIZATION,
-                        "ELIA_ELECTRIZATION"
-                );
-
-        addNpc(
-                elia,
-                Color.LIGHTBLUE
-        );
-
-        addDecoration(
-                "Estrutura condutora / isolante",
-                1100,
-                1500
-        );
-
+        // Saída existente: a área será ligada à conclusão do puzzle depois.
         createExitArea(
                 "Encruzilhada das Facções",
                 3000,
                 1450,
                 140,
                 300
+        );
+    }
+
+    /** Depósito estilizado, mantendo a identidade pixel art do cenário. */
+    private void addInsulatorHouse() {
+        double x = InsulatorTrailLayout.HOUSE_X;
+        double y = InsulatorTrailLayout.HOUSE_Y;
+
+        Rectangle base = new Rectangle(x, y + 65, 455, 185);
+        base.setFill(Color.web("#C4A77D"));
+        base.setStroke(Color.web("#564331"));
+        base.setStrokeWidth(8);
+
+        Rectangle roof = new Rectangle(x - 15, y + 15, 485, 65);
+        roof.setFill(Color.web("#435C70"));
+        roof.setStroke(Color.web("#233442"));
+        roof.setStrokeWidth(8);
+
+        Rectangle door = new Rectangle(x + 325, y + 145, 75, 105);
+        door.setFill(Color.web("#394D58"));
+        door.setStroke(Color.web("#1D2A32"));
+        door.setStrokeWidth(5);
+
+        Rectangle window = new Rectangle(x + 45, y + 110, 130, 70);
+        window.setFill(Color.web("#7CA7A8"));
+        window.setStroke(Color.web("#3E5255"));
+        window.setStrokeWidth(6);
+
+        Label sign = new Label("DEPÓSITO DE ISOLANTES");
+        sign.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 20px; -fx-font-weight: bold;"
+                + "-fx-text-fill: #1B2732;");
+        sign.relocate(x + 35, y + 205);
+
+        worldLayer.getChildren().addAll(
+                base, roof, door, window, sign
+        );
+    }
+
+    /** Placas preparadas para o futuro sistema de coleta. */
+    private void addCeramicPile() {
+        double x = InsulatorTrailLayout.CERAMIC_PILE_X;
+        double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
+        Group pile = new Group();
+
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 3; col++) {
+                Rectangle plate = new Rectangle(
+                        x + col * 58 + (row % 2) * 4,
+                        y + row * 33,
+                        54,
+                        28
+                );
+                plate.setFill(Color.web(row % 2 == 0
+                        ? "#D6E1DD" : "#A5C2BE"));
+                plate.setStroke(Color.web("#527878"));
+                plate.setStrokeWidth(4);
+                pile.getChildren().add(plate);
+            }
+        }
+
+        Label label = new Label("PLACAS DE CERÂMICA");
+        label.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 19px; -fx-font-weight: bold;"
+                + "-fx-text-fill: white; -fx-effect:"
+                + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
+        label.relocate(x - 10, y - 38);
+        worldLayer.getChildren().addAll(pile, label);
+    }
+
+    /**
+     * Estrutura metálica em diagonal, inspirada no croqui.
+     * Visual por enquanto; na próxima etapa receberá zonas de perigo
+     * e espaços para posicionar placas isolantes.
+     */
+    private void addMetalBridge() {
+        Group bridge = new Group();
+
+        Rectangle deck = new Rectangle(0, 0, 760, 170);
+        deck.setFill(Color.web("#58636B"));
+        deck.setStroke(Color.web("#26353D"));
+        deck.setStrokeWidth(12);
+        bridge.getChildren().add(deck);
+
+        for (int i = 0; i < 15; i++) {
+            Rectangle panel = new Rectangle(
+                    20 + i * 49, 18, 42, 134
+            );
+            panel.setFill(Color.web(i % 2 == 0
+                    ? "#778B91" : "#64767E"));
+            panel.setStroke(Color.web("#39474F"));
+            panel.setStrokeWidth(3);
+            bridge.getChildren().add(panel);
+        }
+
+        for (int i = 0; i < 4; i++) {
+            Line arc = new Line(
+                    140 + i * 135, 18,
+                    155 + i * 135, 150
+            );
+            arc.setStroke(Color.web("#F6D55C"));
+            arc.setStrokeWidth(6);
+            bridge.getChildren().add(arc);
+        }
+
+        bridge.setLayoutX(650);
+        bridge.setLayoutY(1170);
+        bridge.setRotate(-20);
+        worldLayer.getChildren().add(bridge);
+
+        Label warning = new Label("PASSARELA ENERGIZADA");
+        warning.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 20px; -fx-font-weight: bold;"
+                + "-fx-text-fill: #F6D55C;");
+        warning.relocate(790, 1070);
+        worldLayer.getChildren().add(warning);
+    }
+
+    /** Marco isolante próximo à saída, ainda sem ativação de checkpoint. */
+    private void addInsulatorMonolith() {
+        double x = InsulatorTrailLayout.MONOLITH_X;
+        double y = InsulatorTrailLayout.MONOLITH_Y;
+
+        Rectangle plinth = new Rectangle(x - 18, y + 145, 225, 40);
+        plinth.setFill(Color.web("#3D6466"));
+        plinth.setStroke(Color.web("#213D42"));
+        plinth.setStrokeWidth(5);
+
+        Rectangle body = new Rectangle(x + 22, y, 146, 155);
+        body.setFill(Color.web("#86C1BF"));
+        body.setStroke(Color.web("#294C52"));
+        body.setStrokeWidth(9);
+
+        Rectangle emblem = new Rectangle(x + 61, y + 52, 68, 44);
+        emblem.setFill(Color.web("#D6F1EA"));
+        emblem.setStroke(Color.web("#3D7774"));
+        emblem.setStrokeWidth(5);
+
+        Label label = new Label("MONÓLITO ISOLANTE");
+        label.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 18px; -fx-font-weight: bold;"
+                + "-fx-text-fill: white; -fx-effect:"
+                + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
+        label.relocate(x - 15, y - 42);
+
+        worldLayer.getChildren().addAll(
+                plinth, body, emblem, label
         );
     }
 

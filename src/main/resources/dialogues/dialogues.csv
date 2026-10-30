@@ -80,18 +80,19 @@ ELIA_ELECTRIZATION;Herói;Essa ponte... está completamente fora de controle.
 ELIA_ELECTRIZATION;Élia;Eu não daria mais nenhum passo se fosse você, viajante.
 ELIA_ELECTRIZATION;Herói;Por quê? São só algumas faíscas.
 ELIA_ELECTRIZATION;Élia;'Só algumas faíscas'? Aquela estrutura metálica está acumulando energia o suficiente para fritar você em segundos.
-ELIA_ELECTRIZATION;Herói;Mas a madeira e a cerâmica ali do lado não estão soltando faíscas. Por que só o metal?
+ELIA_ELECTRIZATION;Herói;O caminho de cerâmica parece seguro, mas há descargas no metal e no chão de madeira. Por quê?
 ELIA_ELECTRIZATION;Élia;É tudo uma questão de liberdade.
 ELIA_ELECTRIZATION;Herói;Liberdade?
 ELIA_ELECTRIZATION;Élia;Exato. O metal é um material condutor. Nele, os portadores de carga, como os elétrons, são livres para se mover. A energia anômala dessa região encontra um caminho fácil de transitar ali.
-ELIA_ELECTRIZATION;Élia;Já a cerâmica e a madeira são isolantes. As cargas neles estão fortemente presas, sem liberdade de movimento. Por isso não reagem ao caos da mesma forma.
-ELIA_ELECTRIZATION;Herói;Entendi... Então, se eu não encostar no metal, estou seguro.
+ELIA_ELECTRIZATION;Élia;A cerâmica do caminho é isolante. Madeira seca também pode isolar, mas aqui ela está completamente encharcada pelas tempestades.
+ELIA_ELECTRIZATION;Élia;A água com sais e impurezas facilita a passagem de corrente. Com esta anomalia, o solo molhado ficou perigoso, enquanto a trilha de cerâmica oferece uma passagem protegida.
+ELIA_ELECTRIZATION;Herói;Então preciso seguir pela cerâmica. Se eu não encostar no metal, estou seguro?
 ELIA_ELECTRIZATION;Élia;Errado de novo. Você não precisa tocar em um condutor para que ele afete você.
 ELIA_ELECTRIZATION;Herói;Como assim?
 ELIA_ELECTRIZATION;Élia;Apenas a proximidade de uma carga elétrica forte já atrai ou repele as cargas livres dentro de um condutor. É o que chamamos de eletrização por indução.
 ELIA_ELECTRIZATION;Élia;Aquela anomalia está tão violenta que afeta o metal a distância. Se você chegar perto demais, a sua própria carga vai induzir uma resposta e puxar uma descarga fatal.
 ELIA_ELECTRIZATION;Herói;Indução... então a energia se rearranja no condutor mesmo sem contato direto. Como eu passo, então?
-ELIA_ELECTRIZATION;Élia;Use a cabeça. Utilize os blocos de cerâmica isolante para bloquear os arcos elétricos. Se interromper o fluxo com um material isolante, você passa.
+ELIA_ELECTRIZATION;Élia;Há placas de cerâmica acumuladas ao lado da passarela. Vamos precisar posicioná-las sobre o metal para criar uma passagem protegida dos arcos elétricos.
 ELIA_ELECTRIZATION;Élia;E lembre-se: saber diferenciar um condutor que acumula energia de um isolante protetor será vital para a sua sobrevivência nas batalhas.
 
 MARA_CROSSROADS;Mara;Alto lá, viajante. Se foram os Elétrons que te enviaram, pode dar meia-volta.

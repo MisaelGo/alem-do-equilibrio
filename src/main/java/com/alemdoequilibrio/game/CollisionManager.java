@@ -70,19 +70,60 @@ public class CollisionManager {
                 addNeutralBushCollisions();
             }
 
-            case INSULATOR_TRAIL ->
+            case INSULATOR_TRAIL -> {
+                addInsulatorTrailWallCollisions();
+                // A ponte metálica permanece transitável: o desafio e o dano
+                // serão adicionados na etapa seguinte.
                 addObstacle(
-                        1100,
-                        1500,
-                        70,
-                        70
+                        InsulatorTrailLayout.HOUSE_X,
+                        InsulatorTrailLayout.HOUSE_Y,
+                        InsulatorTrailLayout.HOUSE_WIDTH,
+                        InsulatorTrailLayout.HOUSE_HEIGHT
                 );
+                addObstacle(
+                        InsulatorTrailLayout.CERAMIC_PILE_X,
+                        InsulatorTrailLayout.CERAMIC_PILE_Y,
+                        InsulatorTrailLayout.CERAMIC_PILE_WIDTH,
+                        InsulatorTrailLayout.CERAMIC_PILE_HEIGHT
+                );
+                addObstacle(
+                        InsulatorTrailLayout.MONOLITH_X,
+                        InsulatorTrailLayout.MONOLITH_Y,
+                        InsulatorTrailLayout.MONOLITH_WIDTH,
+                        InsulatorTrailLayout.MONOLITH_HEIGHT
+                );
+            }
 
             case FACTION_CROSSROADS,
                  COULOMB_VALLEY,
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
+            }
+        }
+    }
+
+    /**
+     * Colisões idênticas às paredes desenhadas pelo TileMapRenderer.
+     * Evita permitir que o herói atravesse as divisórias escuras.
+     */
+    private void addInsulatorTrailWallCollisions() {
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / InsulatorTrailLayout.TILE_SIZE);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                if (InsulatorTrailLayout.isWallTile(col, row,
+                        columns, rows)) {
+                    addObstacle(
+                            col * InsulatorTrailLayout.TILE_SIZE,
+                            row * InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE
+                    );
+                }
             }
         }
     }
