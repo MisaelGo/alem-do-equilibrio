@@ -104,6 +104,8 @@ public class ZoneManager {
 
     private Rectangle exitArea;
 
+    private Rectangle returnArea;
+
     private Rectangle checkpointArea;
 
     public ZoneManager(
@@ -148,6 +150,7 @@ public class ZoneManager {
         interactables.clear();
 
         exitArea = null;
+        returnArea = null;
         checkpointArea = null;
 
         worldLayer
@@ -294,6 +297,17 @@ public class ZoneManager {
                 "ELIA_ELECTRIZATION"
         );
         addNpc(elia, Color.LIGHTBLUE);
+
+        // Passagem oeste sem colisão: permite retornar à Fronteira Neutra.
+        createReturnArea(
+                0,
+                InsulatorTrailLayout.WEST_GATE_FIRST_ROW
+                        * InsulatorTrailLayout.TILE_SIZE,
+                InsulatorTrailLayout.TILE_SIZE,
+                (InsulatorTrailLayout.WEST_GATE_LAST_ROW
+                        - InsulatorTrailLayout.WEST_GATE_FIRST_ROW + 1)
+                        * InsulatorTrailLayout.TILE_SIZE
+        );
 
         // Saída existente: a área será ligada à conclusão do puzzle depois.
         createExitArea(
@@ -1392,6 +1406,28 @@ public class ZoneManager {
                         exitArea,
                         exitLabel
                 );
+    }
+
+    /** Gatilho exclusivo da passagem oeste da Trilha dos Isolantes. */
+    private void createReturnArea(
+            double x, double y, double width, double height) {
+
+        returnArea = new Rectangle(x, y, width, height);
+        returnArea.setFill(Color.TRANSPARENT);
+
+        Label label = new Label("← FRONTEIRA NEUTRA");
+        label.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-weight: bold; -fx-font-size: 18px;"
+                + "-fx-text-fill: #f4f4f4;"
+                + "-fx-effect: dropshadow(gaussian, black, 4, 0.9, 1, 1);");
+        label.relocate(65, y - 35);
+
+        worldLayer.getChildren().addAll(returnArea, label);
+    }
+
+    public boolean intersectsReturn(
+            double x, double y, double width, double height) {
+        return intersects(returnArea, x, y, width, height);
     }
 
     public boolean intersectsExit(

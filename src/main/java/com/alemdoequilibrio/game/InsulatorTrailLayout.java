@@ -14,6 +14,10 @@ final class InsulatorTrailLayout {
 
     static final int TILE_SIZE = 40;
 
+    // Entrada/saída oeste, alinhada com a trilha de cerâmica inferior.
+    static final int WEST_GATE_FIRST_ROW = 36;
+    static final int WEST_GATE_LAST_ROW = 42;
+
     static final double HOUSE_X = 175;
     static final double HOUSE_Y = 185;
     static final double HOUSE_WIDTH = 455;
@@ -67,7 +71,13 @@ final class InsulatorTrailLayout {
         if (col < 0 || row < 0 || col >= columns || row >= rows) {
             return true;
         }
-        if (row <= 2 || row >= rows - 2 || col == 0) {
+        if (row <= 2 || row >= rows - 2) {
+            return true;
+        }
+        // A abertura oeste permite voltar à Fronteira Neutra.
+        if (col == 0
+                && (row < WEST_GATE_FIRST_ROW
+                    || row > WEST_GATE_LAST_ROW)) {
             return true;
         }
         // A abertura leste coincide com a saída para a Encruzilhada.

@@ -1162,6 +1162,25 @@ public class ExplorationController {
     private boolean
             handleZoneTransition() {
 
+        // Retorno pela abertura oeste da Trilha, preservando o progresso.
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && zoneManager.intersectsReturn(
+                        hero.getX(), hero.getY(),
+                        TILE_SIZE, TILE_SIZE
+                )) {
+
+            loadZone(ExplorationZone.NEUTRAL_BORDER);
+
+            // Reaparece próximo à passagem leste, não no começo do jogo.
+            hero.setPosition(1460, 680);
+            heroView.setPosition(hero.getX(), hero.getY());
+            updateCamera();
+
+            updateZoneMusic(ExplorationZone.NEUTRAL_BORDER);
+            return true;
+        }
+
         if (!zoneManager
                 .intersectsExit(
                         hero.getX(),
