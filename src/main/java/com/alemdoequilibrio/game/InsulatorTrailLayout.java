@@ -30,7 +30,8 @@ final class InsulatorTrailLayout {
     static final double HOUSE_HEIGHT = 250;
 
     static final double CERAMIC_PILE_X = 220;
-    static final double CERAMIC_PILE_Y = 1110;
+    // Ao lado do corredor inferior de cerâmica, sem obstruir a passagem.
+    static final double CERAMIC_PILE_Y = 1320;
     static final double CERAMIC_PILE_WIDTH = 180;
     static final double CERAMIC_PILE_HEIGHT = 110;
 
@@ -56,9 +57,6 @@ final class InsulatorTrailLayout {
         { {3, 38}, {11, 38}, {19, 38}, {27, 34}, {35, 31},
           {43, 28}, {49, 27}, {57, 30}, {65, 33}, {72, 38}, {78, 38} },
 
-        { {3, 31}, {13, 29}, {22, 26}, {31, 23}, {37, 21},
-          {35, 18}, {29, 15}, {20, 14}, {12, 13}, {3, 13} },
-
         { {3, 10}, {11, 11}, {19, 10}, {24, 10}, {32, 11},
           {36, 14}, {41, 18}, {45, 18}, {53, 14}, {62, 8},
           {70, 3} },
@@ -68,7 +66,7 @@ final class InsulatorTrailLayout {
     };
 
     // Meia-largura de cada caminho, em tiles.
-    private static final double[] ROUTE_RADII = {3.1, 2.7, 2.5, 2.5};
+    private static final double[] ROUTE_RADII = {3.1, 2.5, 2.5};
 
     private InsulatorTrailLayout() {
     }
