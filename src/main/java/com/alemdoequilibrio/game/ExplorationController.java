@@ -446,7 +446,7 @@ public class ExplorationController {
                 // Entrada oeste: aparece junto à borda, sobre a cerâmica.
                 // A passagem de retorno só dispara ao caminhar para a esquerda.
                 hero.setPosition(
-                        65,
+                        10,
                         1560
                 );
 
@@ -1175,7 +1175,7 @@ public class ExplorationController {
 
             // Reaparece junto à borda leste, sem acionar a saída
             // até que o jogador avance novamente para a direita.
-            hero.setPosition(1530, 680);
+            hero.setPosition(1550, 680);
             heroView.setPosition(hero.getX(), hero.getY());
             updateCamera();
 

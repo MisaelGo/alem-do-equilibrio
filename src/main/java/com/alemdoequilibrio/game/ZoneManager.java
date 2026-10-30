@@ -303,7 +303,7 @@ public class ZoneManager {
                 0,
                 InsulatorTrailLayout.WEST_GATE_FIRST_ROW
                         * InsulatorTrailLayout.TILE_SIZE,
-                InsulatorTrailLayout.TILE_SIZE,
+                5,
                 (InsulatorTrailLayout.WEST_GATE_LAST_ROW
                         - InsulatorTrailLayout.WEST_GATE_FIRST_ROW + 1)
                         * InsulatorTrailLayout.TILE_SIZE
