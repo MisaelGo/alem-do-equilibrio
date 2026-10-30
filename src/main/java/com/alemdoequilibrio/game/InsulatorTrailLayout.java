@@ -14,9 +14,15 @@ final class InsulatorTrailLayout {
 
     static final int TILE_SIZE = 40;
 
-    // Entrada/saída oeste, alinhada com a trilha de cerâmica inferior.
+    /*
+     * Mesmo vão da saída leste da Fronteira Neutra: 4 tiles (160 px).
+     * Fronteira: linhas 15..18; Trilha: 36..39.
+     * Diferença de 21 tiles = 840 px entre os limites inferiores dos mapas.
+     * Assim, as duas paredes ficam na mesma altura quando a câmera
+     * mostra a extremidade inferior das respectivas regiões.
+     */
     static final int WEST_GATE_FIRST_ROW = 36;
-    static final int WEST_GATE_LAST_ROW = 42;
+    static final int WEST_GATE_LAST_ROW = 39;
 
     static final double HOUSE_X = 175;
     static final double HOUSE_Y = 185;
@@ -47,7 +53,7 @@ final class InsulatorTrailLayout {
      * O renderizador colore os tiles resultantes com a textura de cerâmica.
      */
     private static final double[][][] ROUTES = {
-        { {3, 40}, {11, 40}, {19, 38}, {27, 34}, {35, 31},
+        { {3, 38}, {11, 38}, {19, 38}, {27, 34}, {35, 31},
           {43, 28}, {49, 27}, {57, 30}, {65, 33}, {72, 38}, {78, 38} },
 
         { {3, 31}, {13, 29}, {22, 26}, {31, 23}, {37, 21},
@@ -99,6 +105,17 @@ final class InsulatorTrailLayout {
                 (int) (ZoneManager.WORLD_WIDTH / TILE_SIZE),
                 (int) (ZoneManager.WORLD_HEIGHT / TILE_SIZE))) {
             return false;
+        }
+
+        /*
+         * Nos 12 tiles iniciais, o corredor inferior tem exatamente a
+         * largura da abertura da Fronteira Neutra. Mais adiante,
+         * ele volta a seguir o traçado sinuoso normal.
+         * Limita apenas a faixa inferior, sem apagar os demais caminhos.
+         */
+        if (col <= 11 && row >= 35) {
+            return row >= WEST_GATE_FIRST_ROW
+                    && row <= WEST_GATE_LAST_ROW;
         }
 
         double x = col + 0.5;

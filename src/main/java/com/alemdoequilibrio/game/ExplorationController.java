@@ -447,7 +447,7 @@ public class ExplorationController {
                 // A passagem de retorno só dispara ao caminhar para a esquerda.
                 hero.setPosition(
                         10,
-                        1560
+                        1520
                 );
 
             case FACTION_CROSSROADS ->
