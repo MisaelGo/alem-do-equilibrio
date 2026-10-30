@@ -607,6 +607,8 @@ public class BattleView {
             imagePath = "/images/enemy_battle_boss.png";
         } else if (enemy instanceof CorruptedDipole) {
             imagePath = "/images/enemy_battle_dipole.png";
+        } else if (enemy instanceof UnstableConductor) {
+            imagePath = "/images/enemy_battle_conductor.png";
         } else if (enemy instanceof UncontrolledCharge uncharged) {
             imagePath = (uncharged.getChargeType() == ChargeType.POSITIVE)
                     ? "/images/enemy_battle_charge_pos.png"

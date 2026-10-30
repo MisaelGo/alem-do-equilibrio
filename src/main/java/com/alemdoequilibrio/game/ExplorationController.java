@@ -209,7 +209,8 @@ public class ExplorationController {
 
         mapEnemySpawner =
                 new MapEnemySpawner(
-                        worldLayer
+                        worldLayer,
+                        resourceManager
                 );
 
         collisionManager =
