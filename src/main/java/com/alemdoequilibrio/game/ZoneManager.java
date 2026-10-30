@@ -309,13 +309,17 @@ public class ZoneManager {
                         * InsulatorTrailLayout.TILE_SIZE
         );
 
-        // Saída existente: a área será ligada à conclusão do puzzle depois.
+        // Saída na abertura superior direita, alinhada à cerâmica.
+        // Mantém o gatilho estreito, como na Fronteira Neutra.
         createExitArea(
                 "Encruzilhada das Facções",
-                3000,
-                1450,
-                140,
-                300
+                WORLD_WIDTH - 5,
+                InsulatorTrailLayout.EAST_GATE_FIRST_ROW
+                        * InsulatorTrailLayout.TILE_SIZE,
+                5,
+                (InsulatorTrailLayout.EAST_GATE_LAST_ROW
+                        - InsulatorTrailLayout.EAST_GATE_FIRST_ROW + 1)
+                        * InsulatorTrailLayout.TILE_SIZE
         );
     }
 
@@ -1383,7 +1387,8 @@ public class ZoneManager {
                 );
 
         exitLabel.relocate(
-                x - 40,
+                currentZone == ExplorationZone.INSULATOR_TRAIL
+                        ? x - 270 : x - 40,
                 y - 35
         );
 

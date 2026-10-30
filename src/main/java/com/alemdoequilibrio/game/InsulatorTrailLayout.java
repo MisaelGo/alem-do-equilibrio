@@ -24,6 +24,10 @@ final class InsulatorTrailLayout {
     static final int WEST_GATE_FIRST_ROW = 36;
     static final int WEST_GATE_LAST_ROW = 39;
 
+    // Saída na extremidade superior direita (4 tiles = 160 px).
+    static final int EAST_GATE_FIRST_ROW = 9;
+    static final int EAST_GATE_LAST_ROW = 12;
+
     static final double HOUSE_X = 175;
     static final double HOUSE_Y = 185;
     static final double HOUSE_WIDTH = 455;
@@ -49,24 +53,30 @@ final class InsulatorTrailLayout {
     };
 
     /*
-     * Trilhas sinuosas do croqui, representadas por eixos em tiles.
-     * Cada eixo recebe uma largura própria, formando corredores e bifurcações.
-     * O renderizador colore os tiles resultantes com a textura de cerâmica.
+     * Rede de cerâmica conectada, com uma única entrada oeste e saída
+     * superior direita. A ligação central une os dois caminhos antes
+     * separados e preserva o percurso próximo à ponte e ao monólito.
      */
     private static final double[][][] ROUTES = {
+        // Caminho inferior da entrada até o setor da ponte e do monólito.
         { {3, 38}, {11, 38}, {19, 38}, {27, 34}, {35, 31},
           {43, 28}, {49, 27}, {57, 30}, {65, 33}, {72, 38}, {78, 38} },
 
+        // Caminho superior até a saída na borda direita.
         { {3, 10}, {11, 11}, {19, 10}, {24, 10}, {32, 11},
           {36, 14}, {41, 18}, {45, 18}, {53, 14}, {62, 8},
-          {70, 3} },
+          {70, 10}, {79, 11} },
 
+        // Ramificação pela direita, passando abaixo da parede intermediária.
         { {76, 11}, {70, 11}, {64, 15}, {59, 20}, {58, 25},
-          {63, 27}, {74, 27}, {76, 30}, {76, 38} }
+          {63, 27}, {74, 27}, {76, 30}, {76, 38} },
+
+        // Ponte de cerâmica entre o caminho inferior e o superior.
+        { {43, 28}, {45, 24}, {46, 20}, {45, 18} }
     };
 
-    // Meia-largura de cada caminho, em tiles.
-    private static final double[] ROUTE_RADII = {3.1, 2.5, 2.5};
+    // Meia-largura dos corredores, na mesma ordem de ROUTES.
+    private static final double[] ROUTE_RADII = {3.1, 2.5, 2.5, 2.4};
 
     private InsulatorTrailLayout() {
     }
@@ -84,8 +94,10 @@ final class InsulatorTrailLayout {
                     || row > WEST_GATE_LAST_ROW)) {
             return true;
         }
-        // A abertura leste coincide com a saída para a Encruzilhada.
-        if (col >= columns - 2 && (row < 35 || row > 42)) {
+        // Abertura superior direita para a Encruzilhada das Facções.
+        if (col >= columns - 2
+                && (row < EAST_GATE_FIRST_ROW
+                    || row > EAST_GATE_LAST_ROW)) {
             return true;
         }
         for (int[] wall : INNER_WALLS) {
@@ -114,6 +126,13 @@ final class InsulatorTrailLayout {
         if (col <= 11 && row >= 35) {
             return row >= WEST_GATE_FIRST_ROW
                     && row <= WEST_GATE_LAST_ROW;
+        }
+
+        // O trecho aberto na borda leste deve ser todo de cerâmica.
+        if (col >= (int) (ZoneManager.WORLD_WIDTH / TILE_SIZE) - 2
+                && row >= EAST_GATE_FIRST_ROW
+                && row <= EAST_GATE_LAST_ROW) {
+            return true;
         }
 
         double x = col + 0.5;
