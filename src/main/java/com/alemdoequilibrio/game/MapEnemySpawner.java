@@ -68,19 +68,37 @@ public class MapEnemySpawner {
             }
 
             /*
-             * Primeiros inimigos simples na Trilha dos Isolantes.
+             * Quatro encontros distribuídos pela Trilha dos Isolantes:
+             * ponte metálica, caminho central, entrada do depósito e
+             * saída superior direita para a Encruzilhada das Facções.
              */
             case INSULATOR_TRAIL -> {
+                // Centro da passarela metálica (centro do sprite: 1100, 1400).
                 spawnEnemy(
                         new WanderingSpark(201),
-                        1250,
-                        1400
+                        1080,
+                        1380
                 );
 
+                // Centro do caminho de cerâmica, após a passarela.
                 spawnEnemy(
                         new UncontrolledCharge(202, ChargeType.NEGATIVE),
-                        2200,
-                        1050
+                        2180,
+                        1140
+                );
+
+                // Próximo à porta do depósito de isolantes.
+                spawnEnemy(
+                        new WanderingSpark(203),
+                        520,
+                        500
+                );
+
+                // Último encontro antes da saída superior direita.
+                spawnEnemy(
+                        new UncontrolledCharge(204, ChargeType.POSITIVE),
+                        3020,
+                        420
                 );
             }
 
