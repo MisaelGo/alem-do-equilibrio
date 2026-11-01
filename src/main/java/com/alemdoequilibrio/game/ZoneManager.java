@@ -1039,7 +1039,7 @@ public class ZoneManager {
         }
         return switch (name.trim().toLowerCase()) {
             case "nilo" -> "/images/npc_nilo.png";
-            case "élia", "elia" -> "/images/elia_new.png";
+            case "élia", "elia" -> "/images/npc_elia.png";
             case "mara" -> "/images/npc_mara.png";
             case "vetor" -> "/images/npc_vetor.png";
             case "sera" -> "/images/npc_sera.png";
