@@ -117,13 +117,21 @@ public final class TileMapRenderer {
                     continue;
                 }
 
-                // 2. Trilhas e estruturas específicas da zona
+                // 2. Trecho da passarela: metal substitui completamente
+                // a cerâmica, sem camada sobreposta ao caminho.
+                if (zone == ExplorationZone.INSULATOR_TRAIL
+                        && InsulatorTrailLayout.isMetalBridgeTile(col, row)) {
+                    gc.drawImage(theme.wall, x, y, tileSize, tileSize);
+                    continue;
+                }
+
+                // 3. Trilhas e estruturas específicas da zona
                 if (isZonePathTile(zone, col, row)) {
                     gc.drawImage(theme.path, x, y, tileSize, tileSize);
                     continue;
                 }
 
-                // 3. Solo padrão da zona
+                // 4. Solo padrão da zona
                 gc.drawImage(theme.ground, x, y, tileSize, tileSize);
             }
         }

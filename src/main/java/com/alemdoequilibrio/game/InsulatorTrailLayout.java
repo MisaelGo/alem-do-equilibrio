@@ -1,5 +1,10 @@
 package com.alemdoequilibrio.game;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.geometry.Rectangle2D;
+
 /**
  * Geometria compartilhada da Trilha dos Isolantes.
  *
@@ -34,8 +39,8 @@ final class InsulatorTrailLayout {
     static final double HOUSE_HEIGHT = 250;
 
     static final double CERAMIC_PILE_X = 220;
-    // Ao lado do corredor inferior de cerâmica, sem obstruir a passagem.
-    static final double CERAMIC_PILE_Y = 1320;
+    // Encostada à borda superior do corredor inferior, sem invadi-lo.
+    static final double CERAMIC_PILE_Y = 1340;
     static final double CERAMIC_PILE_WIDTH = 180;
     static final double CERAMIC_PILE_HEIGHT = 110;
 
@@ -79,6 +84,31 @@ final class InsulatorTrailLayout {
     private InsulatorTrailLayout() {
     }
 
+    /**
+     * Retângulos das nove placas visíveis, usados tanto na renderização
+     * quanto nas colisões. Não cria colisão no espaço vazio da pilha.
+     */
+    static List<Rectangle2D> getCeramicPilePlates() {
+        List<Rectangle2D> plates = new ArrayList<>();
+
+        for (int layer = 0; layer < 3; layer++) {
+            int count = 4 - layer;
+            double layerX = CERAMIC_PILE_X + layer * (TILE_SIZE / 2.0);
+            double layerY = CERAMIC_PILE_Y + (2 - layer) * 28;
+
+            for (int col = 0; col < count; col++) {
+                plates.add(new Rectangle2D(
+                        layerX + col * TILE_SIZE,
+                        layerY,
+                        TILE_SIZE,
+                        TILE_SIZE
+                ));
+            }
+        }
+
+        return plates;
+    }
+
     static boolean isWallTile(int col, int row, int columns, int rows) {
         if (col < 0 || row < 0 || col >= columns || row >= rows) {
             return true;
@@ -107,7 +137,35 @@ final class InsulatorTrailLayout {
         return false;
     }
 
+    /**
+     * Piso metálico que substitui a cerâmica na parte diagonal da trilha.
+     * Usa os mesmos limites do caminho, sem sobrepor uma ponte visual.
+     */
+    static boolean isMetalBridgeTile(int col, int row) {
+        if (!isPathTile(col, row)) {
+            return false;
+        }
+
+        double x = col + 0.5;
+        double y = row + 0.5;
+        double[] start = ROUTES[0][2]; // (19, 38)
+        double[] end = ROUTES[0][4];   // (35, 31)
+        double dx = end[0] - start[0];
+        double dy = end[1] - start[1];
+        double lengthSquared = dx * dx + dy * dy;
+        double t = ((x - start[0]) * dx + (y - start[1]) * dy)
+                / lengthSquared;
+
+        return t >= 0.0 && t <= 1.0
+                && distanceToSegment(x, y, start, end) <= ROUTE_RADII[0];
+    }
+
     static boolean isCeramicTile(int col, int row) {
+        return isPathTile(col, row) && !isMetalBridgeTile(col, row);
+    }
+
+    /** Retorna todos os tiles transitáveis, independentemente do material. */
+    private static boolean isPathTile(int col, int row) {
         // Evita considerar paredes como parte de um piso seguro.
         if (isWallTile(col, row,
                 (int) (ZoneManager.WORLD_WIDTH / TILE_SIZE),

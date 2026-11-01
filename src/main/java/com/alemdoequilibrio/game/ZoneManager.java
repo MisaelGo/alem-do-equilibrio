@@ -363,33 +363,24 @@ public class ZoneManager {
     private void addCeramicPile() {
         double x = InsulatorTrailLayout.CERAMIC_PILE_X;
         double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
-        double tileSize = InsulatorTrailLayout.TILE_SIZE;
         Image ceramicTile = resourceManager.getImage(
                 "/images/tile_insulator_ceramic.png"
         );
 
         Group pile = new Group();
 
-        /*
-         * Mesma textura da trilha, empilhada em três camadas.
-         * Cada camada de cima tem Y menor, com ligeiro deslocamento
-         * horizontal. A base fica junto ao corredor, sem obstruí-lo.
-         */
-        for (int layer = 0; layer < 3; layer++) {
-            int plates = 4 - layer;
-            double layerX = x + layer * (tileSize / 2.0);
-            double layerY = y + (2 - layer) * 28;
-
-            for (int col = 0; col < plates; col++) {
-                ImageView plate = new ImageView(ceramicTile);
-                plate.setX(layerX + col * tileSize);
-                plate.setY(layerY);
-                plate.setFitWidth(tileSize);
-                plate.setFitHeight(tileSize);
-                plate.setPreserveRatio(false);
-                plate.setSmooth(false);
-                pile.getChildren().add(plate);
-            }
+        // Compartilha as dimensões e a posição de CADA placa com
+        // o gerenciador de colisão, sem caixa retangular ao redor.
+        for (javafx.geometry.Rectangle2D bounds
+                : InsulatorTrailLayout.getCeramicPilePlates()) {
+            ImageView plate = new ImageView(ceramicTile);
+            plate.setX(bounds.getMinX());
+            plate.setY(bounds.getMinY());
+            plate.setFitWidth(bounds.getWidth());
+            plate.setFitHeight(bounds.getHeight());
+            plate.setPreserveRatio(false);
+            plate.setSmooth(false);
+            pile.getChildren().add(plate);
         }
 
         Label label = new Label("PLACAS DE CERÂMICA");
@@ -402,59 +393,15 @@ public class ZoneManager {
     }
 
     /**
-     * Passarela visual com a textura metálica usada nas bordas da região.
-     * Acompanha o trecho diagonal da própria trilha de cerâmica, de
-     * (19, 38) a (35, 31) em coordenadas de tile.
-     *
-     * O dano elétrico e a colocação de placas serão implementados
-     * em uma etapa posterior; a ponte permanece transitável.
+     * A passarela é desenhada diretamente no TileMapRenderer usando
+     * o tile metálico da borda. Aqui fica apenas sua identificação.
      */
     private void addMetalBridge() {
-        double tileSize = InsulatorTrailLayout.TILE_SIZE;
-        int columns = 18;
-        int rows = 3;
-        double bridgeWidth = columns * tileSize;
-        double bridgeHeight = rows * tileSize;
-
-        Image metalTile = resourceManager.getImage(
-                "/images/tile_insulator_rock.png"
-        );
-
-        Group bridge = new Group();
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < columns; col++) {
-                ImageView tile = new ImageView(metalTile);
-                tile.setX(col * tileSize);
-                tile.setY(row * tileSize);
-                tile.setFitWidth(tileSize);
-                tile.setFitHeight(tileSize);
-                tile.setPreserveRatio(false);
-                tile.setSmooth(false);
-                bridge.getChildren().add(tile);
-            }
-        }
-
-        // Eixo do corredor diagonal: o centro da ponte coincide
-        // com o centro do trecho entre esses dois pontos.
-        double startX = (19 + 0.5) * tileSize;
-        double startY = (38 + 0.5) * tileSize;
-        double endX = (35 + 0.5) * tileSize;
-        double endY = (31 + 0.5) * tileSize;
-
-        bridge.setLayoutX((startX + endX - bridgeWidth) / 2.0);
-        bridge.setLayoutY((startY + endY - bridgeHeight) / 2.0);
-        bridge.setRotate(Math.toDegrees(
-                Math.atan2(endY - startY, endX - startX)
-        ));
-
-        worldLayer.getChildren().add(bridge);
-
         Label warning = new Label("PASSARELA ENERGIZADA");
         warning.setStyle("-fx-font-family: 'Consolas';"
                 + "-fx-font-size: 20px; -fx-font-weight: bold;"
                 + "-fx-text-fill: #F6D55C;");
-        warning.relocate(910, 1130);
+        warning.relocate(910, 1200);
         worldLayer.getChildren().add(warning);
     }
 

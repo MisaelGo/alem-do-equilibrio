@@ -80,12 +80,17 @@ public class CollisionManager {
                         InsulatorTrailLayout.HOUSE_WIDTH,
                         InsulatorTrailLayout.HOUSE_HEIGHT
                 );
-                addObstacle(
-                        InsulatorTrailLayout.CERAMIC_PILE_X,
-                        InsulatorTrailLayout.CERAMIC_PILE_Y,
-                        InsulatorTrailLayout.CERAMIC_PILE_WIDTH,
-                        InsulatorTrailLayout.CERAMIC_PILE_HEIGHT
-                );
+                // Colisão em cada uma das placas: o herói pode
+                // chegar até o contorno real da pilha.
+                for (Rectangle2D plate
+                        : InsulatorTrailLayout.getCeramicPilePlates()) {
+                    addObstacle(
+                            plate.getMinX(),
+                            plate.getMinY(),
+                            plate.getWidth(),
+                            plate.getHeight()
+                    );
+                }
                 addObstacle(
                         InsulatorTrailLayout.MONOLITH_X,
                         InsulatorTrailLayout.MONOLITH_Y,
