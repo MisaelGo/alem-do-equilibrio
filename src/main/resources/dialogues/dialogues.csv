@@ -76,24 +76,59 @@ NILO_CHARGE_SIGNS;Nilo;Mas cada resposta começa por alguma delas.
 
 NILO_REPEAT;Nilo;Boa sorte na sua viagem. E lembre-se: observe bem como as cargas ao seu redor se comportam.
 
-ELIA_ELECTRIZATION;Herói;Essa ponte... está completamente fora de controle.
-ELIA_ELECTRIZATION;Élia;Eu não daria mais nenhum passo se fosse você, viajante.
-ELIA_ELECTRIZATION;Herói;Por quê? São só algumas faíscas.
-ELIA_ELECTRIZATION;Élia;'Só algumas faíscas'? Aquela estrutura metálica está acumulando energia o suficiente para fritar você em segundos.
-ELIA_ELECTRIZATION;Herói;O caminho de cerâmica parece seguro, mas há descargas no metal e no chão de madeira. Por quê?
-ELIA_ELECTRIZATION;Élia;É tudo uma questão de liberdade.
-ELIA_ELECTRIZATION;Herói;Liberdade?
-ELIA_ELECTRIZATION;Élia;Exato. O metal é um material condutor. Nele, os portadores de carga, como os elétrons, são livres para se mover. A energia anômala dessa região encontra um caminho fácil de transitar ali.
-ELIA_ELECTRIZATION;Élia;A cerâmica do caminho é isolante. Madeira seca também pode isolar, mas aqui ela está completamente encharcada pelas tempestades.
-ELIA_ELECTRIZATION;Élia;A água com sais e impurezas facilita a passagem de corrente. Com esta anomalia, o solo molhado ficou perigoso, enquanto a trilha de cerâmica oferece uma passagem protegida.
-ELIA_ELECTRIZATION;Herói;Então preciso seguir pela cerâmica. Se eu não encostar no metal, estou seguro?
-ELIA_ELECTRIZATION;Élia;Errado de novo. Você não precisa tocar em um condutor para que ele afete você.
-ELIA_ELECTRIZATION;Herói;Como assim?
-ELIA_ELECTRIZATION;Élia;Apenas a proximidade de uma carga elétrica forte já atrai ou repele as cargas livres dentro de um condutor. É o que chamamos de eletrização por indução.
-ELIA_ELECTRIZATION;Élia;Aquela anomalia está tão violenta que afeta o metal a distância. Se você chegar perto demais, a sua própria carga vai induzir uma resposta e puxar uma descarga fatal.
-ELIA_ELECTRIZATION;Herói;Indução... então a energia se rearranja no condutor mesmo sem contato direto. Como eu passo, então?
-ELIA_ELECTRIZATION;Élia;Há placas de cerâmica acumuladas ao lado da passarela. Vamos precisar posicioná-las sobre o metal para criar uma passagem protegida dos arcos elétricos.
-ELIA_ELECTRIZATION;Élia;E lembre-se: saber diferenciar um condutor que acumula energia de um isolante protetor será vital para a sua sobrevivência nas batalhas.
+INTRO_INSULATOR_TRAIL;Élia;Ei! Você aí! Não saia da trilha de cerâmica!
+INTRO_INSULATOR_TRAIL;Herói;O quê? Quem está falando?
+INTRO_INSULATOR_TRAIL;Élia;Aqui! E não pise nessa madeira, a menos que queira descobrir como é levar uma descarga elétrica.
+INTRO_INSULATOR_TRAIL;Herói;Deve ser aquela pessoa ali adiante. Melhor falar com ela antes de continuar.
+
+ELIA_ELECTRIZATION;Herói;O chão de madeira está eletrificado?
+ELIA_ELECTRIZATION;Élia;Não exatamente. Está completamente encharcado. As tempestades não param há dias, e a água acumulada, junto às anomalias elétricas, tornou o solo perigoso.
+ELIA_ELECTRIZATION;Herói;Então é por isso que existe esse caminho de cerâmica...
+ELIA_ELECTRIZATION;Élia;Exatamente. A cerâmica é um bom isolante elétrico. Já a água com sais e impurezas, presente na madeira molhada, facilita a passagem de corrente elétrica.
+ELIA_ELECTRIZATION;Herói;Entendi. Madeira molhada, perigosa. Cerâmica, segura.
+ELIA_ELECTRIZATION;Élia;Pelo menos aqui. Mas não confunda um caminho relativamente seguro com um lugar sem perigos.
+ELIA_ELECTRIZATION;Herói;Você parece entender bastante dessas coisas.
+ELIA_ELECTRIZATION;Élia;Élia. Técnica especializada em materiais elétricos. E você é...?
+ELIA_ELECTRIZATION;Herói;Alguém tentando encontrar um Fragmento desaparecido. Nilo me disse que ele pode estar relacionado às anomalias.
+ELIA_ELECTRIZATION;Élia;Um Fragmento? Então não sou a única investigando o que aconteceu...
+ELIA_ELECTRIZATION;Herói;Você sabe de alguma coisa?
+ELIA_ELECTRIZATION;Élia;Sei que os instrumentos enlouqueceram quando as primeiras descargas começaram. E que a energia está se comportando de maneiras que nunca vimos.
+ELIA_ELECTRIZATION;Herói;Nilo também falou sobre isso.
+ELIA_ELECTRIZATION;Élia;Então escute o que vou dizer. Mais adiante existe uma passarela metálica. Antes, ela ligava duas partes da trilha. Agora, está energizada.
+ELIA_ELECTRIZATION;Herói;Mas por que o metal é tão perigoso, enquanto a cerâmica nos protege?
+ELIA_ELECTRIZATION;Élia;Porque o metal é um condutor. Seus elétrons podem se movimentar com facilidade, permitindo a circulação de cargas elétricas.
+ELIA_ELECTRIZATION;Herói;E a cerâmica impede essa movimentação?
+ELIA_ELECTRIZATION;Élia;Ela dificulta muito a passagem de corrente elétrica. É por isso que usamos materiais isolantes para proteger estruturas e equipamentos.
+ELIA_ELECTRIZATION;Herói;Então basta não tocar no metal?
+ELIA_ELECTRIZATION;Élia;Não necessariamente. Um campo elétrico pode provocar uma redistribuição de cargas em um condutor próximo, mesmo sem contato. Isso é eletrização por indução.
+ELIA_ELECTRIZATION;Herói;Quer dizer que a eletricidade pode afetar um objeto sem encostar nele?
+ELIA_ELECTRIZATION;Élia;Exatamente. E, com as tensões anormais desta região, também podem ocorrer descargas pelo ar.
+ELIA_ELECTRIZATION;Herói;Ótimo. Uma ponte perigosa, um chão perigoso... Existe alguma coisa que não queira me matar?
+ELIA_ELECTRIZATION;Élia;Talvez. Há placas de cerâmica acumuladas perto da entrada. Elas podem ser usadas para preparar uma passagem isolada sobre o metal.
+ELIA_ELECTRIZATION;Herói;Então preciso levar essas placas até a passarela.
+ELIA_ELECTRIZATION;Élia;Essa é a ideia. Mas cuidado com as criaturas corrompidas que apareceram pelo caminho.
+ELIA_ELECTRIZATION;Élia;E mais uma coisa. Se encontrar um monumento antigo no fim da trilha, não o ignore.
+ELIA_ELECTRIZATION;Herói;Um monumento?
+ELIA_ELECTRIZATION;Élia;O Monólito Isolante. Ninguém sabe ao certo por que foi construído ali, mas suas propriedades têm intrigado os pesquisadores desde o início das anomalias.
+ELIA_ELECTRIZATION;Herói;Você acha que está relacionado ao Fragmento?
+ELIA_ELECTRIZATION;Élia;Não tenho provas. Mas há algo estranho acontecendo ao redor dele.
+ELIA_ELECTRIZATION;Herói;Então vou investigar.
+ELIA_ELECTRIZATION;Élia;Faça isso. E, viajante...
+ELIA_ELECTRIZATION;Herói;Sim?
+ELIA_ELECTRIZATION;Élia;Se descobrir o que está provocando essas descargas, volte e me conte. Há perguntas demais e respostas de menos por aqui.
+
+ELIA_REPEAT;Élia;Continue pela cerâmica, viajante. O metal da passarela está energizado e a madeira está encharcada. Se encontrar algo no monólito, venha me contar.
+
+INSULATOR_DEPOT_INTERACTION;Herói;Um depósito de isolantes... Parece que guardavam materiais para proteger as estruturas desta região.
+INSULATOR_DEPOT_INTERACTION;Herói;Há caixas de madeira e peças de cerâmica por toda parte.
+INSULATOR_DEPOT_INTERACTION;Herói;Talvez seja daqui que vieram as placas acumuladas perto da entrada da trilha.
+INSULATOR_DEPOT_INTERACTION;Herói;É estranho... O depósito parece abandonado há pouco tempo. O que aconteceu com as pessoas que trabalhavam aqui?
+
+INSULATOR_MONOLITH_INTERACTION;Herói;Que estrutura impressionante...
+INSULATOR_MONOLITH_INTERACTION;Herói;Parece feita de materiais isolantes, mas há um símbolo brilhando no centro.
+INSULATOR_MONOLITH_INTERACTION;Herói;Estranho... Mesmo com toda a instabilidade elétrica desta região, o monólito parece intacto.
+INSULATOR_MONOLITH_INTERACTION;Herói;Será que ele foi construído para resistir às descargas?
+INSULATOR_MONOLITH_INTERACTION;Herói;Élia disse que ninguém sabe sua verdadeira função. Talvez exista algo mais por trás deste monumento.
 
 MARA_CROSSROADS;Mara;Alto lá, viajante. Se foram os Elétrons que te enviaram, pode dar meia-volta.
 MARA_CROSSROADS;Herói;Calma, ninguém me enviou. Sou de fora. Só estou tentando descobrir o que está causando essa instabilidade toda e onde está o Fragmento.

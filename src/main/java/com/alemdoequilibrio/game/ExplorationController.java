@@ -639,6 +639,18 @@ public class ExplorationController {
         }
 
         if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof NPC npc
+                && "Élia".equalsIgnoreCase(npc.getName())
+                && chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                )) {
+
+            dialogueController.startDialogue("ELIA_REPEAT");
+            return;
+        }
+
+        if (zoneManager.getCurrentZone()
                 == ExplorationZone.NEUTRAL_BORDER
                 && interactable
                         instanceof NPC npc) {
@@ -1234,6 +1246,12 @@ public class ExplorationController {
                 nextZone
         );
 
+        // A primeira entrada na Trilha dos Isolantes dispara o aviso
+        // de Élia imediatamente, antes de liberar novos movimentos.
+        if (shouldStartInsulatorTrailIntro()) {
+            startInsulatorTrailIntro();
+        }
+
         return true;
     }
 
@@ -1402,6 +1420,29 @@ public class ExplorationController {
         }
     }
 
+    private boolean shouldStartInsulatorTrailIntro() {
+        return zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.hasSeenInsulatorTrailIntro()
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                );
+    }
+
+    private void startInsulatorTrailIntro() {
+        // Marca antes da transição para DIALOGUE: ao concluir a fala,
+        // start() será chamado outra vez sem repetir a introdução.
+        chapterProgress.markInsulatorTrailIntroSeen();
+        onProgressChanged.run();
+
+        dialogueController.startDialogue("INTRO_INSULATOR_TRAIL");
+
+        if (dialogueController.isOpen()) {
+            hud.hideInteractionPrompt();
+            onDialogueStarted.run();
+        }
+    }
+
     public void start() {
 
         resetKeys();
@@ -1426,8 +1467,16 @@ public class ExplorationController {
         * o movimento do jogador.
         */
         if (shouldStartNeutralBorderIntro()) {
-        
+
             startNeutralBorderIntro();
+
+            return;
+        }
+
+        // Também cobre carregamentos de save e reaparições na zona.
+        if (shouldStartInsulatorTrailIntro()) {
+
+            startInsulatorTrailIntro();
 
             return;
         }

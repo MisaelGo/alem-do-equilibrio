@@ -346,6 +346,17 @@ public class ZoneManager {
         sign.relocate(x + 85, y - 27);
 
         worldLayer.getChildren().addAll(house, sign);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o depósito",
+                        "INSULATOR_DEPOT_INTERACTION",
+                        x,
+                        y,
+                        InsulatorTrailLayout.HOUSE_WIDTH,
+                        InsulatorTrailLayout.HOUSE_HEIGHT
+                )
+        );
     }
 
     /** Placas preparadas para o futuro sistema de coleta. */
@@ -417,6 +428,17 @@ public class ZoneManager {
         label.relocate(x - 42, y - 42);
 
         worldLayer.getChildren().addAll(monolith, label);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o monólito",
+                        "INSULATOR_MONOLITH_INTERACTION",
+                        x,
+                        y,
+                        InsulatorTrailLayout.MONOLITH_WIDTH,
+                        InsulatorTrailLayout.MONOLITH_HEIGHT
+                )
+        );
     }
 
     private void buildFactionCrossroads() {

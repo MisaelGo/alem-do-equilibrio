@@ -21,6 +21,8 @@ public class ChapterProgress {
 
     private boolean neutralBorderIntroSeen;
 
+    private boolean insulatorTrailIntroSeen;
+
     public ChapterProgress() {
 
         learnedTopics =
@@ -44,6 +46,8 @@ public class ChapterProgress {
         neutralIonMet = false;
 
         neutralBorderIntroSeen = false;
+
+        insulatorTrailIntroSeen = false;
     }
 
     public void learn(
@@ -166,6 +170,14 @@ public class ChapterProgress {
         return neutralBorderIntroSeen;
     }
 
+    public void markInsulatorTrailIntroSeen() {
+        insulatorTrailIntroSeen = true;
+    }
+
+    public boolean hasSeenInsulatorTrailIntro() {
+        return insulatorTrailIntroSeen;
+    }
+
     /**
      * Mantém compatibilidade com chamadas antigas que não
      * armazenavam o encontro com Íon.
@@ -219,6 +231,29 @@ public class ChapterProgress {
             boolean neutralIonMet,
             boolean neutralBorderIntroSeen) {
 
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                neutralIonMet,
+                neutralBorderIntroSeen,
+                false
+        );
+    }
+
+    /** Restaura as duas introduções, mantendo os saves antigos válidos. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen) {
+
         if (checkpoint == null
                 || learnedTopics == null
                 || completedQuizzes == null) {
@@ -254,5 +289,8 @@ public class ChapterProgress {
 
         this.neutralBorderIntroSeen =
                 neutralBorderIntroSeen;
+
+        this.insulatorTrailIntroSeen =
+                insulatorTrailIntroSeen;
     }
 }

@@ -163,6 +163,11 @@ public class SaveManager {
                 + progress.hasSeenNeutralBorderIntro()
         );
 
+        lines.add(
+                "insulatorTrailIntroSeen="
+                + progress.hasSeenInsulatorTrailIntro()
+        );
+
         Path absolutePath =
                 savePath
                         .toAbsolutePath();
@@ -338,6 +343,13 @@ public class SaveManager {
                 ? parseBoolean(introValue, "neutralBorderIntroSeen")
                 : false;
 
+        // Em saves antigos, quem já aprendeu com Élia não vê
+        // novamente o aviso automático da entrada da trilha.
+        String trailIntroValue = values.get("insulatorTrailIntroSeen");
+        boolean insulatorTrailIntroSeen = trailIntroValue != null
+                ? parseBoolean(trailIntroValue, "insulatorTrailIntroSeen")
+                : learnedTopics.contains(KnowledgeTopic.KNOW_ELECTRIZATION);
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -358,7 +370,8 @@ public class SaveManager {
                 bossDefeated,
                 fragmentObtained,
                 neutralIonMet,
-                neutralBorderIntroSeen
+                neutralBorderIntroSeen,
+                insulatorTrailIntroSeen
         );
 
         hero.clearAbilities();
