@@ -53,30 +53,28 @@ final class InsulatorTrailLayout {
     };
 
     /*
-     * Rede de cerâmica conectada, com uma única entrada oeste e saída
-     * superior direita. A ligação central une os dois caminhos antes
-     * separados e preserva o percurso próximo à ponte e ao monólito.
+     * Traçado conectado: a ramificação inferior termina junto ao monólito,
+     * sem uma segunda rota que contorne o monumento pela direita. O jogador
+     * deve voltar pelo mesmo caminho diagonal para seguir até a saída.
      */
     private static final double[][][] ROUTES = {
-        // Caminho inferior da entrada até o setor da ponte e do monólito.
+        // Entrada oeste e desvio diagonal que termina diante do monólito.
         { {3, 38}, {11, 38}, {19, 38}, {27, 34}, {35, 31},
-          {43, 28}, {49, 27}, {57, 30}, {65, 33}, {72, 38}, {78, 38} },
+          {43, 28}, {49, 27}, {57, 30}, {62, 33}, {65, 35},
+          {66, 37} },
 
-        // Caminho superior até a saída na borda direita.
-        { {3, 10}, {11, 11}, {19, 10}, {24, 10}, {32, 11},
-          {36, 14}, {41, 18}, {45, 18}, {53, 14}, {62, 8},
-          {70, 10}, {79, 11} },
+        // Passagem superior sob a divisória rochosa (colunas 25-27).
+        // Centralizada na linha 13 para não ficar cortada pela parede.
+        { {3, 13}, {11, 13}, {19, 13}, {24, 13}, {28, 13},
+          {32, 13}, {36, 14}, {41, 18}, {45, 18}, {53, 14},
+          {62, 8}, {70, 10}, {79, 11} },
 
-        // Ramificação pela direita, passando abaixo da parede intermediária.
-        { {76, 11}, {70, 11}, {64, 15}, {59, 20}, {58, 25},
-          {63, 27}, {74, 27}, {76, 30}, {76, 38} },
-
-        // Ponte de cerâmica entre o caminho inferior e o superior.
+        // Ligação central que permite sair da área do monólito e avançar.
         { {43, 28}, {45, 24}, {46, 20}, {45, 18} }
     };
 
     // Meia-largura dos corredores, na mesma ordem de ROUTES.
-    private static final double[] ROUTE_RADII = {3.1, 2.5, 2.5, 2.4};
+    private static final double[] ROUTE_RADII = {3.1, 2.5, 2.4};
 
     private InsulatorTrailLayout() {
     }
@@ -118,12 +116,11 @@ final class InsulatorTrailLayout {
         }
 
         /*
-         * Nos 12 tiles iniciais, o corredor inferior tem exatamente a
-         * largura da abertura da Fronteira Neutra. Mais adiante,
-         * ele volta a seguir o traçado sinuoso normal.
-         * Limita apenas a faixa inferior, sem apagar os demais caminhos.
+         * O corredor de entrada mantém exatamente os quatro tiles da
+         * saída da Fronteira Neutra até a curva começar. Evita o
+         * alargamento logo após atravessar de uma zona para a outra.
          */
-        if (col <= 11 && row >= 35) {
+        if (col <= 18 && row >= 35) {
             return row >= WEST_GATE_FIRST_ROW
                     && row <= WEST_GATE_LAST_ROW;
         }
