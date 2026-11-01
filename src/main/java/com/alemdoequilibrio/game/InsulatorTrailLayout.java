@@ -87,6 +87,10 @@ final class InsulatorTrailLayout {
     // Meia-largura dos corredores, na mesma ordem de ROUTES.
     private static final double[] ROUTE_RADII = {3.1, 2.5, 2.4};
 
+    // As distâncias são medidas a partir dos blocos reais da passarela.
+    private static final List<List<Rectangle2D>> BRIDGE_SECTION_TILES =
+            buildBridgeSectionTiles();
+
     private InsulatorTrailLayout() {
     }
 
@@ -187,6 +191,41 @@ final class InsulatorTrailLayout {
 
         return Math.min(ChapterProgress.CERAMIC_BRIDGE_PLATES - 1,
                 Math.max(0, (int) (t * ChapterProgress.CERAMIC_BRIDGE_PLATES)));
+    }
+
+    /** Blocos reais de uma etapa da passarela, sempre na ordem de instalação. */
+    static List<Rectangle2D> getBridgeSectionTiles(int section) {
+        if (section < 0 || section >= BRIDGE_SECTION_TILES.size()) {
+            return List.of();
+        }
+        return BRIDGE_SECTION_TILES.get(section);
+    }
+
+    private static List<List<Rectangle2D>> buildBridgeSectionTiles() {
+        List<List<Rectangle2D>> sections = new ArrayList<>();
+        for (int i = 0; i < ChapterProgress.CERAMIC_BRIDGE_PLATES; i++) {
+            sections.add(new ArrayList<>());
+        }
+
+        int columns = (int) (ZoneManager.WORLD_WIDTH / TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT / TILE_SIZE);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                int section = getBridgeSectionForTile(col, row);
+                if (section >= 0) {
+                    sections.get(section).add(new Rectangle2D(
+                            col * TILE_SIZE, row * TILE_SIZE,
+                            TILE_SIZE, TILE_SIZE
+                    ));
+                }
+            }
+        }
+
+        List<List<Rectangle2D>> immutable = new ArrayList<>();
+        for (List<Rectangle2D> section : sections) {
+            immutable.add(List.copyOf(section));
+        }
+        return List.copyOf(immutable);
     }
 
     static boolean isCeramicTile(int col, int row) {

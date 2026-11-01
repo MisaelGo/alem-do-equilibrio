@@ -99,8 +99,6 @@ public class ZoneManager {
 
     private Group ceramicBridgeVisual;
 
-    private Label ceramicBridgeWarning;
-
     private final List<Interactable>
             interactables;
 
@@ -173,8 +171,6 @@ public class ZoneManager {
 
         ceramicPileVisual = null;
         ceramicBridgeVisual = null;
-        ceramicBridgeWarning = null;
-
         worldLayer
                 .getChildren()
                 .clear();
@@ -361,14 +357,7 @@ public class ZoneManager {
         house.setSmooth(false);
         house.relocate(x, y);
 
-        Label sign = new Label("DEPÓSITO DE ISOLANTES");
-        sign.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 18px; -fx-font-weight: bold;"
-                + "-fx-text-fill: white; -fx-effect:"
-                + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
-        sign.relocate(x + 85, y - 27);
-
-        worldLayer.getChildren().addAll(house, sign);
+        worldLayer.getChildren().add(house);
 
         interactables.add(
                 new SceneryInteractable(
@@ -390,46 +379,27 @@ public class ZoneManager {
         double x = InsulatorTrailLayout.CERAMIC_PILE_X;
         double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
 
-        Label label = new Label("PLACAS DE CERÂMICA");
-        label.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 19px; -fx-font-weight: bold;"
-                + "-fx-text-fill: white; -fx-effect:"
-                + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
-        label.relocate(x - 10, y - 38);
-        worldLayer.getChildren().add(label);
-
-        // A zona inteira da pilha permite apertar E a partir do corredor.
-        // A colisão continua sendo feita por cada placa restante.
+        // A distância é calculada nas placas remanescentes (não neste marcador).
         interactables.add(new SceneryInteractable(
                 "uma placa de cerâmica",
                 InsulatorTrailLayout.CERAMIC_PILE_INTERACTION,
-                x - 10, y, 200, 200
+                x, y,
+                InsulatorTrailLayout.CERAMIC_PILE_WIDTH,
+                InsulatorTrailLayout.CERAMIC_PILE_HEIGHT
         ));
     }
 
-    /** Local de instalação de placas na entrada oeste da passarela. */
+    /** Instalação interativa no próximo trecho de metal, sem legenda fixa. */
     private void addMetalBridge() {
         ceramicBridgeVisual = new Group();
         worldLayer.getChildren().add(ceramicBridgeVisual);
 
-        ceramicBridgeWarning = new Label("PASSARELA ENERGIZADA");
-        ceramicBridgeWarning.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 20px; -fx-font-weight: bold;"
-                + "-fx-text-fill: #F6D55C;");
-        ceramicBridgeWarning.relocate(910, 1200);
-        worldLayer.getChildren().add(ceramicBridgeWarning);
-
-        Label installationPoint = new Label("PONTO DE INSTALAÇÃO");
-        installationPoint.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 17px; -fx-font-weight: bold;"
-                + "-fx-text-fill: #F6D55C;");
-        installationPoint.relocate(755, 1410);
-        worldLayer.getChildren().add(installationPoint);
-
+        // Este marcador não determina a proximidade: o controlador mede
+        // a distância até os blocos metálicos da próxima etapa.
         interactables.add(new SceneryInteractable(
                 "a passarela",
                 InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION,
-                740, 1435, 110, 175
+                760, 1320, 40, 40
         ));
     }
 
@@ -484,14 +454,7 @@ public class ZoneManager {
             }
         }
 
-        if (ceramicBridgeWarning != null) {
-            ceramicBridgeWarning.setText(
-                    chapterProgress.isCeramicBridgeComplete()
-                            ? "PASSARELA PROTEGIDA"
-                            : "PASSARELA ENERGIZADA (" + placed + "/"
-                                + ChapterProgress.CERAMIC_BRIDGE_PLATES + ")"
-            );
-        }
+
     }
 
     /** Monólito isolante em pixel art, ainda sem ativação de checkpoint. */
@@ -509,14 +472,7 @@ public class ZoneManager {
         monolith.setSmooth(false);
         monolith.relocate(x, y);
 
-        Label label = new Label("MONÓLITO ISOLANTE");
-        label.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 18px; -fx-font-weight: bold;"
-                + "-fx-text-fill: white; -fx-effect:"
-                + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
-        label.relocate(x - 42, y - 42);
-
-        worldLayer.getChildren().addAll(monolith, label);
+        worldLayer.getChildren().add(monolith);
 
         interactables.add(
                 new SceneryInteractable(
@@ -1453,9 +1409,8 @@ public class ZoneManager {
                 y - 35
         );
 
-        if (currentZone
-                == ExplorationZone
-                        .NEUTRAL_BORDER) {
+        if (currentZone == ExplorationZone.NEUTRAL_BORDER
+                || currentZone == ExplorationZone.INSULATOR_TRAIL) {
 
             worldLayer
                     .getChildren()
@@ -1481,14 +1436,7 @@ public class ZoneManager {
         returnArea = new Rectangle(x, y, width, height);
         returnArea.setFill(Color.TRANSPARENT);
 
-        Label label = new Label("← FRONTEIRA NEUTRA");
-        label.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-weight: bold; -fx-font-size: 18px;"
-                + "-fx-text-fill: #f4f4f4;"
-                + "-fx-effect: dropshadow(gaussian, black, 4, 0.9, 1, 1);");
-        label.relocate(65, y - 35);
-
-        worldLayer.getChildren().addAll(returnArea, label);
+        worldLayer.getChildren().add(returnArea);
     }
 
     public boolean intersectsReturn(

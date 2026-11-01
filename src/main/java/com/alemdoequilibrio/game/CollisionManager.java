@@ -92,10 +92,8 @@ public class CollisionManager {
 
             case INSULATOR_TRAIL -> {
                 addInsulatorTrailWallCollisions();
-                // As partes metálicas ainda descobertas bloqueiam a travessia.
-                // Quando cobertas, tornam-se transitáveis imediatamente.
-                addUncoveredBridgeCollisions(installedPlates);
-
+                // O metal fica transitável, mas causa dano enquanto descoberto.
+                // As áreas já cobertas por cerâmica passam a ser seguras.
                 addObstacle(
                         InsulatorTrailLayout.HOUSE_X,
                         InsulatorTrailLayout.HOUSE_Y,
@@ -128,31 +126,6 @@ public class CollisionManager {
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
-            }
-        }
-    }
-
-    /**
-     * O herói não atravessa o metal exposto até instalar cerâmica
-     * sobre a respectiva faixa.
-     */
-    private void addUncoveredBridgeCollisions(int installedPlates) {
-        int columns = (int) (ZoneManager.WORLD_WIDTH
-                / InsulatorTrailLayout.TILE_SIZE);
-        int rows = (int) (ZoneManager.WORLD_HEIGHT
-                / InsulatorTrailLayout.TILE_SIZE);
-
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < columns; col++) {
-                int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
-                if (section >= installedPlates) {
-                    addObstacle(
-                            col * InsulatorTrailLayout.TILE_SIZE,
-                            row * InsulatorTrailLayout.TILE_SIZE,
-                            InsulatorTrailLayout.TILE_SIZE,
-                            InsulatorTrailLayout.TILE_SIZE
-                    );
-                }
             }
         }
     }
