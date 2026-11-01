@@ -35,8 +35,8 @@ final class InsulatorTrailLayout {
 
     static final double HOUSE_X = 175;
     static final double HOUSE_Y = 185;
-    static final double HOUSE_WIDTH = 455;
-    static final double HOUSE_HEIGHT = 250;
+    static final double HOUSE_WIDTH = 400;
+    static final double HOUSE_HEIGHT = 220;
 
     static final double CERAMIC_PILE_X = 220;
     // Encostada à borda superior do corredor inferior, sem invadi-lo.
