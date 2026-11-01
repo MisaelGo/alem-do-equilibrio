@@ -32,6 +32,9 @@ public class DialogueController {
     private static final String ION_PORTRAIT =
             "/images/ion_dialogue.png";
 
+    private static final String ELIA_PORTRAIT =
+            "/images/elia_dialogue.png";
+
     private final Label speakerLabel;
 
     private final Label dialogueLabel;
@@ -484,6 +487,10 @@ public class DialogueController {
             case "íon",
                  "ion" ->
                     ION_PORTRAIT;
+
+            case "élia",
+                 "elia" ->
+                    ELIA_PORTRAIT;
 
             default ->
                     null;
