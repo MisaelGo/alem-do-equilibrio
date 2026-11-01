@@ -1494,7 +1494,7 @@ public class ExplorationController {
 
                 hud.showInteractionPrompt(
                         chapterProgress.isCeramicBridgeComplete()
-                                ? "Examinar" : "Instalar na",
+                                ? "Examinar" : "Reparar",
                         nearest.getInteractionName()
                 );
 
