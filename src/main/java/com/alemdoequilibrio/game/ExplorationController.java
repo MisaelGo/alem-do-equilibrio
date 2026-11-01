@@ -10,6 +10,7 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.scene.Scene;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -31,6 +32,14 @@ public class ExplorationController {
 
     private static final double
             INTERACTION_RANGE = 30;
+
+    /** Dano ambiental não é aplicado em todos os frames. */
+    private static final long ENVIRONMENTAL_DAMAGE_INTERVAL_NANOS =
+            900_000_000L;
+
+    private static final float WET_WOOD_DAMAGE = 12.0f;
+
+    private static final float EXPOSED_METAL_DAMAGE = 25.0f;
 
     private static final double
             ENEMY_RANGE = 70;
@@ -115,6 +124,8 @@ public class ExplorationController {
             onProgressChanged;
 
     private long lastTime;
+
+    private long lastEnvironmentalDamageTime;
 
     private double cameraX;
 
@@ -426,6 +437,7 @@ public class ExplorationController {
         updateCarriedCeramicView();
         updateCeramicHud();
 
+        lastEnvironmentalDamageTime = 0L;
         resetKeys();
 
         neutralElectricShock.stop();
@@ -658,6 +670,11 @@ public class ExplorationController {
             return false;
         }
 
+        if (chapterProgress.isCeramicBridgeComplete()) {
+            // Nenhum dos dois objetos oferece ação após o reparo completo.
+            return true;
+        }
+
         if (!chapterProgress.hasLearned(KnowledgeTopic.KNOW_ELECTRIZATION)) {
             hud.showCeramicAction("Converse com Élia antes de mexer nas placas.");
             return true;
@@ -725,7 +742,8 @@ public class ExplorationController {
     }
 
     private void updateCeramicHud() {
-        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL) {
+        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.isCeramicBridgeComplete()) {
             hud.showCeramicProgress(
                     chapterProgress.getBridgePlatesPlaced(),
                     ChapterProgress.CERAMIC_BRIDGE_PLATES,
@@ -932,6 +950,47 @@ public class ExplorationController {
                 hero.getY()
                 + TILE_SIZE / 2.0;
 
+        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof SceneryInteractable scenery) {
+            String dialogueId = scenery.getDialogueId();
+            if (InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                    .equals(dialogueId)) {
+                // Sem indicação distante e sem "pegar" enquanto carrega.
+                if (chapterProgress.isCeramicBridgeComplete()
+                        || chapterProgress.isCarryingCeramicPlate()) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                int count = chapterProgress.getRemainingCeramicPlates();
+                List<Rectangle2D> plates =
+                        InsulatorTrailLayout.getCeramicPilePlates();
+                double nearest = Double.POSITIVE_INFINITY;
+                for (int i = 0; i < Math.min(count, plates.size()); i++) {
+                    nearest = Math.min(nearest,
+                            distanceToBounds(heroCenterX, heroCenterY,
+                                    plates.get(i)));
+                }
+                return nearest;
+            }
+
+            if (InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                    .equals(dialogueId)) {
+                // A indicação acompanha o próximo ferro exposto, em vez
+                // de surgir numa região fixa e grande da passarela.
+                if (chapterProgress.isCeramicBridgeComplete()
+                        || !chapterProgress.isCarryingCeramicPlate()) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                double nearest = Double.POSITIVE_INFINITY;
+                for (Rectangle2D tile : InsulatorTrailLayout
+                        .getBridgeSectionTiles(
+                                chapterProgress.getBridgePlatesPlaced())) {
+                    nearest = Math.min(nearest,
+                            distanceToBounds(heroCenterX, heroCenterY, tile));
+                }
+                return nearest;
+            }
+        }
+
         double targetLeft =
                 interactable.getX();
 
@@ -971,6 +1030,19 @@ public class ExplorationController {
                 heroCenterY
                         - nearestY
         );
+    }
+
+    /**
+     * Menor distância entre o centro do herói e o bloco físico.
+     * O aviso de E só aparece dentro do alcance normal (30 px).
+     */
+    private static double distanceToBounds(
+            double centerX, double centerY, Rectangle2D bounds) {
+        double nearestX = Math.max(bounds.getMinX(),
+                Math.min(centerX, bounds.getMaxX()));
+        double nearestY = Math.max(bounds.getMinY(),
+                Math.min(centerY, bounds.getMaxY()));
+        return Math.hypot(centerX - nearestX, centerY - nearestY);
     }
 
     private void completeInteraction(
@@ -1102,6 +1174,14 @@ public class ExplorationController {
                 );
 
                 updateCarriedCeramicView();
+
+                // Madeira encharcada e metal sem isolamento retiram vida.
+                // Ao morrer o herói reaparece no checkpoint, então o
+                // frame atual termina para não processar a zona antiga.
+                if (handleEnvironmentalDamage(now)) {
+                    return;
+                }
+
                 updateInteractionPrompt();
 
                 handleCheckpoint();
@@ -1225,6 +1305,71 @@ public class ExplorationController {
                 );
             }
         }
+    }
+
+    /**
+     * Usa a posição dos pés, evitando dano quando o sprite do herói
+     * apenas se sobrepõe visualmente à madeira ou à passarela.
+     * Ferro já coberto por cerâmica e trilha cerâmica não causam dano.
+     *
+     * @return true quando ocorreu morte/reaparecimento neste frame.
+     */
+    private boolean handleEnvironmentalDamage(long now) {
+        if (zoneManager.getCurrentZone() != ExplorationZone.INSULATOR_TRAIL) {
+            return false;
+        }
+
+        int col = (int) Math.floor((hero.getX() + TILE_SIZE / 2.0)
+                / InsulatorTrailLayout.TILE_SIZE);
+        int row = (int) Math.floor((hero.getY() + TILE_SIZE - 6.0)
+                / InsulatorTrailLayout.TILE_SIZE);
+
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / InsulatorTrailLayout.TILE_SIZE);
+        if (InsulatorTrailLayout.isWallTile(col, row, columns, rows)) {
+            return false;
+        }
+
+        int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
+        boolean exposedMetal = section >= 0
+                && section >= chapterProgress.getBridgePlatesPlaced();
+        boolean wetWood = section < 0
+                && !InsulatorTrailLayout.isCeramicTile(col, row);
+
+        if (!exposedMetal && !wetWood) {
+            return false;
+        }
+
+        if (lastEnvironmentalDamageTime != 0L
+                && now - lastEnvironmentalDamageTime
+                        < ENVIRONMENTAL_DAMAGE_INTERVAL_NANOS) {
+            return false;
+        }
+
+        lastEnvironmentalDamageTime = now;
+        float damage = exposedMetal ? EXPOSED_METAL_DAMAGE : WET_WOOD_DAMAGE;
+        hero.takeDamage(damage);
+        hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
+
+        if (!hero.isAlive()) {
+            // Mesmo fluxo de restauração usado após perder uma batalha.
+            respawnAtCheckpoint();
+            onProgressChanged.run();
+            hud.showCeramicAction(
+                    "Descarga elétrica! Você voltou ao último checkpoint."
+            );
+            return true;
+        }
+
+        hud.showCeramicAction(
+                exposedMetal
+                        ? "Ferro energizado! -" + (int) damage + " HP"
+                        : "Madeira encharcada! -" + (int) damage + " HP"
+        );
+        onProgressChanged.run();
+        return false;
     }
 
     private boolean
