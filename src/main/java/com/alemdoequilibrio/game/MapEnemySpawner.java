@@ -40,6 +40,8 @@ public class MapEnemySpawner {
     private final ResourceManager resourceManager;
     private final List<MapEnemyNode> activeEnemies;
 
+    private ExplorationZone currentZone;
+
     /**
      * Construtor padrão para compatibilidade com inicializações sem ResourceManager.
      */
@@ -58,6 +60,7 @@ public class MapEnemySpawner {
 
     public void spawnForZone(ExplorationZone zone) {
         clear();
+        currentZone = Objects.requireNonNull(zone);
 
         switch (zone) {
             /*
@@ -229,7 +232,10 @@ public class MapEnemySpawner {
         name.setAlignment(Pos.CENTER);
         name.relocate((width - 120) / 2.0, -22);
 
-        Pane visual = new Pane(visualBody, name);
+        // Na Trilha dos Isolantes não há nomes sobre os inimigos.
+        Pane visual = currentZone == ExplorationZone.INSULATOR_TRAIL
+                ? new Pane(visualBody)
+                : new Pane(visualBody, name);
         visual.setPrefSize(width, height);
         visual.relocate(x, y);
 

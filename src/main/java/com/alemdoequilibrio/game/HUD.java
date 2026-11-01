@@ -309,9 +309,10 @@ public class HUD {
                 "-fx-background-color: rgba(24, 31, 40, 0.90);"
                 + "-fx-text-fill: #F9E6AE;"
                 + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
-                + "-fx-font-family: 'Consolas'; -fx-font-size: 17px;"
-                + "-fx-font-weight: bold; -fx-padding: 9px 14px;");
-        ceramicProgressLabel.relocate(780, 28);
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 16px;"
+                + "-fx-font-weight: bold; -fx-padding: 9px 12px;");
+        // Alinhado ao topo do HUD de vida e próximo à borda direita.
+        ceramicProgressLabel.relocate(950, 10);
         ceramicProgressLabel.setVisible(false);
 
         ceramicActionLabel = new Label();
@@ -427,8 +428,8 @@ public class HUD {
     /** Indicador persistente das nove viagens de instalação. */
     public void showCeramicProgress(int placed, int total, boolean carrying) {
         ceramicProgressLabel.setText(
-                "PASSARELA: " + placed + "/" + total
-                + (carrying ? "  |  Carregando cerâmica" : "  |  Mãos livres")
+                "CERÂMICA: faltam " + (total - placed)
+                + (carrying ? " | Com placa" : "")
         );
         ceramicProgressLabel.setVisible(true);
     }
