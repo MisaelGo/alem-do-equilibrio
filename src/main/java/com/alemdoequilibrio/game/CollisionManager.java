@@ -31,6 +31,17 @@ public class CollisionManager {
             ExplorationZone zone,
             List<Interactable> interactables) {
 
+        loadZone(zone, interactables,
+                ChapterProgress.CERAMIC_BRIDGE_PLATES, 0);
+    }
+
+    /** Reconstrói colisões para o estoque e as etapas atuais da ponte. */
+    public void loadZone(
+            ExplorationZone zone,
+            List<Interactable> interactables,
+            int remainingPlates,
+            int installedPlates) {
+
         Objects.requireNonNull(
                 zone
         );
@@ -47,6 +58,15 @@ public class CollisionManager {
          */
         for (Interactable interactable
                 : interactables) {
+
+            // Áreas de pegar/instalar são marcadores, não objetos sólidos.
+            if (zone == ExplorationZone.INSULATOR_TRAIL
+                    && (InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                                .equals(interactable.getDialogueId())
+                        || InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                                .equals(interactable.getDialogueId()))) {
+                continue;
+            }
 
             addObstacle(
                     interactable.getX(),
@@ -72,8 +92,10 @@ public class CollisionManager {
 
             case INSULATOR_TRAIL -> {
                 addInsulatorTrailWallCollisions();
-                // A ponte metálica permanece transitável: o desafio e o dano
-                // serão adicionados na etapa seguinte.
+                // As partes metálicas ainda descobertas bloqueiam a travessia.
+                // Quando cobertas, tornam-se transitáveis imediatamente.
+                addUncoveredBridgeCollisions(installedPlates);
+
                 addObstacle(
                         InsulatorTrailLayout.HOUSE_X,
                         InsulatorTrailLayout.HOUSE_Y,
@@ -82,8 +104,10 @@ public class CollisionManager {
                 );
                 // Colisão em cada uma das placas: o herói pode
                 // chegar até o contorno real da pilha.
-                for (Rectangle2D plate
-                        : InsulatorTrailLayout.getCeramicPilePlates()) {
+                List<Rectangle2D> plates =
+                        InsulatorTrailLayout.getCeramicPilePlates();
+                for (int i = 0; i < Math.min(remainingPlates, plates.size()); i++) {
+                    Rectangle2D plate = plates.get(i);
                     addObstacle(
                             plate.getMinX(),
                             plate.getMinY(),
@@ -104,6 +128,31 @@ public class CollisionManager {
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
+            }
+        }
+    }
+
+    /**
+     * O herói não atravessa o metal exposto até instalar cerâmica
+     * sobre a respectiva faixa.
+     */
+    private void addUncoveredBridgeCollisions(int installedPlates) {
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / InsulatorTrailLayout.TILE_SIZE);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
+                if (section >= installedPlates) {
+                    addObstacle(
+                            col * InsulatorTrailLayout.TILE_SIZE,
+                            row * InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE
+                    );
+                }
             }
         }
     }

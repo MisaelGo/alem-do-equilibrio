@@ -5,6 +5,12 @@ import java.util.Set;
 
 public class ChapterProgress {
 
+    public static final int CERAMIC_BRIDGE_PLATES = 9;
+
+    private int ceramicBridgePlatesPlaced;
+
+    private boolean carryingCeramicPlate;
+
     private final EnumSet<KnowledgeTopic>
             learnedTopics;
 
@@ -48,6 +54,48 @@ public class ChapterProgress {
         neutralBorderIntroSeen = false;
 
         insulatorTrailIntroSeen = false;
+
+        ceramicBridgePlatesPlaced = 0;
+        carryingCeramicPlate = false;
+    }
+
+    /** Coleta uma placa por viagem, respeitando o estoque finito. */
+    public boolean pickUpCeramicPlate() {
+        if (carryingCeramicPlate || getRemainingCeramicPlates() == 0) {
+            return false;
+        }
+
+        carryingCeramicPlate = true;
+        return true;
+    }
+
+    /** Consome a placa carregada e conclui mais uma parte da ponte. */
+    public boolean installCeramicPlate() {
+        if (!carryingCeramicPlate
+                || ceramicBridgePlatesPlaced >= CERAMIC_BRIDGE_PLATES) {
+            return false;
+        }
+
+        ceramicBridgePlatesPlaced++;
+        carryingCeramicPlate = false;
+        return true;
+    }
+
+    public int getBridgePlatesPlaced() {
+        return ceramicBridgePlatesPlaced;
+    }
+
+    public boolean isCarryingCeramicPlate() {
+        return carryingCeramicPlate;
+    }
+
+    public boolean isCeramicBridgeComplete() {
+        return ceramicBridgePlatesPlaced == CERAMIC_BRIDGE_PLATES;
+    }
+
+    public int getRemainingCeramicPlates() {
+        return CERAMIC_BRIDGE_PLATES - ceramicBridgePlatesPlaced
+                - (carryingCeramicPlate ? 1 : 0);
     }
 
     public void learn(
@@ -254,6 +302,42 @@ public class ChapterProgress {
             boolean neutralBorderIntroSeen,
             boolean insulatorTrailIntroSeen) {
 
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                neutralIonMet,
+                neutralBorderIntroSeen,
+                insulatorTrailIntroSeen,
+                0,
+                false
+        );
+    }
+
+    /** Inclui o estoque, a carga transportada e as placas instaladas. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen,
+            int ceramicBridgePlatesPlaced,
+            boolean carryingCeramicPlate) {
+
+        if (ceramicBridgePlatesPlaced < 0
+                || ceramicBridgePlatesPlaced > CERAMIC_BRIDGE_PLATES
+                || ceramicBridgePlatesPlaced + (carryingCeramicPlate ? 1 : 0)
+                        > CERAMIC_BRIDGE_PLATES) {
+            throw new IllegalArgumentException(
+                    "Quantidade inválida de cerâmica no save."
+            );
+        }
+
         if (checkpoint == null
                 || learnedTopics == null
                 || completedQuizzes == null) {
@@ -292,5 +376,8 @@ public class ChapterProgress {
 
         this.insulatorTrailIntroSeen =
                 insulatorTrailIntroSeen;
+
+        this.ceramicBridgePlatesPlaced = ceramicBridgePlatesPlaced;
+        this.carryingCeramicPlate = carryingCeramicPlate;
     }
 }

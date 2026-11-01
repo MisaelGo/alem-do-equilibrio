@@ -58,6 +58,12 @@ public class HUD {
 
     private final Label conceptTitleLabel;
 
+    private final Label ceramicProgressLabel;
+
+    private final Label ceramicActionLabel;
+
+    private PauseTransition ceramicActionTimer;
+
     private SequentialTransition
             conceptAnimation;
 
@@ -298,12 +304,36 @@ public class HUD {
         conceptBanner.relocate((LOGICAL_WIDTH - conceptWidth) / 2.0, 25);
         conceptBanner.setVisible(false);
 
+        ceramicProgressLabel = new Label();
+        ceramicProgressLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.90);"
+                + "-fx-text-fill: #F9E6AE;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 17px;"
+                + "-fx-font-weight: bold; -fx-padding: 9px 14px;");
+        ceramicProgressLabel.relocate(780, 28);
+        ceramicProgressLabel.setVisible(false);
+
+        ceramicActionLabel = new Label();
+        ceramicActionLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.94);"
+                + "-fx-text-fill: white;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 19px;"
+                + "-fx-font-weight: bold; -fx-padding: 10px 14px;");
+        ceramicActionLabel.setWrapText(true);
+        ceramicActionLabel.setMaxWidth(580);
+        ceramicActionLabel.relocate(360, 115);
+        ceramicActionLabel.setVisible(false);
+
         this.hudLayer
                 .getChildren()
                 .addAll(
                         statusCard,
                         interactionPrompt,
-                        conceptBanner
+                        conceptBanner,
+                        ceramicProgressLabel,
+                        ceramicActionLabel
                 );
     }
 
@@ -392,6 +422,36 @@ public class HUD {
         interactionPrompt.setVisible(
                 false
         );
+    }
+
+    /** Indicador persistente das nove viagens de instalação. */
+    public void showCeramicProgress(int placed, int total, boolean carrying) {
+        ceramicProgressLabel.setText(
+                "PASSARELA: " + placed + "/" + total
+                + (carrying ? "  |  Carregando cerâmica" : "  |  Mãos livres")
+        );
+        ceramicProgressLabel.setVisible(true);
+    }
+
+    public void hideCeramicProgress() {
+        ceramicProgressLabel.setVisible(false);
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setVisible(false);
+    }
+
+    /** Mensagem curta de coleta, instalação ou tentativa inválida. */
+    public void showCeramicAction(String message) {
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setText(message);
+        ceramicActionLabel.setVisible(true);
+        ceramicActionTimer = new PauseTransition(Duration.seconds(3.2));
+        ceramicActionTimer.setOnFinished(event ->
+                ceramicActionLabel.setVisible(false));
+        ceramicActionTimer.play();
     }
 
     public void showConceptLearned(

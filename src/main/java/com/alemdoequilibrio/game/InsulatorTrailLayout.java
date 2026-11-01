@@ -19,6 +19,11 @@ final class InsulatorTrailLayout {
 
     static final int TILE_SIZE = 40;
 
+    /** Interação nas extremidades da passarela sem colisão adicional. */
+    static final String CERAMIC_PILE_INTERACTION = "CERAMIC_PILE_PICKUP";
+    static final String CERAMIC_BRIDGE_INTERACTION = "CERAMIC_BRIDGE_PLACE";
+
+
     /*
      * Mesmo vão da saída leste da Fronteira Neutra: 4 tiles (160 px).
      * Fronteira: linhas 15..18; Trilha: 36..39.
@@ -159,6 +164,29 @@ final class InsulatorTrailLayout {
 
         return t >= 0.0 && t <= 1.0
                 && distanceToSegment(x, y, start, end) <= ROUTE_RADII[0];
+    }
+
+    /**
+     * Divide toda a parte metálica em nove faixas da entrada à saída.
+     * Cada viagem instala a cerâmica em uma faixa consecutiva.
+     * Retorna -1 para terrenos que não fazem parte da passarela.
+     */
+    static int getBridgeSectionForTile(int col, int row) {
+        if (!isMetalBridgeTile(col, row)) {
+            return -1;
+        }
+
+        double[] start = ROUTES[0][2];
+        double[] end = ROUTES[0][4];
+        double dx = end[0] - start[0];
+        double dy = end[1] - start[1];
+
+        double t = ((col + 0.5 - start[0]) * dx
+                + (row + 0.5 - start[1]) * dy)
+                / (dx * dx + dy * dy);
+
+        return Math.min(ChapterProgress.CERAMIC_BRIDGE_PLATES - 1,
+                Math.max(0, (int) (t * ChapterProgress.CERAMIC_BRIDGE_PLATES)));
     }
 
     static boolean isCeramicTile(int col, int row) {

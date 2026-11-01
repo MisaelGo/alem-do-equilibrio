@@ -93,6 +93,14 @@ public class ZoneManager {
 
     private final QuestionBank questionBank;
 
+    private final ChapterProgress chapterProgress;
+
+    private Group ceramicPileVisual;
+
+    private Group ceramicBridgeVisual;
+
+    private Label ceramicBridgeWarning;
+
     private final List<Interactable>
             interactables;
 
@@ -112,6 +120,16 @@ public class ZoneManager {
             Pane worldLayer,
             ResourceManager resourceManager,
             QuestionBank questionBank) {
+        this(worldLayer, resourceManager, questionBank, new ChapterProgress());
+    }
+
+    public ZoneManager(
+            Pane worldLayer,
+            ResourceManager resourceManager,
+            QuestionBank questionBank,
+            ChapterProgress chapterProgress) {
+
+        this.chapterProgress = Objects.requireNonNull(chapterProgress);
 
         this.worldLayer =
                 Objects.requireNonNull(
@@ -152,6 +170,10 @@ public class ZoneManager {
         exitArea = null;
         returnArea = null;
         checkpointArea = null;
+
+        ceramicPileVisual = null;
+        ceramicBridgeVisual = null;
+        ceramicBridgeWarning = null;
 
         worldLayer
                 .getChildren()
@@ -286,6 +308,7 @@ public class ZoneManager {
         addCeramicPile();
         addMetalBridge();
         addInsulatorMonolith();
+        refreshCeramicConstruction();
 
         NPC elia = new NPC(
                 "Élia",
@@ -359,29 +382,13 @@ public class ZoneManager {
         );
     }
 
-    /** Placas preparadas para o futuro sistema de coleta. */
+    /** Pilha coletável: as placas somem de cima para baixo a cada viagem. */
     private void addCeramicPile() {
+        ceramicPileVisual = new Group();
+        worldLayer.getChildren().add(ceramicPileVisual);
+
         double x = InsulatorTrailLayout.CERAMIC_PILE_X;
         double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
-        Image ceramicTile = resourceManager.getImage(
-                "/images/tile_insulator_ceramic.png"
-        );
-
-        Group pile = new Group();
-
-        // Compartilha as dimensões e a posição de CADA placa com
-        // o gerenciador de colisão, sem caixa retangular ao redor.
-        for (javafx.geometry.Rectangle2D bounds
-                : InsulatorTrailLayout.getCeramicPilePlates()) {
-            ImageView plate = new ImageView(ceramicTile);
-            plate.setX(bounds.getMinX());
-            plate.setY(bounds.getMinY());
-            plate.setFitWidth(bounds.getWidth());
-            plate.setFitHeight(bounds.getHeight());
-            plate.setPreserveRatio(false);
-            plate.setSmooth(false);
-            pile.getChildren().add(plate);
-        }
 
         Label label = new Label("PLACAS DE CERÂMICA");
         label.setStyle("-fx-font-family: 'Consolas';"
@@ -389,20 +396,102 @@ public class ZoneManager {
                 + "-fx-text-fill: white; -fx-effect:"
                 + " dropshadow(gaussian, black, 3, 0.9, 1, 1);");
         label.relocate(x - 10, y - 38);
-        worldLayer.getChildren().addAll(pile, label);
+        worldLayer.getChildren().add(label);
+
+        // A zona inteira da pilha permite apertar E a partir do corredor.
+        // A colisão continua sendo feita por cada placa restante.
+        interactables.add(new SceneryInteractable(
+                "uma placa de cerâmica",
+                InsulatorTrailLayout.CERAMIC_PILE_INTERACTION,
+                x - 10, y, 200, 200
+        ));
+    }
+
+    /** Local de instalação de placas na entrada oeste da passarela. */
+    private void addMetalBridge() {
+        ceramicBridgeVisual = new Group();
+        worldLayer.getChildren().add(ceramicBridgeVisual);
+
+        ceramicBridgeWarning = new Label("PASSARELA ENERGIZADA");
+        ceramicBridgeWarning.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 20px; -fx-font-weight: bold;"
+                + "-fx-text-fill: #F6D55C;");
+        ceramicBridgeWarning.relocate(910, 1200);
+        worldLayer.getChildren().add(ceramicBridgeWarning);
+
+        Label installationPoint = new Label("PONTO DE INSTALAÇÃO");
+        installationPoint.setStyle("-fx-font-family: 'Consolas';"
+                + "-fx-font-size: 17px; -fx-font-weight: bold;"
+                + "-fx-text-fill: #F6D55C;");
+        installationPoint.relocate(755, 1410);
+        worldLayer.getChildren().add(installationPoint);
+
+        interactables.add(new SceneryInteractable(
+                "a passarela",
+                InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION,
+                740, 1435, 110, 175
+        ));
     }
 
     /**
-     * A passarela é desenhada diretamente no TileMapRenderer usando
-     * o tile metálico da borda. Aqui fica apenas sua identificação.
+     * Redesenha a pilha restante e todas as faixas instaladas,
+     * sem recarregar a zona, NPCs ou inimigos.
      */
-    private void addMetalBridge() {
-        Label warning = new Label("PASSARELA ENERGIZADA");
-        warning.setStyle("-fx-font-family: 'Consolas';"
-                + "-fx-font-size: 20px; -fx-font-weight: bold;"
-                + "-fx-text-fill: #F6D55C;");
-        warning.relocate(910, 1200);
-        worldLayer.getChildren().add(warning);
+    public void refreshCeramicConstruction() {
+        if (currentZone != ExplorationZone.INSULATOR_TRAIL
+                || ceramicPileVisual == null || ceramicBridgeVisual == null) {
+            return;
+        }
+
+        Image ceramic = resourceManager.getImage(
+                "/images/tile_insulator_ceramic.png"
+        );
+        ceramicPileVisual.getChildren().clear();
+        ceramicBridgeVisual.getChildren().clear();
+
+        List<javafx.geometry.Rectangle2D> plates =
+                InsulatorTrailLayout.getCeramicPilePlates();
+        int remaining = Math.min(plates.size(),
+                chapterProgress.getRemainingCeramicPlates());
+
+        for (int i = 0; i < remaining; i++) {
+            javafx.geometry.Rectangle2D bounds = plates.get(i);
+            ImageView tile = new ImageView(ceramic);
+            tile.setX(bounds.getMinX());
+            tile.setY(bounds.getMinY());
+            tile.setFitWidth(bounds.getWidth());
+            tile.setFitHeight(bounds.getHeight());
+            tile.setSmooth(false);
+            ceramicPileVisual.getChildren().add(tile);
+        }
+
+        int placed = chapterProgress.getBridgePlatesPlaced();
+        int cols = (int) (WORLD_WIDTH / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (WORLD_HEIGHT / InsulatorTrailLayout.TILE_SIZE);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
+                if (section < 0 || section >= placed) {
+                    continue;
+                }
+                ImageView tile = new ImageView(ceramic);
+                tile.setX(col * InsulatorTrailLayout.TILE_SIZE);
+                tile.setY(row * InsulatorTrailLayout.TILE_SIZE);
+                tile.setFitWidth(InsulatorTrailLayout.TILE_SIZE);
+                tile.setFitHeight(InsulatorTrailLayout.TILE_SIZE);
+                tile.setSmooth(false);
+                ceramicBridgeVisual.getChildren().add(tile);
+            }
+        }
+
+        if (ceramicBridgeWarning != null) {
+            ceramicBridgeWarning.setText(
+                    chapterProgress.isCeramicBridgeComplete()
+                            ? "PASSARELA PROTEGIDA"
+                            : "PASSARELA ENERGIZADA (" + placed + "/"
+                                + ChapterProgress.CERAMIC_BRIDGE_PLATES + ")"
+            );
+        }
     }
 
     /** Monólito isolante em pixel art, ainda sem ativação de checkpoint. */

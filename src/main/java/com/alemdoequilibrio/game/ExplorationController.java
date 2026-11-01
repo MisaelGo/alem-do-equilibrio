@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
@@ -51,6 +52,8 @@ public class ExplorationController {
     private final Hero hero;
 
     private final HeroView heroView;
+
+    private final ImageView carriedCeramicView;
 
     private final Pane worldLayer;
 
@@ -184,6 +187,15 @@ public class ExplorationController {
             HERO_START_Y
         );
 
+        carriedCeramicView = new ImageView(
+                resourceManager.getImage("/images/tile_insulator_ceramic.png")
+        );
+        carriedCeramicView.setFitWidth(28);
+        carriedCeramicView.setFitHeight(28);
+        carriedCeramicView.setSmooth(false);
+        carriedCeramicView.setMouseTransparent(true);
+        carriedCeramicView.setVisible(false);
+
         worldLayer =
                 new Pane();
 
@@ -204,7 +216,8 @@ public class ExplorationController {
                 new ZoneManager(
                         worldLayer,
                         resourceManager,
-                        questionBank
+                        questionBank,
+                        chapterProgress
                 );
 
         mapEnemySpawner =
@@ -387,12 +400,12 @@ public class ExplorationController {
                     );
         }
 
-        collisionManager
-                .loadZone(
-                        zone,
-                        zoneManager
-                                .getInteractables()
-                );
+        collisionManager.loadZone(
+                zone,
+                zoneManager.getInteractables(),
+                chapterProgress.getRemainingCeramicPlates(),
+                chapterProgress.getBridgePlatesPlaced()
+        );
 
         positionHeroAtZoneStart(
             zone
@@ -408,6 +421,10 @@ public class ExplorationController {
                 .add(
                         heroView.getNode()
                 );
+
+        worldLayer.getChildren().add(carriedCeramicView);
+        updateCarriedCeramicView();
+        updateCeramicHud();
 
         resetKeys();
 
@@ -606,6 +623,10 @@ public class ExplorationController {
             return;
         }
 
+        if (handleCeramicInteraction(interactable)) {
+            return;
+        }
+
         startInteractionDialogue(
                 interactable
         );
@@ -617,6 +638,101 @@ public class ExplorationController {
 
             onDialogueStarted
                     .run();
+        }
+    }
+
+    /**
+     * Ações imediatas na pilha e na entrada da ponte, sem abrir diálogo.
+     * Retorna true quando a tecla E foi consumida pela construção.
+     */
+    private boolean handleCeramicInteraction(Interactable interactable) {
+        if (zoneManager.getCurrentZone() != ExplorationZone.INSULATOR_TRAIL
+                || !(interactable instanceof SceneryInteractable)) {
+            return false;
+        }
+
+        String id = interactable.getDialogueId();
+        boolean isPile = InsulatorTrailLayout.CERAMIC_PILE_INTERACTION.equals(id);
+        boolean isBridge = InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION.equals(id);
+        if (!isPile && !isBridge) {
+            return false;
+        }
+
+        if (!chapterProgress.hasLearned(KnowledgeTopic.KNOW_ELECTRIZATION)) {
+            hud.showCeramicAction("Converse com Élia antes de mexer nas placas.");
+            return true;
+        }
+
+        if (isPile) {
+            if (chapterProgress.isCarryingCeramicPlate()) {
+                hud.showCeramicAction(
+                        "Você já carrega uma placa. Leve-a até a passarela."
+                );
+            } else if (chapterProgress.pickUpCeramicPlate()) {
+                refreshCeramicConstruction();
+                onProgressChanged.run();
+                hud.showCeramicAction(
+                        "Placa coletada! Vá ao ponto de instalação da passarela."
+                );
+            } else {
+                hud.showCeramicAction("A pilha está vazia. A passarela já foi reparada.");
+            }
+            return true;
+        }
+
+        if (chapterProgress.isCeramicBridgeComplete()) {
+            hud.showCeramicAction("A passarela está protegida. Travessia liberada!");
+        } else if (!chapterProgress.isCarryingCeramicPlate()) {
+            hud.showCeramicAction(
+                    "Você precisa pegar uma placa na pilha antes de instalá-la."
+            );
+        } else if (chapterProgress.installCeramicPlate()) {
+            refreshCeramicConstruction();
+            onProgressChanged.run();
+            int count = chapterProgress.getBridgePlatesPlaced();
+            hud.showCeramicAction(
+                    chapterProgress.isCeramicBridgeComplete()
+                            ? "Última placa instalada! A passarela está protegida."
+                            : "Placa " + count + "/"
+                                + ChapterProgress.CERAMIC_BRIDGE_PLATES
+                                + " instalada! Volte à pilha buscar outra."
+            );
+        }
+        return true;
+    }
+
+    private void refreshCeramicConstruction() {
+        zoneManager.refreshCeramicConstruction();
+        collisionManager.loadZone(
+                zoneManager.getCurrentZone(),
+                zoneManager.getInteractables(),
+                chapterProgress.getRemainingCeramicPlates(),
+                chapterProgress.getBridgePlatesPlaced()
+        );
+        updateCarriedCeramicView();
+        updateCeramicHud();
+        updateInteractionPrompt();
+    }
+
+    private void updateCarriedCeramicView() {
+        boolean show = zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && chapterProgress.isCarryingCeramicPlate();
+        carriedCeramicView.setVisible(show);
+        if (show) {
+            carriedCeramicView.relocate(hero.getX() + 6, hero.getY() - 24);
+        }
+    }
+
+    private void updateCeramicHud() {
+        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL) {
+            hud.showCeramicProgress(
+                    chapterProgress.getBridgePlatesPlaced(),
+                    ChapterProgress.CERAMIC_BRIDGE_PLATES,
+                    chapterProgress.isCarryingCeramicPlate()
+            );
+        } else {
+            hud.hideCeramicProgress();
         }
     }
 
@@ -985,6 +1101,7 @@ public class ExplorationController {
                         hero.getY()
                 );
 
+                updateCarriedCeramicView();
                 updateInteractionPrompt();
 
                 handleCheckpoint();
@@ -1357,7 +1474,31 @@ public class ExplorationController {
 
         if (nearest != null) {
 
-            if (nearest
+            if (nearest instanceof SceneryInteractable
+                    && zoneManager.getCurrentZone()
+                            == ExplorationZone.INSULATOR_TRAIL
+                    && InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                            .equals(nearest.getDialogueId())) {
+
+                hud.showInteractionPrompt(
+                        chapterProgress.isCarryingCeramicPlate()
+                                ? "Verificar" : "Pegar",
+                        nearest.getInteractionName()
+                );
+
+            } else if (nearest instanceof SceneryInteractable
+                    && zoneManager.getCurrentZone()
+                            == ExplorationZone.INSULATOR_TRAIL
+                    && InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                            .equals(nearest.getDialogueId())) {
+
+                hud.showInteractionPrompt(
+                        chapterProgress.isCeramicBridgeComplete()
+                                ? "Examinar" : "Instalar na",
+                        nearest.getInteractionName()
+                );
+
+            } else if (nearest
                     instanceof SceneryInteractable) {
 
                 hud.showInteractionPrompt(

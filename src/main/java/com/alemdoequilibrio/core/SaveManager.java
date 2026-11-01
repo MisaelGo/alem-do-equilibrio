@@ -168,6 +168,16 @@ public class SaveManager {
                 + progress.hasSeenInsulatorTrailIntro()
         );
 
+        lines.add(
+                "ceramicBridgePlatesPlaced="
+                + progress.getBridgePlatesPlaced()
+        );
+
+        lines.add(
+                "carryingCeramicPlate="
+                + progress.isCarryingCeramicPlate()
+        );
+
         Path absolutePath =
                 savePath
                         .toAbsolutePath();
@@ -350,6 +360,24 @@ public class SaveManager {
                 ? parseBoolean(trailIntroValue, "insulatorTrailIntroSeen")
                 : learnedTopics.contains(KnowledgeTopic.KNOW_ELECTRIZATION);
 
+        // Ausentes em versões anteriores do save: nenhuma placa instalada.
+        String placedValue = values.get("ceramicBridgePlatesPlaced");
+        int ceramicBridgePlatesPlaced = placedValue == null
+                ? 0 : parseInteger(placedValue, "ceramicBridgePlatesPlaced");
+
+        String carryingValue = values.get("carryingCeramicPlate");
+        boolean carryingCeramicPlate = carryingValue != null
+                && parseBoolean(carryingValue, "carryingCeramicPlate");
+
+        if (ceramicBridgePlatesPlaced < 0
+                || ceramicBridgePlatesPlaced > ChapterProgress.CERAMIC_BRIDGE_PLATES
+                || ceramicBridgePlatesPlaced + (carryingCeramicPlate ? 1 : 0)
+                        > ChapterProgress.CERAMIC_BRIDGE_PLATES) {
+            throw new SaveFormatException(
+                    "Quantidade de placas de cerâmica inválida no save."
+            );
+        }
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -371,7 +399,9 @@ public class SaveManager {
                 fragmentObtained,
                 neutralIonMet,
                 neutralBorderIntroSeen,
-                insulatorTrailIntroSeen
+                insulatorTrailIntroSeen,
+                ceramicBridgePlatesPlaced,
+                carryingCeramicPlate
         );
 
         hero.clearAbilities();
