@@ -191,6 +191,12 @@ final class InsulatorTrailLayout {
             return true;
         }
 
+        // Pequena base de cerâmica ligada à trilha sob o monólito.
+        // O cálculo usa sua posição atual e acompanha futuros ajustes.
+        if (isMonolithBaseTile(col, row)) {
+            return true;
+        }
+
         double x = col + 0.5;
         double y = row + 0.5;
 
@@ -204,6 +210,26 @@ final class InsulatorTrailLayout {
             }
         }
         return false;
+    }
+
+    /**
+     * Base de dois tiles de profundidade abaixo do monólito isolante,
+     * com um pequeno avanço lateral. Não altera a colisão do monólito.
+     */
+    private static boolean isMonolithBaseTile(int col, int row) {
+        int firstCol = (int) Math.floor(
+                (MONOLITH_X - TILE_SIZE) / TILE_SIZE
+        );
+        int lastCol = (int) Math.floor(
+                (MONOLITH_X + MONOLITH_WIDTH + TILE_SIZE / 2.0)
+                        / TILE_SIZE
+        );
+        int firstRow = (int) Math.ceil(
+                (MONOLITH_Y + MONOLITH_HEIGHT) / TILE_SIZE
+        );
+
+        return col >= firstCol && col <= lastCol
+                && row >= firstRow && row <= firstRow + 1;
     }
 
     private static double distanceToSegment(
