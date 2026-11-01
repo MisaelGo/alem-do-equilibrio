@@ -363,20 +363,31 @@ public class ZoneManager {
     private void addCeramicPile() {
         double x = InsulatorTrailLayout.CERAMIC_PILE_X;
         double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
+        double tileSize = InsulatorTrailLayout.TILE_SIZE;
+        Image ceramicTile = resourceManager.getImage(
+                "/images/tile_insulator_ceramic.png"
+        );
+
         Group pile = new Group();
 
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                Rectangle plate = new Rectangle(
-                        x + col * 58 + (row % 2) * 4,
-                        y + row * 33,
-                        54,
-                        28
-                );
-                plate.setFill(Color.web(row % 2 == 0
-                        ? "#D6E1DD" : "#A5C2BE"));
-                plate.setStroke(Color.web("#527878"));
-                plate.setStrokeWidth(4);
+        /*
+         * Mesma textura da trilha, empilhada em três camadas.
+         * Cada camada de cima tem Y menor, com ligeiro deslocamento
+         * horizontal. A base fica junto ao corredor, sem obstruí-lo.
+         */
+        for (int layer = 0; layer < 3; layer++) {
+            int plates = 4 - layer;
+            double layerX = x + layer * (tileSize / 2.0);
+            double layerY = y + (2 - layer) * 28;
+
+            for (int col = 0; col < plates; col++) {
+                ImageView plate = new ImageView(ceramicTile);
+                plate.setX(layerX + col * tileSize);
+                plate.setY(layerY);
+                plate.setFitWidth(tileSize);
+                plate.setFitHeight(tileSize);
+                plate.setPreserveRatio(false);
+                plate.setSmooth(false);
                 pile.getChildren().add(plate);
             }
         }
@@ -391,50 +402,59 @@ public class ZoneManager {
     }
 
     /**
-     * Estrutura metálica em diagonal, inspirada no croqui.
-     * Visual por enquanto; na próxima etapa receberá zonas de perigo
-     * e espaços para posicionar placas isolantes.
+     * Passarela visual com a textura metálica usada nas bordas da região.
+     * Acompanha o trecho diagonal da própria trilha de cerâmica, de
+     * (19, 38) a (35, 31) em coordenadas de tile.
+     *
+     * O dano elétrico e a colocação de placas serão implementados
+     * em uma etapa posterior; a ponte permanece transitável.
      */
     private void addMetalBridge() {
+        double tileSize = InsulatorTrailLayout.TILE_SIZE;
+        int columns = 18;
+        int rows = 3;
+        double bridgeWidth = columns * tileSize;
+        double bridgeHeight = rows * tileSize;
+
+        Image metalTile = resourceManager.getImage(
+                "/images/tile_insulator_rock.png"
+        );
+
         Group bridge = new Group();
 
-        Rectangle deck = new Rectangle(0, 0, 760, 170);
-        deck.setFill(Color.web("#58636B"));
-        deck.setStroke(Color.web("#26353D"));
-        deck.setStrokeWidth(12);
-        bridge.getChildren().add(deck);
-
-        for (int i = 0; i < 15; i++) {
-            Rectangle panel = new Rectangle(
-                    20 + i * 49, 18, 42, 134
-            );
-            panel.setFill(Color.web(i % 2 == 0
-                    ? "#778B91" : "#64767E"));
-            panel.setStroke(Color.web("#39474F"));
-            panel.setStrokeWidth(3);
-            bridge.getChildren().add(panel);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                ImageView tile = new ImageView(metalTile);
+                tile.setX(col * tileSize);
+                tile.setY(row * tileSize);
+                tile.setFitWidth(tileSize);
+                tile.setFitHeight(tileSize);
+                tile.setPreserveRatio(false);
+                tile.setSmooth(false);
+                bridge.getChildren().add(tile);
+            }
         }
 
-        for (int i = 0; i < 4; i++) {
-            Line arc = new Line(
-                    140 + i * 135, 18,
-                    155 + i * 135, 150
-            );
-            arc.setStroke(Color.web("#F6D55C"));
-            arc.setStrokeWidth(6);
-            bridge.getChildren().add(arc);
-        }
+        // Eixo do corredor diagonal: o centro da ponte coincide
+        // com o centro do trecho entre esses dois pontos.
+        double startX = (19 + 0.5) * tileSize;
+        double startY = (38 + 0.5) * tileSize;
+        double endX = (35 + 0.5) * tileSize;
+        double endY = (31 + 0.5) * tileSize;
 
-        bridge.setLayoutX(650);
-        bridge.setLayoutY(1170);
-        bridge.setRotate(-20);
+        bridge.setLayoutX((startX + endX - bridgeWidth) / 2.0);
+        bridge.setLayoutY((startY + endY - bridgeHeight) / 2.0);
+        bridge.setRotate(Math.toDegrees(
+                Math.atan2(endY - startY, endX - startX)
+        ));
+
         worldLayer.getChildren().add(bridge);
 
         Label warning = new Label("PASSARELA ENERGIZADA");
         warning.setStyle("-fx-font-family: 'Consolas';"
                 + "-fx-font-size: 20px; -fx-font-weight: bold;"
                 + "-fx-text-fill: #F6D55C;");
-        warning.relocate(790, 1070);
+        warning.relocate(910, 1130);
         worldLayer.getChildren().add(warning);
     }
 
