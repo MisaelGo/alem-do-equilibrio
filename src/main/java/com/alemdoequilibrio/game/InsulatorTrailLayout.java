@@ -45,8 +45,8 @@ final class InsulatorTrailLayout {
     static final double CERAMIC_PILE_HEIGHT = 110;
 
     // Mantém o centro original e ajusta a colisão à imagem vertical.
-    static final double MONOLITH_X = 2631;
-    static final double MONOLITH_Y = 1530;
+    static final double MONOLITH_X = 2761;
+    static final double MONOLITH_Y = 1330;
     static final double MONOLITH_WIDTH = 128;
     static final double MONOLITH_HEIGHT = 185;
 
