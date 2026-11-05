@@ -1,6 +1,7 @@
 package com.alemdoequilibrio.game;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ChapterProgress {
@@ -10,6 +11,10 @@ public class ChapterProgress {
     private int ceramicBridgePlatesPlaced;
 
     private boolean carryingCeramicPlate;
+
+    private boolean monolithActivated;
+
+    private final Set<Integer> defeatedEnemyIds;
 
     private final EnumSet<KnowledgeTopic>
             learnedTopics;
@@ -57,6 +62,34 @@ public class ChapterProgress {
 
         ceramicBridgePlatesPlaced = 0;
         carryingCeramicPlate = false;
+
+        monolithActivated = false;
+        defeatedEnemyIds = new HashSet<>();
+    }
+
+    /** Ativa apenas uma vez a recuperação e o checkpoint do monólito. */
+    public boolean activateMonolithCheckpoint() {
+        if (monolithActivated) {
+            return false;
+        }
+        monolithActivated = true;
+        checkpoint = ExplorationZone.INSULATOR_TRAIL;
+        return true;
+    }
+
+    public boolean isMonolithActivated() {
+        return monolithActivated;
+    }
+
+    public boolean markEnemyDefeated(int enemyId) {
+        if (enemyId <= 0) {
+            throw new IllegalArgumentException("ID de inimigo inválido.");
+        }
+        return defeatedEnemyIds.add(enemyId);
+    }
+
+    public Set<Integer> getDefeatedEnemyIds() {
+        return Set.copyOf(defeatedEnemyIds);
     }
 
     /** Coleta uma placa por viagem, respeitando o estoque finito. */
@@ -316,7 +349,7 @@ public class ChapterProgress {
         );
     }
 
-    /** Inclui o estoque, a carga transportada e as placas instaladas. */
+    /** Mantém compatibilidade com o estado anterior. */
     public void restoreFromSave(
             ExplorationZone checkpoint,
             Set<KnowledgeTopic> learnedTopics,
@@ -328,6 +361,35 @@ public class ChapterProgress {
             boolean insulatorTrailIntroSeen,
             int ceramicBridgePlatesPlaced,
             boolean carryingCeramicPlate) {
+
+        restoreFromSave(
+                checkpoint, learnedTopics, completedQuizzes,
+                bossDefeated, fragmentObtained, neutralIonMet,
+                neutralBorderIntroSeen, insulatorTrailIntroSeen,
+                ceramicBridgePlatesPlaced, carryingCeramicPlate,
+                false, Set.of()
+        );
+    }
+
+    /** Restaura monólito, combate e construção no mesmo save. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen,
+            int ceramicBridgePlatesPlaced,
+            boolean carryingCeramicPlate,
+            boolean monolithActivated,
+            Set<Integer> defeatedEnemyIds) {
+
+        if (defeatedEnemyIds == null
+                || defeatedEnemyIds.stream().anyMatch(id -> id == null || id <= 0)) {
+            throw new IllegalArgumentException("IDs de inimigos inválidos.");
+        }
 
         if (ceramicBridgePlatesPlaced < 0
                 || ceramicBridgePlatesPlaced > CERAMIC_BRIDGE_PLATES
@@ -379,5 +441,9 @@ public class ChapterProgress {
 
         this.ceramicBridgePlatesPlaced = ceramicBridgePlatesPlaced;
         this.carryingCeramicPlate = carryingCeramicPlate;
+
+        this.monolithActivated = monolithActivated;
+        this.defeatedEnemyIds.clear();
+        this.defeatedEnemyIds.addAll(defeatedEnemyIds);
     }
 }

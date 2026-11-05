@@ -178,6 +178,16 @@ public class SaveManager {
                 + progress.isCarryingCeramicPlate()
         );
 
+        lines.add(
+                "monolithActivated="
+                + progress.isMonolithActivated()
+        );
+
+        lines.add(
+                "defeatedEnemyIds="
+                + joinEnemyIds(progress.getDefeatedEnemyIds())
+        );
+
         Path absolutePath =
                 savePath
                         .toAbsolutePath();
@@ -378,6 +388,15 @@ public class SaveManager {
             );
         }
 
+        // Campos opcionais para manter saves anteriores compatíveis.
+        String monolithValue = values.get("monolithActivated");
+        boolean monolithActivated = monolithValue != null
+                && parseBoolean(monolithValue, "monolithActivated");
+
+        Set<Integer> defeatedEnemyIds = parseEnemyIds(
+                values.getOrDefault("defeatedEnemyIds", "")
+        );
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -401,7 +420,9 @@ public class SaveManager {
                 neutralBorderIntroSeen,
                 insulatorTrailIntroSeen,
                 ceramicBridgePlatesPlaced,
-                carryingCeramicPlate
+                carryingCeramicPlate,
+                monolithActivated,
+                defeatedEnemyIds
         );
 
         hero.clearAbilities();
@@ -731,6 +752,30 @@ public class SaveManager {
                 + ": "
                 + value
         );
+    }
+
+    private Set<Integer> parseEnemyIds(String value)
+            throws SaveFormatException {
+        Set<Integer> ids = new HashSet<>();
+        if (value.isBlank()) {
+            return ids;
+        }
+        for (String part : value.split(",")) {
+            int id = parseInteger(part.trim(), "defeatedEnemyIds");
+            if (id <= 0 || !ids.add(id)) {
+                throw new SaveFormatException(
+                        "ID duplicado ou inválido em defeatedEnemyIds: " + id);
+            }
+        }
+        return ids;
+    }
+
+    private String joinEnemyIds(Set<Integer> ids) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Integer id : new java.util.TreeSet<>(ids)) {
+            joiner.add(Integer.toString(id));
+        }
+        return joiner.toString();
     }
 
     private String joinTopics(

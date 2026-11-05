@@ -3,6 +3,7 @@ package com.alemdoequilibrio.game;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.alemdoequilibrio.core.ResourceManager;
 
@@ -42,6 +43,8 @@ public class MapEnemySpawner {
 
     private ExplorationZone currentZone;
 
+    private Set<Integer> defeatedEnemyIds = Set.of();
+
     /**
      * Construtor padrão para compatibilidade com inicializações sem ResourceManager.
      */
@@ -59,8 +62,16 @@ public class MapEnemySpawner {
     }
 
     public void spawnForZone(ExplorationZone zone) {
+        spawnForZone(zone, Set.of());
+    }
+
+    /** Ignora IDs registrados como derrotados, inclusive após carregar save. */
+    public void spawnForZone(
+            ExplorationZone zone, Set<Integer> defeatedEnemyIds) {
         clear();
         currentZone = Objects.requireNonNull(zone);
+        this.defeatedEnemyIds =
+                Set.copyOf(Objects.requireNonNull(defeatedEnemyIds));
 
         switch (zone) {
             /*
@@ -187,6 +198,10 @@ public class MapEnemySpawner {
     }
 
     private MapEnemyNode spawnEnemy(Enemy enemy, double x, double y) {
+        if (defeatedEnemyIds.contains(enemy.getEnemyId())) {
+            return null;
+        }
+
         double width = getEnemyWidth(enemy);
         double height = getEnemyHeight(enemy);
 
