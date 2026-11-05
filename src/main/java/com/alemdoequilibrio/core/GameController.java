@@ -68,19 +68,25 @@ public class GameController {
 
         this.stage = Objects.requireNonNull(stage);
 
-        mainMenuController = new MainMenuController(
-                this::playGame,
-                this::restartGame,
-                Platform::exit
-        );
+        resourceManager =
+                new ResourceManager();
 
         sceneRouter =
                 new SceneRouter(
                         stage
                 );
 
-        resourceManager =
-                new ResourceManager();
+        try {
+            sceneRouter.setIcon(resourceManager.getImage("/images/game_icon.png"));
+        } catch (Exception ignored) {
+        }
+
+        mainMenuController = new MainMenuController(
+                this::playGame,
+                this::restartGame,
+                Platform::exit,
+                resourceManager
+        );
 
         chapterProgress =
                 new ChapterProgress();
@@ -134,6 +140,10 @@ public class GameController {
     /** Abre sempre o menu antes de iniciar a partida. */
     public void startGame() {
         sceneRouter.setTitle("Além do Equilíbrio");
+        try {
+            sceneRouter.setIcon(resourceManager.getImage("/images/game_icon.png"));
+        } catch (Exception ignored) {
+        }
         sceneRouter.show(mainMenuController.getScene());
     }
 
@@ -178,6 +188,10 @@ public class GameController {
 
         GameController freshGame = new GameController(stage);
         freshGame.sceneRouter.setTitle("Além do Equilíbrio");
+        try {
+            freshGame.sceneRouter.setIcon(freshGame.resourceManager.getImage("/images/game_icon.png"));
+        } catch (Exception ignored) {
+        }
         freshGame.changeState(GameState.PROLOGUE);
     }
 

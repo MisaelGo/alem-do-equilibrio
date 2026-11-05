@@ -1,12 +1,14 @@
 package com.alemdoequilibrio.core;
 
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 /**
  * Centraliza o controle da janela principal da aplicação.
  *
- * O SceneRouter é responsável por exibir cenas no Stage principal
+ * O SceneRouter é responsável por exibir cenas no Stage principal,
+ * por configurar o ícone da aplicação na barra de tarefas e janela,
  * e por alterar propriedades da janela, como o título.
  *
  * Dessa forma, outras classes não precisam manipular o Stage diretamente.
@@ -47,5 +49,25 @@ public class SceneRouter {
      */
     public void setTitle(String title) {
         stage.setTitle(title);
+    }
+
+    /**
+     * Define o ícone exibido na barra de título e na barra de tarefas do sistema operacional.
+     *
+     * @param icon imagem do ícone da aplicação
+     */
+    public void setIcon(Image icon) {
+        if (icon != null) {
+            stage.getIcons().setAll(icon);
+        }
+    }
+
+    /**
+     * Retorna a janela principal associada a este roteador.
+     *
+     * @return stage gerenciado
+     */
+    public Stage getStage() {
+        return stage;
     }
 }
