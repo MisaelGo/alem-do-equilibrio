@@ -457,7 +457,7 @@ public class ZoneManager {
 
     }
 
-    /** Monólito isolante em pixel art, ainda sem ativação de checkpoint. */
+    /** Monólito isolante: primeira ativação cura e registra um checkpoint. */
     private void addInsulatorMonolith() {
         double x = InsulatorTrailLayout.MONOLITH_X;
         double y = InsulatorTrailLayout.MONOLITH_Y;

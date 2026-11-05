@@ -55,6 +55,12 @@ final class InsulatorTrailLayout {
     static final double MONOLITH_WIDTH = 128;
     static final double MONOLITH_HEIGHT = 185;
 
+    // Respawn seguro na base de cerâmica, ao sul do monólito.
+    static final double MONOLITH_CHECKPOINT_X =
+            MONOLITH_X + (MONOLITH_WIDTH - TILE_SIZE) / 2.0;
+    static final double MONOLITH_CHECKPOINT_Y =
+            MONOLITH_Y + MONOLITH_HEIGHT + 8;
+
     // Paredes interiores do desenho: coluna esquerda, divisão e bloqueio leste.
     // Intervalos [coluna inicial, final, linha inicial, final] inclusivos.
     private static final int[][] INNER_WALLS = {

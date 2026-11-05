@@ -109,9 +109,9 @@ ELIA_ELECTRIZATION;Herói;Então preciso levar essas placas até a passarela.
 ELIA_ELECTRIZATION;Élia;Essa é a ideia. Mas cuidado com as criaturas corrompidas que apareceram pelo caminho.
 ELIA_ELECTRIZATION;Élia;E mais uma coisa. Se encontrar um monumento antigo no fim da trilha, não o ignore.
 ELIA_ELECTRIZATION;Herói;Um monumento?
-ELIA_ELECTRIZATION;Élia;O Monólito Isolante. Ninguém sabe ao certo por que foi construído ali, mas suas propriedades têm intrigado os pesquisadores desde o início das anomalias.
+ELIA_ELECTRIZATION;Élia;O Monólito Isolante. Ninguém sabe ao certo por que foi construído ali. Mesmo após as descargas, seu brilho nunca se apagou.
 ELIA_ELECTRIZATION;Herói;Você acha que está relacionado ao Fragmento?
-ELIA_ELECTRIZATION;Élia;Não tenho provas. Mas há algo estranho acontecendo ao redor dele.
+ELIA_ELECTRIZATION;Élia;Não tenho provas. Mas parece oferecer alguma proteção. Se conseguir alcançá-lo, examine o símbolo no centro. Talvez ele possa ajudá-lo a seguir em frente.
 ELIA_ELECTRIZATION;Herói;Então vou investigar.
 ELIA_ELECTRIZATION;Élia;Faça isso. E, viajante...
 ELIA_ELECTRIZATION;Herói;Sim?
@@ -129,6 +129,14 @@ INSULATOR_MONOLITH_INTERACTION;Herói;Parece feita de materiais isolantes, mas h
 INSULATOR_MONOLITH_INTERACTION;Herói;Estranho... Mesmo com toda a instabilidade elétrica desta região, o monólito parece intacto.
 INSULATOR_MONOLITH_INTERACTION;Herói;Será que ele foi construído para resistir às descargas?
 INSULATOR_MONOLITH_INTERACTION;Herói;Élia disse que ninguém sabe sua verdadeira função. Talvez exista algo mais por trás deste monumento.
+INSULATOR_MONOLITH_INTERACTION;Herói;Ao aproximar a mão do símbolo, sinto uma energia suave, diferente das descargas da trilha.
+INSULATOR_MONOLITH_INTERACTION;Herói;A luz parece capaz de recuperar parte das minhas forças... Mas tenho a impressão de que isso só acontecerá uma vez.
+INSULATOR_MONOLITH_INTERACTION;Herói;As inscrições também parecem guardar o caminho que percorri. Se eu cair, talvez consiga retornar a este lugar.
+INSULATOR_MONOLITH_INTERACTION;Herói;Vou ativá-lo. É bom ter um ponto seguro nesta região.
+
+INSULATOR_MONOLITH_REPEAT;Herói;O monólito já me fortaleceu uma vez. Sua luz continua firme. Posso registrar meu progresso aqui.
+
+INSULATOR_EXIT_NEED_ELIA;Herói;Antes de deixar esta trilha, preciso conversar com Élia. Ela deve entender melhor as anomalias elétricas.
 
 MARA_CROSSROADS;Mara;Alto lá, viajante. Se foram os Elétrons que te enviaram, pode dar meia-volta.
 MARA_CROSSROADS;Herói;Calma, ninguém me enviou. Sou de fora. Só estou tentando descobrir o que está causando essa instabilidade toda e onde está o Fragmento.

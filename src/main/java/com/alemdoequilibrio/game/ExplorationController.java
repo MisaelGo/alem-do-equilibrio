@@ -430,7 +430,8 @@ public class ExplorationController {
 
             mapEnemySpawner
                     .spawnForZone(
-                            zone
+                            zone,
+                            chapterProgress.getDefeatedEnemyIds()
                     );
         }
 
@@ -822,6 +823,25 @@ public class ExplorationController {
 
         if (zoneManager.getCurrentZone()
                 == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof SceneryInteractable
+                && "INSULATOR_MONOLITH_INTERACTION".equals(
+                        interactable.getDialogueId()
+                )
+                && chapterProgress.isMonolithActivated()) {
+
+            // Mantém o objeto associado ao diálogo para salvar novamente
+            // somente quando o jogador concluir suas falas.
+            dialogueController.startDialogue(new SceneryInteractable(
+                    interactable.getInteractionName(),
+                    "INSULATOR_MONOLITH_REPEAT",
+                    interactable.getX(), interactable.getY(),
+                    interactable.getWidth(), interactable.getHeight()
+            ));
+            return;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
                 && interactable instanceof NPC npc
                 && "Élia".equalsIgnoreCase(npc.getName())
                 && chapterProgress.hasLearned(
@@ -1098,6 +1118,35 @@ public class ExplorationController {
     private void completeInteraction(
             Interactable interactable) {
 
+        if (interactable instanceof SceneryInteractable scenery
+                && zoneManager.getCurrentZone()
+                        == ExplorationZone.INSULATOR_TRAIL
+                && ("INSULATOR_MONOLITH_INTERACTION".equals(
+                        scenery.getDialogueId())
+                    || "INSULATOR_MONOLITH_REPEAT".equals(
+                        scenery.getDialogueId()))) {
+
+            if (chapterProgress.activateMonolithCheckpoint()) {
+                float before = hero.getHealth();
+                hero.setHealth(Math.min(hero.getMaxHealth(), before + 20.0f));
+                hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
+                hud.playCompletionSound();
+
+                int healed = Math.round(hero.getHealth() - before);
+                hud.showCeramicAction(
+                        "Monólito ativado! +" + healed
+                        + " HP. Checkpoint e progresso salvos."
+                );
+            } else {
+                hud.showCeramicAction("Monólito: progresso salvo.");
+            }
+
+            // A cada interação terminada o progresso é gravado,
+            // mas a cura e o check só acontecem na primeira vez.
+            onProgressChanged.run();
+            return;
+        }
+
         if (interactable
                 instanceof Merchant merchant) {
 
@@ -1128,9 +1177,7 @@ public class ExplorationController {
             chapterProgress
                     .markNeutralIonMet();
 
-            // Primeira descoberta de Íon na Fronteira Neutra.
-            hud.playCompletionSound();
-
+            // Conhecer Íon não concede habilidade; não tocar check.
             onProgressChanged
                     .run();
         }
@@ -1530,6 +1577,14 @@ public class ExplorationController {
         }
 
         if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                )) {
+            return blockInsulatorTrailExit();
+        }
+
+        if (zoneManager.getCurrentZone()
                 == ExplorationZone.NEUTRAL_BORDER) {
 
             if (!chapterProgress
@@ -1575,6 +1630,21 @@ public class ExplorationController {
             startInsulatorTrailIntro();
         }
 
+        return true;
+    }
+
+    /** A passagem exige Élia, mas não exige monólito ou ponte concluída. */
+    private boolean blockInsulatorTrailExit() {
+        // Impede a repetição do diálogo a cada frame no gatilho leste.
+        hero.setPosition(3135, hero.getY());
+        heroView.setPosition(hero.getX(), hero.getY());
+        updateCamera();
+        hud.hideInteractionPrompt();
+
+        dialogueController.startDialogue("INSULATOR_EXIT_NEED_ELIA");
+        if (dialogueController.isOpen()) {
+            onDialogueStarted.run();
+        }
         return true;
     }
 
@@ -1857,10 +1927,27 @@ public class ExplorationController {
     public void removeDefeatedEnemy(
             Enemy enemy) {
 
-        mapEnemySpawner
-                .removeEnemy(
-                        enemy
-                );
+        if (enemy == null) {
+            return;
+        }
+
+        // GameController salva o resultado após cada vitória.
+        chapterProgress.markEnemyDefeated(enemy.getEnemyId());
+        mapEnemySpawner.removeEnemy(enemy);
+    }
+
+    /** Reaparece ao lado do monólito, não no início da Trilha. */
+    private void positionHeroAtCheckpoint() {
+        if (chapterProgress.getCheckpoint() == ExplorationZone.INSULATOR_TRAIL
+                && chapterProgress.isMonolithActivated()) {
+            hero.setPosition(
+                    InsulatorTrailLayout.MONOLITH_CHECKPOINT_X,
+                    InsulatorTrailLayout.MONOLITH_CHECKPOINT_Y
+            );
+            heroView.setPosition(hero.getX(), hero.getY());
+            updateCarriedCeramicView();
+            updateCamera();
+        }
     }
 
     public void respawnAtCheckpoint() {
@@ -1871,6 +1958,7 @@ public class ExplorationController {
                 chapterProgress
                         .getCheckpoint()
         );
+        positionHeroAtCheckpoint();
 
         hud.updateHealth(
                 hero.getHealth(),
@@ -1887,6 +1975,7 @@ public class ExplorationController {
                 chapterProgress
                         .getCheckpoint()
         );
+        positionHeroAtCheckpoint();
 
         hud.updateHealth(
                 hero.getHealth(),
