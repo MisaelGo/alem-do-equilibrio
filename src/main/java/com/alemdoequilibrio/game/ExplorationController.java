@@ -58,6 +58,14 @@ public class ExplorationController {
             NEUTRAL_ELECTRIC_SFX =
                     "/audio/electric_shock.mp3";
 
+    private static final String
+            INSULATOR_TRAIL_MUSIC =
+                    "/audio/trilha_isolantes_trilha.mp3";
+
+    private static final String
+            CERAMIC_SFX =
+                    "/audio/ceramics_sound.mp3";
+
     private final Hero hero;
 
     private final HeroView heroView;
@@ -102,8 +110,14 @@ public class ExplorationController {
     private final MediaPlayer
             neutralBorderMusicPlayer;
 
+    private final MediaPlayer
+            insulatorTrailMusicPlayer;
+
     private final AudioClip
             neutralElectricShock;
+
+    private final AudioClip
+            ceramicSound;
 
     private final Runnable
             onDialogueStarted;
@@ -291,6 +305,15 @@ public class ExplorationController {
                 0.35
         );
 
+        insulatorTrailMusicPlayer = new MediaPlayer(
+                resourceManager.getMedia(INSULATOR_TRAIL_MUSIC)
+        );
+        insulatorTrailMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        insulatorTrailMusicPlayer.setVolume(0.32);
+
+        ceramicSound = resourceManager.getAudioClip(CERAMIC_SFX);
+        ceramicSound.setVolume(0.65);
+
         neutralElectricShock =
                 resourceManager.getAudioClip(
                         NEUTRAL_ELECTRIC_SFX
@@ -448,16 +471,34 @@ public class ExplorationController {
     private void updateZoneMusic(
             ExplorationZone zone) {
 
-        if (zone
-                == ExplorationZone
-                        .NEUTRAL_BORDER) {
-
+        if (zone == ExplorationZone.NEUTRAL_BORDER) {
+            insulatorTrailMusicPlayer.stop();
             neutralBorderMusicPlayer.play();
-
             return;
         }
 
         neutralBorderMusicPlayer.stop();
+
+        if (zone == ExplorationZone.INSULATOR_TRAIL) {
+            insulatorTrailMusicPlayer.play();
+        } else {
+            insulatorTrailMusicPlayer.stop();
+        }
+    }
+
+    /**
+     * Evita misturar música de exploração com a música própria da batalha.
+     * O próximo start() retoma a faixa pausada.
+     */
+    public void pauseZoneMusic() {
+        if (neutralBorderMusicPlayer.getStatus()
+                == MediaPlayer.Status.PLAYING) {
+            neutralBorderMusicPlayer.pause();
+        }
+        if (insulatorTrailMusicPlayer.getStatus()
+                == MediaPlayer.Status.PLAYING) {
+            insulatorTrailMusicPlayer.pause();
+        }
     }
 
     private void positionHeroAtZoneStart(
@@ -687,6 +728,7 @@ public class ExplorationController {
                 );
             } else if (chapterProgress.pickUpCeramicPlate()) {
                 refreshCeramicConstruction();
+                ceramicSound.play();
                 onProgressChanged.run();
                 hud.showCeramicAction(
                         "Placa coletada! Vá ao ponto de instalação da passarela."
@@ -705,7 +747,13 @@ public class ExplorationController {
             );
         } else if (chapterProgress.installCeramicPlate()) {
             refreshCeramicConstruction();
+            ceramicSound.play();
             onProgressChanged.run();
+
+            if (chapterProgress.isCeramicBridgeComplete()) {
+                hud.playCompletionSound();
+            }
+
             int count = chapterProgress.getBridgePlatesPlaced();
             hud.showCeramicAction(
                     chapterProgress.isCeramicBridgeComplete()
@@ -871,6 +919,8 @@ public class ExplorationController {
                 );
 
         if (success) {
+            // Recompensa de habilidade nova: check apenas na aprovação.
+            hud.playCompletionSound();
 
             onProgressChanged
                     .run();
@@ -1077,6 +1127,9 @@ public class ExplorationController {
 
             chapterProgress
                     .markNeutralIonMet();
+
+            // Primeira descoberta de Íon na Fronteira Neutra.
+            hud.playCompletionSound();
 
             onProgressChanged
                     .run();
@@ -1350,6 +1403,13 @@ public class ExplorationController {
 
         lastEnvironmentalDamageTime = now;
         float damage = exposedMetal ? EXPOSED_METAL_DAMAGE : WET_WOOD_DAMAGE;
+
+        // O mesmo choque já presente nos objetos da Fronteira Neutra.
+        // Evita sobrepor múltiplas descargas quando o som ainda toca.
+        if (!neutralElectricShock.isPlaying()) {
+            neutralElectricShock.play();
+        }
+
         hero.takeDamage(damage);
         hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
 
@@ -1417,6 +1477,7 @@ public class ExplorationController {
                         zone
                 )) {
 
+            hud.playCompletionSound();
             hero.restoreHealth();
 
             hud.updateHealth(

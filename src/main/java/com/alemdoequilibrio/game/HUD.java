@@ -36,6 +36,9 @@ public class HUD {
     private static final String CONCEPT_IMAGE =
             "/images/conceito_registrado.png";
 
+    private static final String CHECK_SOUND =
+            "/audio/check.mp3";
+
     private static final double LOGICAL_WIDTH =
             1280.0;
 
@@ -455,6 +458,18 @@ public class HUD {
         ceramicActionTimer.play();
     }
 
+    /**
+     * Reproduz o efeito de conquista para conceitos, habilidades,
+     * checkpoints e a última placa da passarela.
+     */
+    public void playCompletionSound() {
+        try {
+            resourceManager.getAudioClip(CHECK_SOUND).play(0.70);
+        } catch (Exception exception) {
+            // A conquista continua mesmo se o áudio falhar.
+        }
+    }
+
     public void showConceptLearned(
             KnowledgeTopic topic) {
 
@@ -482,18 +497,8 @@ public class HUD {
                 true
         );
 
-        try {
-
-            resourceManager
-                    .getAudioClip(
-                            "/audio/sfx_quiz_correct.wav"
-                    )
-                    .play();
-
-        } catch (Exception e) {
-
-            // Se áudio estiver indisponível, a notificação segue normalmente.
-        }
+        // O conhecimento só é registrado uma vez; usa o check.
+        playCompletionSound();
 
         FadeTransition fadeIn =
                 new FadeTransition(
