@@ -109,18 +109,29 @@ public final class TileMapRenderer {
                 boolean hasEastExit = (zone != ExplorationZone.FRAGMENT_CHAMBER);
                 boolean isEastWall = (col >= columns - 2) && (!hasEastExit || (row < 35 || row > 42));
 
-                if (isNorthWall || isSouthWall || isWestWall || isEastWall) {
+                boolean isWall = zone == ExplorationZone.INSULATOR_TRAIL
+                        ? InsulatorTrailLayout.isWallTile(col, row, columns, rows)
+                        : isNorthWall || isSouthWall || isWestWall || isEastWall;
+                if (isWall) {
                     gc.drawImage(theme.wall, x, y, tileSize, tileSize);
                     continue;
                 }
 
-                // 2. Trilhas e estruturas específicas da zona
+                // 2. Trecho da passarela: metal substitui completamente
+                // a cerâmica, sem camada sobreposta ao caminho.
+                if (zone == ExplorationZone.INSULATOR_TRAIL
+                        && InsulatorTrailLayout.isMetalBridgeTile(col, row)) {
+                    gc.drawImage(theme.wall, x, y, tileSize, tileSize);
+                    continue;
+                }
+
+                // 3. Trilhas e estruturas específicas da zona
                 if (isZonePathTile(zone, col, row)) {
                     gc.drawImage(theme.path, x, y, tileSize, tileSize);
                     continue;
                 }
 
-                // 3. Solo padrão da zona
+                // 4. Solo padrão da zona
                 gc.drawImage(theme.ground, x, y, tileSize, tileSize);
             }
         }
@@ -217,10 +228,7 @@ public final class TileMapRenderer {
             case NEUTRAL_BORDER -> false;
 
             case INSULATOR_TRAIL ->
-                // Trilha de cerâmica vítrea sinuosa conduzindo até o leste
-                (row >= 39 && row <= 42 && col >= 2 && col <= 24)
-                || (col > 24 && col <= 50 && row >= (41 - (int)((col - 24) * 0.15) - 1) && row <= (41 - (int)((col - 24) * 0.15) + 1))
-                || (col > 50 && col <= 77 && row >= 36 && row <= 39);
+                InsulatorTrailLayout.isCeramicTile(col, row);
 
             case FACTION_CROSSROADS ->
                 // Encruzilhada: via horizontal principal e grande avenida perpendicular

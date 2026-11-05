@@ -383,6 +383,8 @@ public class GameController {
             return;
         }
 
+        explorationController.pauseZoneMusic();
+
         currentBattleController =
                 new BattleController(
                         explorationController

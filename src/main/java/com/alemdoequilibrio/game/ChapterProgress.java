@@ -1,9 +1,20 @@
 package com.alemdoequilibrio.game;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 public class ChapterProgress {
+
+    public static final int CERAMIC_BRIDGE_PLATES = 9;
+
+    private int ceramicBridgePlatesPlaced;
+
+    private boolean carryingCeramicPlate;
+
+    private boolean monolithActivated;
+
+    private final Set<Integer> defeatedEnemyIds;
 
     private final EnumSet<KnowledgeTopic>
             learnedTopics;
@@ -20,6 +31,8 @@ public class ChapterProgress {
     private boolean neutralIonMet;
 
     private boolean neutralBorderIntroSeen;
+
+    private boolean insulatorTrailIntroSeen;
 
     public ChapterProgress() {
 
@@ -44,6 +57,78 @@ public class ChapterProgress {
         neutralIonMet = false;
 
         neutralBorderIntroSeen = false;
+
+        insulatorTrailIntroSeen = false;
+
+        ceramicBridgePlatesPlaced = 0;
+        carryingCeramicPlate = false;
+
+        monolithActivated = false;
+        defeatedEnemyIds = new HashSet<>();
+    }
+
+    /** Ativa apenas uma vez a recuperação e o checkpoint do monólito. */
+    public boolean activateMonolithCheckpoint() {
+        if (monolithActivated) {
+            return false;
+        }
+        monolithActivated = true;
+        checkpoint = ExplorationZone.INSULATOR_TRAIL;
+        return true;
+    }
+
+    public boolean isMonolithActivated() {
+        return monolithActivated;
+    }
+
+    public boolean markEnemyDefeated(int enemyId) {
+        if (enemyId <= 0) {
+            throw new IllegalArgumentException("ID de inimigo inválido.");
+        }
+        return defeatedEnemyIds.add(enemyId);
+    }
+
+    public Set<Integer> getDefeatedEnemyIds() {
+        return Set.copyOf(defeatedEnemyIds);
+    }
+
+    /** Coleta uma placa por viagem, respeitando o estoque finito. */
+    public boolean pickUpCeramicPlate() {
+        if (carryingCeramicPlate || getRemainingCeramicPlates() == 0) {
+            return false;
+        }
+
+        carryingCeramicPlate = true;
+        return true;
+    }
+
+    /** Consome a placa carregada e conclui mais uma parte da ponte. */
+    public boolean installCeramicPlate() {
+        if (!carryingCeramicPlate
+                || ceramicBridgePlatesPlaced >= CERAMIC_BRIDGE_PLATES) {
+            return false;
+        }
+
+        ceramicBridgePlatesPlaced++;
+        carryingCeramicPlate = false;
+        return true;
+    }
+
+    public int getBridgePlatesPlaced() {
+        return ceramicBridgePlatesPlaced;
+    }
+
+    public boolean isCarryingCeramicPlate() {
+        return carryingCeramicPlate;
+    }
+
+    public boolean isCeramicBridgeComplete() {
+        return ceramicBridgePlatesPlaced == CERAMIC_BRIDGE_PLATES;
+    }
+
+    public int getRemainingCeramicPlates() {
+        return CERAMIC_BRIDGE_PLATES - ceramicBridgePlatesPlaced
+                - (carryingCeramicPlate ? 1 : 0);
     }
 
     public void learn(
@@ -166,6 +251,14 @@ public class ChapterProgress {
         return neutralBorderIntroSeen;
     }
 
+    public void markInsulatorTrailIntroSeen() {
+        insulatorTrailIntroSeen = true;
+    }
+
+    public boolean hasSeenInsulatorTrailIntro() {
+        return insulatorTrailIntroSeen;
+    }
+
     /**
      * Mantém compatibilidade com chamadas antigas que não
      * armazenavam o encontro com Íon.
@@ -219,6 +312,94 @@ public class ChapterProgress {
             boolean neutralIonMet,
             boolean neutralBorderIntroSeen) {
 
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                neutralIonMet,
+                neutralBorderIntroSeen,
+                false
+        );
+    }
+
+    /** Restaura as duas introduções, mantendo os saves antigos válidos. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen) {
+
+        restoreFromSave(
+                checkpoint,
+                learnedTopics,
+                completedQuizzes,
+                bossDefeated,
+                fragmentObtained,
+                neutralIonMet,
+                neutralBorderIntroSeen,
+                insulatorTrailIntroSeen,
+                0,
+                false
+        );
+    }
+
+    /** Mantém compatibilidade com o estado anterior. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen,
+            int ceramicBridgePlatesPlaced,
+            boolean carryingCeramicPlate) {
+
+        restoreFromSave(
+                checkpoint, learnedTopics, completedQuizzes,
+                bossDefeated, fragmentObtained, neutralIonMet,
+                neutralBorderIntroSeen, insulatorTrailIntroSeen,
+                ceramicBridgePlatesPlaced, carryingCeramicPlate,
+                false, Set.of()
+        );
+    }
+
+    /** Restaura monólito, combate e construção no mesmo save. */
+    public void restoreFromSave(
+            ExplorationZone checkpoint,
+            Set<KnowledgeTopic> learnedTopics,
+            Set<KnowledgeTopic> completedQuizzes,
+            boolean bossDefeated,
+            boolean fragmentObtained,
+            boolean neutralIonMet,
+            boolean neutralBorderIntroSeen,
+            boolean insulatorTrailIntroSeen,
+            int ceramicBridgePlatesPlaced,
+            boolean carryingCeramicPlate,
+            boolean monolithActivated,
+            Set<Integer> defeatedEnemyIds) {
+
+        if (defeatedEnemyIds == null
+                || defeatedEnemyIds.stream().anyMatch(id -> id == null || id <= 0)) {
+            throw new IllegalArgumentException("IDs de inimigos inválidos.");
+        }
+
+        if (ceramicBridgePlatesPlaced < 0
+                || ceramicBridgePlatesPlaced > CERAMIC_BRIDGE_PLATES
+                || ceramicBridgePlatesPlaced + (carryingCeramicPlate ? 1 : 0)
+                        > CERAMIC_BRIDGE_PLATES) {
+            throw new IllegalArgumentException(
+                    "Quantidade inválida de cerâmica no save."
+            );
+        }
+
         if (checkpoint == null
                 || learnedTopics == null
                 || completedQuizzes == null) {
@@ -254,5 +435,15 @@ public class ChapterProgress {
 
         this.neutralBorderIntroSeen =
                 neutralBorderIntroSeen;
+
+        this.insulatorTrailIntroSeen =
+                insulatorTrailIntroSeen;
+
+        this.ceramicBridgePlatesPlaced = ceramicBridgePlatesPlaced;
+        this.carryingCeramicPlate = carryingCeramicPlate;
+
+        this.monolithActivated = monolithActivated;
+        this.defeatedEnemyIds.clear();
+        this.defeatedEnemyIds.addAll(defeatedEnemyIds);
     }
 }

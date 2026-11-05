@@ -36,6 +36,9 @@ public class HUD {
     private static final String CONCEPT_IMAGE =
             "/images/conceito_registrado.png";
 
+    private static final String CHECK_SOUND =
+            "/audio/check.mp3";
+
     private static final double LOGICAL_WIDTH =
             1280.0;
 
@@ -57,6 +60,12 @@ public class HUD {
     private final Pane conceptBanner;
 
     private final Label conceptTitleLabel;
+
+    private final Label ceramicProgressLabel;
+
+    private final Label ceramicActionLabel;
+
+    private PauseTransition ceramicActionTimer;
 
     private SequentialTransition
             conceptAnimation;
@@ -298,12 +307,37 @@ public class HUD {
         conceptBanner.relocate((LOGICAL_WIDTH - conceptWidth) / 2.0, 25);
         conceptBanner.setVisible(false);
 
+        ceramicProgressLabel = new Label();
+        ceramicProgressLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.90);"
+                + "-fx-text-fill: #F9E6AE;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 16px;"
+                + "-fx-font-weight: bold; -fx-padding: 9px 12px;");
+        // Alinhado ao topo do HUD de vida e próximo à borda direita.
+        ceramicProgressLabel.relocate(950, 10);
+        ceramicProgressLabel.setVisible(false);
+
+        ceramicActionLabel = new Label();
+        ceramicActionLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.94);"
+                + "-fx-text-fill: white;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 19px;"
+                + "-fx-font-weight: bold; -fx-padding: 10px 14px;");
+        ceramicActionLabel.setWrapText(true);
+        ceramicActionLabel.setMaxWidth(580);
+        ceramicActionLabel.relocate(360, 115);
+        ceramicActionLabel.setVisible(false);
+
         this.hudLayer
                 .getChildren()
                 .addAll(
                         statusCard,
                         interactionPrompt,
-                        conceptBanner
+                        conceptBanner,
+                        ceramicProgressLabel,
+                        ceramicActionLabel
                 );
     }
 
@@ -394,6 +428,48 @@ public class HUD {
         );
     }
 
+    /** Indicador persistente das nove viagens de instalação. */
+    public void showCeramicProgress(int placed, int total, boolean carrying) {
+        ceramicProgressLabel.setText(
+                "CERÂMICA: faltam " + (total - placed)
+                + (carrying ? " | Com placa" : "")
+        );
+        ceramicProgressLabel.setVisible(true);
+    }
+
+    public void hideCeramicProgress() {
+        ceramicProgressLabel.setVisible(false);
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setVisible(false);
+    }
+
+    /** Mensagem curta de coleta, instalação ou tentativa inválida. */
+    public void showCeramicAction(String message) {
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setText(message);
+        ceramicActionLabel.setVisible(true);
+        ceramicActionTimer = new PauseTransition(Duration.seconds(3.2));
+        ceramicActionTimer.setOnFinished(event ->
+                ceramicActionLabel.setVisible(false));
+        ceramicActionTimer.play();
+    }
+
+    /**
+     * Reproduz o efeito de conquista para conceitos, habilidades,
+     * checkpoints e a última placa da passarela.
+     */
+    public void playCompletionSound() {
+        try {
+            resourceManager.getAudioClip(CHECK_SOUND).play(0.70);
+        } catch (Exception exception) {
+            // A conquista continua mesmo se o áudio falhar.
+        }
+    }
+
     public void showConceptLearned(
             KnowledgeTopic topic) {
 
@@ -421,18 +497,8 @@ public class HUD {
                 true
         );
 
-        try {
-
-            resourceManager
-                    .getAudioClip(
-                            "/audio/sfx_quiz_correct.wav"
-                    )
-                    .play();
-
-        } catch (Exception e) {
-
-            // Se áudio estiver indisponível, a notificação segue normalmente.
-        }
+        // O conhecimento só é registrado uma vez; usa o check.
+        playCompletionSound();
 
         FadeTransition fadeIn =
                 new FadeTransition(

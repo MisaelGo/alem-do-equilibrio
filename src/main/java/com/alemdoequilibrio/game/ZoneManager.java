@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import com.alemdoequilibrio.core.ResourceManager;
 
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -92,6 +93,12 @@ public class ZoneManager {
 
     private final QuestionBank questionBank;
 
+    private final ChapterProgress chapterProgress;
+
+    private Group ceramicPileVisual;
+
+    private Group ceramicBridgeVisual;
+
     private final List<Interactable>
             interactables;
 
@@ -103,12 +110,24 @@ public class ZoneManager {
 
     private Rectangle exitArea;
 
+    private Rectangle returnArea;
+
     private Rectangle checkpointArea;
 
     public ZoneManager(
             Pane worldLayer,
             ResourceManager resourceManager,
             QuestionBank questionBank) {
+        this(worldLayer, resourceManager, questionBank, new ChapterProgress());
+    }
+
+    public ZoneManager(
+            Pane worldLayer,
+            ResourceManager resourceManager,
+            QuestionBank questionBank,
+            ChapterProgress chapterProgress) {
+
+        this.chapterProgress = Objects.requireNonNull(chapterProgress);
 
         this.worldLayer =
                 Objects.requireNonNull(
@@ -147,8 +166,11 @@ public class ZoneManager {
         interactables.clear();
 
         exitArea = null;
+        returnArea = null;
         checkpointArea = null;
 
+        ceramicPileVisual = null;
+        ceramicBridgeVisual = null;
         worldLayer
                 .getChildren()
                 .clear();
@@ -275,40 +297,192 @@ public class ZoneManager {
     }
 
     private void buildInsulatorTrail() {
+        addZoneTitle("TRILHA DOS ISOLANTES");
 
-        addZoneTitle(
-                "TRILHA DOS ISOLANTES"
+        // Elementos da etapa visual: paredes e cerâmica estão no tilemap.
+        addInsulatorHouse();
+        addCeramicPile();
+        addMetalBridge();
+        addInsulatorMonolith();
+        refreshCeramicConstruction();
+
+        NPC elia = new NPC(
+                "Élia",
+                500,
+                1580,
+                40,
+                50,
+                KnowledgeTopic.KNOW_ELECTRIZATION,
+                "ELIA_ELECTRIZATION"
+        );
+        addNpc(elia, Color.LIGHTBLUE);
+
+        // Passagem oeste sem colisão: permite retornar à Fronteira Neutra.
+        createReturnArea(
+                0,
+                InsulatorTrailLayout.WEST_GATE_FIRST_ROW
+                        * InsulatorTrailLayout.TILE_SIZE,
+                5,
+                (InsulatorTrailLayout.WEST_GATE_LAST_ROW
+                        - InsulatorTrailLayout.WEST_GATE_FIRST_ROW + 1)
+                        * InsulatorTrailLayout.TILE_SIZE
         );
 
-        NPC elia =
-                new NPC(
-                        "Élia",
-                        650,
-                        1650,
-                        40,
-                        50,
-                        KnowledgeTopic
-                                .KNOW_ELECTRIZATION,
-                        "ELIA_ELECTRIZATION"
-                );
-
-        addNpc(
-                elia,
-                Color.LIGHTBLUE
-        );
-
-        addDecoration(
-                "Estrutura condutora / isolante",
-                1100,
-                1500
-        );
-
+        // Saída na abertura superior direita, alinhada à cerâmica.
+        // Mantém o gatilho estreito, como na Fronteira Neutra.
         createExitArea(
                 "Encruzilhada das Facções",
-                3000,
-                1450,
-                140,
-                300
+                WORLD_WIDTH - 5,
+                InsulatorTrailLayout.EAST_GATE_FIRST_ROW
+                        * InsulatorTrailLayout.TILE_SIZE,
+                5,
+                (InsulatorTrailLayout.EAST_GATE_LAST_ROW
+                        - InsulatorTrailLayout.EAST_GATE_FIRST_ROW + 1)
+                        * InsulatorTrailLayout.TILE_SIZE
+        );
+    }
+
+    /** Depósito de madeira e cerâmica, com imagem pixel art própria. */
+    private void addInsulatorHouse() {
+        double x = InsulatorTrailLayout.HOUSE_X;
+        double y = InsulatorTrailLayout.HOUSE_Y;
+
+        Image image = resourceManager.getImage(
+                "/images/deposito_isolantes.png"
+        );
+        ImageView house = new ImageView(image);
+        house.setFitWidth(InsulatorTrailLayout.HOUSE_WIDTH);
+        house.setFitHeight(InsulatorTrailLayout.HOUSE_HEIGHT);
+        house.setPreserveRatio(false);
+        house.setSmooth(false);
+        house.relocate(x, y);
+
+        worldLayer.getChildren().add(house);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o depósito",
+                        "INSULATOR_DEPOT_INTERACTION",
+                        x,
+                        y,
+                        InsulatorTrailLayout.HOUSE_WIDTH,
+                        InsulatorTrailLayout.HOUSE_HEIGHT
+                )
+        );
+    }
+
+    /** Pilha coletável: as placas somem de cima para baixo a cada viagem. */
+    private void addCeramicPile() {
+        ceramicPileVisual = new Group();
+        worldLayer.getChildren().add(ceramicPileVisual);
+
+        double x = InsulatorTrailLayout.CERAMIC_PILE_X;
+        double y = InsulatorTrailLayout.CERAMIC_PILE_Y;
+
+        // A distância é calculada nas placas remanescentes (não neste marcador).
+        interactables.add(new SceneryInteractable(
+                "uma placa de cerâmica",
+                InsulatorTrailLayout.CERAMIC_PILE_INTERACTION,
+                x, y,
+                InsulatorTrailLayout.CERAMIC_PILE_WIDTH,
+                InsulatorTrailLayout.CERAMIC_PILE_HEIGHT
+        ));
+    }
+
+    /** Instalação interativa no próximo trecho de metal, sem legenda fixa. */
+    private void addMetalBridge() {
+        ceramicBridgeVisual = new Group();
+        worldLayer.getChildren().add(ceramicBridgeVisual);
+
+        // Este marcador não determina a proximidade: o controlador mede
+        // a distância até os blocos metálicos da próxima etapa.
+        interactables.add(new SceneryInteractable(
+                "a passarela",
+                InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION,
+                760, 1320, 40, 40
+        ));
+    }
+
+    /**
+     * Redesenha a pilha restante e todas as faixas instaladas,
+     * sem recarregar a zona, NPCs ou inimigos.
+     */
+    public void refreshCeramicConstruction() {
+        if (currentZone != ExplorationZone.INSULATOR_TRAIL
+                || ceramicPileVisual == null || ceramicBridgeVisual == null) {
+            return;
+        }
+
+        Image ceramic = resourceManager.getImage(
+                "/images/tile_insulator_ceramic.png"
+        );
+        ceramicPileVisual.getChildren().clear();
+        ceramicBridgeVisual.getChildren().clear();
+
+        List<javafx.geometry.Rectangle2D> plates =
+                InsulatorTrailLayout.getCeramicPilePlates();
+        int remaining = Math.min(plates.size(),
+                chapterProgress.getRemainingCeramicPlates());
+
+        for (int i = 0; i < remaining; i++) {
+            javafx.geometry.Rectangle2D bounds = plates.get(i);
+            ImageView tile = new ImageView(ceramic);
+            tile.setX(bounds.getMinX());
+            tile.setY(bounds.getMinY());
+            tile.setFitWidth(bounds.getWidth());
+            tile.setFitHeight(bounds.getHeight());
+            tile.setSmooth(false);
+            ceramicPileVisual.getChildren().add(tile);
+        }
+
+        int placed = chapterProgress.getBridgePlatesPlaced();
+        int cols = (int) (WORLD_WIDTH / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (WORLD_HEIGHT / InsulatorTrailLayout.TILE_SIZE);
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < cols; col++) {
+                int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
+                if (section < 0 || section >= placed) {
+                    continue;
+                }
+                ImageView tile = new ImageView(ceramic);
+                tile.setX(col * InsulatorTrailLayout.TILE_SIZE);
+                tile.setY(row * InsulatorTrailLayout.TILE_SIZE);
+                tile.setFitWidth(InsulatorTrailLayout.TILE_SIZE);
+                tile.setFitHeight(InsulatorTrailLayout.TILE_SIZE);
+                tile.setSmooth(false);
+                ceramicBridgeVisual.getChildren().add(tile);
+            }
+        }
+
+
+    }
+
+    /** Monólito isolante: primeira ativação cura e registra um checkpoint. */
+    private void addInsulatorMonolith() {
+        double x = InsulatorTrailLayout.MONOLITH_X;
+        double y = InsulatorTrailLayout.MONOLITH_Y;
+
+        Image image = resourceManager.getImage(
+                "/images/monolito_isolante.png"
+        );
+        ImageView monolith = new ImageView(image);
+        monolith.setFitWidth(InsulatorTrailLayout.MONOLITH_WIDTH);
+        monolith.setFitHeight(InsulatorTrailLayout.MONOLITH_HEIGHT);
+        monolith.setPreserveRatio(true);
+        monolith.setSmooth(false);
+        monolith.relocate(x, y);
+
+        worldLayer.getChildren().add(monolith);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o monólito",
+                        "INSULATOR_MONOLITH_INTERACTION",
+                        x,
+                        y,
+                        InsulatorTrailLayout.MONOLITH_WIDTH,
+                        InsulatorTrailLayout.MONOLITH_HEIGHT
+                )
         );
     }
 
@@ -851,6 +1025,7 @@ public class ZoneManager {
             imageView.setFitWidth(npc.getWidth());
             imageView.setFitHeight(npc.getHeight());
             imageView.setPreserveRatio(true);
+            imageView.setSmooth(false);
             imageView.relocate(
                     npc.getX(),
                     npc.getY()
@@ -1229,13 +1404,13 @@ public class ZoneManager {
                 );
 
         exitLabel.relocate(
-                x - 40,
+                currentZone == ExplorationZone.INSULATOR_TRAIL
+                        ? x - 270 : x - 40,
                 y - 35
         );
 
-        if (currentZone
-                == ExplorationZone
-                        .NEUTRAL_BORDER) {
+        if (currentZone == ExplorationZone.NEUTRAL_BORDER
+                || currentZone == ExplorationZone.INSULATOR_TRAIL) {
 
             worldLayer
                     .getChildren()
@@ -1252,6 +1427,21 @@ public class ZoneManager {
                         exitArea,
                         exitLabel
                 );
+    }
+
+    /** Gatilho exclusivo da passagem oeste da Trilha dos Isolantes. */
+    private void createReturnArea(
+            double x, double y, double width, double height) {
+
+        returnArea = new Rectangle(x, y, width, height);
+        returnArea.setFill(Color.TRANSPARENT);
+
+        worldLayer.getChildren().add(returnArea);
+    }
+
+    public boolean intersectsReturn(
+            double x, double y, double width, double height) {
+        return intersects(returnArea, x, y, width, height);
     }
 
     public boolean intersectsExit(
