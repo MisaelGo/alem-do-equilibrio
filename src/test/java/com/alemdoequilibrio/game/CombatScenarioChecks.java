@@ -2,19 +2,18 @@ package com.alemdoequilibrio.game;
 
 import java.util.EnumSet;
 
+import org.junit.jupiter.api.Test;
+
 /**
- * Verificacao executavel do combate sem dependencias de teste adicionais.
+ * Verificações automatizadas de combate usando JUnit.
  *
- * Executar apos mvn test-compile com:
- * java -cp "target/classes;target/test-classes"
- *     com.alemdoequilibrio.game.CombatScenarioChecks
+ * Evita um segundo método main no projeto (penalidade do professor).
+ * É executado pelo Maven Surefire com o comando mvn test.
  */
 public final class CombatScenarioChecks {
 
-    private CombatScenarioChecks() {
-    }
-
-    public static void main(String[] args) {
+    @Test
+    public void runAll() {
         checkBossIsWinnableWithoutAbilities();
         checkRepulsionAndTurnOrder();
         checkChargeSelectionDuringBattle();

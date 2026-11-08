@@ -7,17 +7,16 @@ import java.nio.file.Path;
 import com.alemdoequilibrio.core.SaveFormatException;
 import com.alemdoequilibrio.core.SaveManager;
 
+import org.junit.jupiter.api.Test;
+
 /**
- * Verificacoes estruturais de registry,
- * progresso e persistencia.
+ * Verificações de registry, progresso, persistência e requisitos POO.
+ * São executadas pelo Maven/JUnit, sem declarar outro método main.
  */
 public final class PersistenceScenarioChecks {
 
-    private PersistenceScenarioChecks() {
-    }
-
-    public static void main(
-            String[] args)
+    @Test
+    public void runAll()
             throws Exception {
 
         checkGameRegistry();

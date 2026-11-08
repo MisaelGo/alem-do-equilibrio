@@ -1,4 +1,4 @@
-name: Compilação e cenários POO
+name: Validacao dos 22 itens POO
 
 on:
   push:
@@ -7,20 +7,16 @@ on:
     branches: [main]
 
 jobs:
-  java26:
+  build-e-testes:
     runs-on: ubuntu-latest
     steps:
-      - name: Obter código
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Configurar JDK 26
+      - name: JDK 26
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '26'
           cache: maven
-      - name: Compilar classes e verificações
-        run: mvn -B -ntp test-compile
-      - name: Verificar combate
-        run: mvn -B -ntp org.codehaus.mojo:exec-maven-plugin:3.5.0:java -Dexec.classpathScope=test -Dexec.mainClass=com.alemdoequilibrio.game.CombatScenarioChecks
-      - name: Verificar persistência e requisitos POO
-        run: mvn -B -ntp org.codehaus.mojo:exec-maven-plugin:3.5.0:java -Dexec.classpathScope=test -Dexec.mainClass=com.alemdoequilibrio.game.PersistenceScenarioChecks
+      - name: Compilar, testar e gerar o JAR
+        run: mvn -B -ntp verify
