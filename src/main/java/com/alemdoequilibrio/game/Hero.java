@@ -254,6 +254,30 @@ public class Hero extends GameCharacter
     }
 
     /**
+     * POO 7.2 - Coerção explícita (casting) de double para float.
+     * Uma recuperação calculada em double (pontos de cura) é limitada
+     * ao máximo e atribuída ao atributo float health. O cast é
+     * necessário porque o HUD/combate armazenam HP em float, enquanto
+     * valores de recuperação podem vir de cálculos em double.
+     *
+     * O monólito utiliza este método para recuperar 20 pontos apenas
+     * em sua primeira ativação, sem curar acima do limite.
+     */
+    public void restoreHealth(double points) {
+        if (!Double.isFinite(points) || points < 0.0) {
+            throw new IllegalArgumentException(
+                    "A recuperação deve ser finita e não negativa.");
+        }
+
+        double recoveredHealth = Math.min((double) maxHealth, health + points);
+        health = (float) recoveredHealth;
+
+        if (isAlive()) {
+            activate();
+        }
+    }
+
+    /**
      * Recupera o Hero depois de uma derrota
      * sem perder suas habilidades.
      */

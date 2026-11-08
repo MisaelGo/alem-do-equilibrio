@@ -1128,7 +1128,7 @@ public class ExplorationController {
 
             if (chapterProgress.activateMonolithCheckpoint()) {
                 float before = hero.getHealth();
-                hero.setHealth(Math.min(hero.getMaxHealth(), before + 20.0f));
+                hero.restoreHealth(20.0);
                 hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
                 hud.playCompletionSound();
 

@@ -3,7 +3,7 @@ package com.alemdoequilibrio.core;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -195,28 +195,28 @@ public class GameController {
         freshGame.changeState(GameState.PROLOGUE);
     }
 
-    /** Confirmação síncrona na EDT, mantendo a operação modal. */
+    /**
+     * POO 12 - Entrada de dados por caixa de diálogo.
+     * A resposta textual do jogador (JOptionPane.showInputDialog)
+     * é efetivamente lida e validada: apenas "REINICIAR" autoriza
+     * apagar um save, evitando perdas acidentais de progresso.
+     * O diálogo Swing é executado na EDT.
+     */
     private boolean confirmRestartWithJOptionPane() {
-        AtomicInteger selection =
-                new AtomicInteger(JOptionPane.CLOSED_OPTION);
+        AtomicBoolean confirmed = new AtomicBoolean(false);
 
         try {
             SwingUtilities.invokeAndWait(() -> {
-                Object[] options = {"Reiniciar", "Cancelar"};
-
-                int answer = JOptionPane.showOptionDialog(
+                String response = JOptionPane.showInputDialog(
                         null,
-                        "Apagar o progresso salvo e recomeçar desde o prólogo?\n"
-                        + "Esta ação não poderá ser desfeita.",
-                        "Reiniciar jogo",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE,
-                        null,
-                        options,
-                        options[1]
+                        "Para apagar o progresso e começar do prólogo,\n"
+                        + "digite REINICIAR. Qualquer outra resposta cancela.",
+                        "Confirmar reinício",
+                        JOptionPane.WARNING_MESSAGE
                 );
 
-                selection.set(answer);
+                confirmed.set(response != null
+                        && "REINICIAR".equalsIgnoreCase(response.trim()));
             });
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
@@ -230,7 +230,7 @@ public class GameController {
             return false;
         }
 
-        return selection.get() == JOptionPane.YES_OPTION;
+        return confirmed.get();
     }
 
     /** Exibe falhas de exclusão do save também usando JOptionPane. */

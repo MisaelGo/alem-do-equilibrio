@@ -21,10 +21,12 @@ public final class AbilityRegistry {
             "EQUIPOTENTIAL_SHIELD";
 
     /*
-     * C1-043 - Uso concreto do generic.
-     *
-     * GameRegistry<T> é utilizado como
-     * GameRegistry<Ability> em um fluxo real do jogo.
+     * POO 7.4 - Polimorfismo paramétrico (classe concreta):
+     * o atributo é declarado explicitamente GameRegistry<Ability>,
+     * não apenas inferido no construtor. O mesmo registro recebe
+     * RepulsionPulse, FieldImpulse e EquipotentialShield, todos do
+     * tipo Ability, e é utilizado efetivamente para conceder
+     * e restaurar habilidades por ID.
      */
     private static final GameRegistry<Ability>
             REGISTRY =

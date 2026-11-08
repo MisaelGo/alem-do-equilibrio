@@ -1,6 +1,6 @@
 package com.alemdoequilibrio.game;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,22 +84,35 @@ public class Merchant extends NPC
         this.failureDialogueId =
                 failureDialogueId;
 
-        if (requiredTopics == null
-                || requiredTopics.length == 0) {
+        this.requiredTopics = normalizePrerequisites(
+                quizTopic, requiredTopics
+        );
+    }
 
-            this.requiredTopics =
-                    new KnowledgeTopic[] {
-                        quizTopic
-                    };
-
-        } else {
-
-            this.requiredTopics =
-                    Arrays.copyOf(
-                            requiredTopics,
-                            requiredTopics.length
-                    );
+    /**
+     * POO 2.1 - Método com argumentos variados (varargs) e laço FOR.
+     * O comerciante pode exigir um ou vários conceitos antes do quiz.
+     * O for valida os conceitos e evita requisitos repetidos, que
+     * tornariam a liberação de habilidades inconsistentes.
+     *
+     * POO 2.2 - Método estático: esta normalização independe do estado
+     * do comerciante e é utilizada em seu construtor.
+     */
+    private static KnowledgeTopic[] normalizePrerequisites(
+            KnowledgeTopic defaultTopic, KnowledgeTopic... topics) {
+        Objects.requireNonNull(defaultTopic, "Conceito do quiz obrigatório");
+        if (topics == null || topics.length == 0) {
+            return new KnowledgeTopic[] { defaultTopic };
         }
+
+        ArrayList<KnowledgeTopic> uniqueTopics = new ArrayList<>();
+        for (KnowledgeTopic topic : topics) {
+            Objects.requireNonNull(topic, "Pré-requisito não pode ser nulo");
+            if (!uniqueTopics.contains(topic)) {
+                uniqueTopics.add(topic);
+            }
+        }
+        return uniqueTopics.toArray(new KnowledgeTopic[0]);
     }
 
     @Override

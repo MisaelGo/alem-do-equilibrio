@@ -41,6 +41,15 @@ public class MapEnemySpawner {
     private final ResourceManager resourceManager;
     private final List<MapEnemyNode> activeEnemies;
 
+    /**
+     * POO 6.2 - Acoplamento dinâmico: o tipo declarado é WanderingSpark
+     * (filha concreta de Enemy), criado neste controlador. Na seleção
+     * de encontros chamamos bridgeSpark.getEnemyId(), método herdado
+     * de Enemy e não sobrescrito por WanderingSpark. Assim a identidade
+     * fixa do guardião da ponte coincide com a persistência das vitórias.
+     */
+    private final WanderingSpark bridgeSpark;
+
     private ExplorationZone currentZone;
 
     private Set<Integer> defeatedEnemyIds = Set.of();
@@ -59,6 +68,8 @@ public class MapEnemySpawner {
         this.worldLayer = Objects.requireNonNull(worldLayer, "worldLayer não pode ser nulo.");
         this.resourceManager = (resourceManager != null) ? resourceManager : new ResourceManager();
         this.activeEnemies = new ArrayList<>();
+
+        bridgeSpark = new WanderingSpark(201);
     }
 
     public void spawnForZone(ExplorationZone zone) {
@@ -87,12 +98,14 @@ public class MapEnemySpawner {
              * saída superior direita para a Encruzilhada das Facções.
              */
             case INSULATOR_TRAIL -> {
-                // Centro da passarela metálica (centro do sprite: 1100, 1400).
-                spawnEnemy(
-                        new WanderingSpark(201),
-                        1080,
-                        1380
-                );
+                // Identidade do encontro permanece estável após trocar de área.
+                if (!defeatedEnemyIds.contains(bridgeSpark.getEnemyId())) {
+                    spawnEnemy(
+                            bridgeSpark,
+                            1080,
+                            1380
+                    );
+                }
 
                 // Centro do caminho de cerâmica, após a passarela.
                 spawnEnemy(
