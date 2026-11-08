@@ -100,8 +100,12 @@ public class MapEnemySpawner {
             case INSULATOR_TRAIL -> {
                 // Identidade do encontro permanece estável após trocar de área.
                 if (!defeatedEnemyIds.contains(bridgeSpark.getEnemyId())) {
+                    // Cada carregamento recebe vida nova. O atributo
+                    // bridgeSpark fornece o ID herdado de Enemy (POO 6.2),
+                    // mas não reaproveitamos o inimigo danificado de uma
+                    // batalha perdida antes de salvar.
                     spawnEnemy(
-                            bridgeSpark,
+                            new WanderingSpark(bridgeSpark.getEnemyId()),
                             1080,
                             1380
                     );
