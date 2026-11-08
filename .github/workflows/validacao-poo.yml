@@ -1,4 +1,4 @@
-name: Validacao dos 22 itens POO
+name: Validação dos 22 itens POO
 
 on:
   push:
@@ -18,5 +18,13 @@ jobs:
           distribution: temurin
           java-version: '26'
           cache: maven
-      - name: Compilar, testar e gerar o JAR
+      - name: Compilar, executar testes POO e gerar JAR
         run: mvn -B -ntp verify
+      - name: Instalar Graphviz para validar a documentação
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq graphviz
+      - name: Verificar índice, diagrama PDF e pacote ZIP
+        run: |
+          python3 scripts/gerar-entrega.py Equipe_Teste
+          test -s dist/Equipe_Teste.zip
+          unzip -l dist/Equipe_Teste.zip | grep -q 'documentacao/diagrama-classes.pdf'
+          unzip -l dist/Equipe_Teste.zip | grep -q 'docs/indice-22-itens-poo.md'
