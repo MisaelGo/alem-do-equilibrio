@@ -2,6 +2,11 @@ package com.alemdoequilibrio.game;
 
 /**
  * Representa o personagem controlado pelo jogador.
+ *
+ * POO 8 - Interfaces: Hero implementa diretamente Damageable e Movable
+ * porque recebe dano no combate e precisa de movimento no mapa.
+ * Enemy também implementa Damageable, e NPC implementa Interactable:
+ * são pelo menos três classes concretas usando interfaces do sistema.
  */
 public class Hero extends GameCharacter
         implements Damageable, Movable {
@@ -29,12 +34,17 @@ public class Hero extends GameCharacter
     private ChargeType chargeType;
 
     /*
-     * POO - Composicao:
-     * o Hero cria e possui seu proprio AbilityBook.
+     * POO 4 - Associação por composição:
+     * o Hero cria internamente seu AbilityBook no construtor,
+     * controla seu ciclo de vida e não compartilha o livro com outro Hero.
      */
     private final AbilityBook
             abilityBook;
 
+    /**
+     * POO 3 - Construtores de classes concretas: Hero e Enemy
+     * são criados com posições e atributos válidos para jogar.
+     */
     public Hero(
             double x,
             double y,
@@ -263,6 +273,8 @@ public class Hero extends GameCharacter
      * O monólito utiliza este método para recuperar 20 pontos apenas
      * em sua primeira ativação, sem curar acima do limite.
      */
+    // POO 7.1 - Sobrecarga: restoreHealth(double) recupera pontos
+    // parciais; restoreHealth() sem argumento cura totalmente após derrota.
     public void restoreHealth(double points) {
         if (!Double.isFinite(points) || points < 0.0) {
             throw new IllegalArgumentException(

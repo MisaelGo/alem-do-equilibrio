@@ -210,6 +210,13 @@ public class MapEnemySpawner {
         }
     }
 
+    /**
+     * POO 7.3 - Polimorfismo de subtipagem entre classes concretas:
+     * este método recebe Enemy e é chamado com WanderingSpark,
+     * BossEnemy, UncontrolledCharge e outras subclasses de Enemy.
+     * O mesmo fluxo de posicionamento, animação e remoção funciona
+     * independentemente da subclasse concreta recebida.
+     */
     private MapEnemyNode spawnEnemy(Enemy enemy, double x, double y) {
         if (defeatedEnemyIds.contains(enemy.getEnemyId())) {
             return null;

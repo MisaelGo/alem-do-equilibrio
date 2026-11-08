@@ -1,7 +1,10 @@
 package com.alemdoequilibrio.core;
 
 /**
- * C1-055 - Excecao customizada.
+ * POO 11 - Exceção customizada, levantada e tratada.
+ * SaveManager lança SaveFormatException quando um arquivo salvo
+ * possui campos inválidos; GameController a captura ao tentar
+ * continuar a partida, evitando carregar estado corrompido.
  *
  * Representa erros semanticos ou incompatibilidades
  * no formato do arquivo de save.

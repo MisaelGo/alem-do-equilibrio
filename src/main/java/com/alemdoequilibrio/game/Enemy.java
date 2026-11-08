@@ -5,6 +5,9 @@ package com.alemdoequilibrio.game;
  *
  * Enemy herda o estado comum de GameCharacter e implementa Damageable
  * porque pode receber dano durante uma batalha.
+ *
+ * POO 1.1 - Encapsulamento: o nome, nível, vida e identidade
+ * permanecem private, impedindo alterações arbitrárias em combate.
  */
 public class Enemy extends GameCharacter implements Damageable {
 

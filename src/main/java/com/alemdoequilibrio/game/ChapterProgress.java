@@ -6,6 +6,12 @@ import java.util.Set;
 
 public class ChapterProgress {
 
+    /**
+     * POO 1.5 - Constante primitiva em classe concreta.
+     * O limite de nove placas é usado em ExplorationController, HUD
+     * e SaveManager para validar estoque, montagem e persistência.
+     * O valor não pode variar durante uma partida.
+     */
     public static final int CERAMIC_BRIDGE_PLATES = 9;
 
     private int ceramicBridgePlatesPlaced;

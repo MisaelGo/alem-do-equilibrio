@@ -26,6 +26,12 @@ public final class PersistenceScenarioChecks {
 
         checkSaveAndLoad();
 
+        checkMonolithAndDefeatedEnemiesSave();
+
+        checkPartialHealingAndExplicitCoercion();
+
+        checkMerchantVarargsPrerequisites();
+
         checkInvalidSave();
 
         System.out.println(
@@ -132,6 +138,85 @@ public final class PersistenceScenarioChecks {
                 progress.hasFragmentObtained(),
                 "O fragmento deve ser registrado."
         );
+    }
+
+    /**
+     * Confere a cura parcial (double para float) e o teto de HP.
+     * Garante que o exemplo POO 7.2 também seja regra utilizada no jogo.
+     */
+    private static void checkPartialHealingAndExplicitCoercion() {
+        Hero hero = new Hero(0, 0, 200);
+        hero.takeDamage(35.0f);
+        hero.restoreHealth(20.0);
+        check(hero.getHealth() == 85.0f,
+                "O monólito deve recuperar 20 pontos.");
+        hero.restoreHealth(50.0);
+        check(hero.getHealth() == 100.0f,
+                "A recuperação deve respeitar a vida máxima.");
+
+        boolean invalidRejected = false;
+        try {
+            hero.restoreHealth(Double.NaN);
+        } catch (IllegalArgumentException expected) {
+            invalidRejected = true;
+        }
+        check(invalidRejected,
+                "Uma cura de valor inválido deve ser rejeitada.");
+    }
+
+    /** Confere os pré-requisitos variáveis realmente exigidos pelo quiz. */
+    private static void checkMerchantVarargsPrerequisites() {
+        Merchant merchant = new Merchant(
+                "Íon", 0, 0, 40, 50, "ION_QUIZ_I",
+                new QuestionBank(), KnowledgeTopic.KNOW_CHARGE_SIGNS,
+                AbilityRegistry.REPULSION_PULSE_ID,
+                "ION_SUCCESS_I", "ION_FAILURE_I",
+                KnowledgeTopic.KNOW_CHARGE_SIGNS,
+                KnowledgeTopic.KNOW_ELECTRIZATION,
+                KnowledgeTopic.KNOW_CHARGE_SIGNS
+        );
+        ChapterProgress progress = new ChapterProgress();
+        progress.learn(KnowledgeTopic.KNOW_CHARGE_SIGNS);
+        check(!merchant.canStartQuiz(progress),
+                "O quiz não pode começar sem todos os pré-requisitos.");
+        progress.learn(KnowledgeTopic.KNOW_ELECTRIZATION);
+        check(merchant.canStartQuiz(progress),
+                "O quiz deve abrir após aprender os conceitos exigidos.");
+    }
+
+    /** Confere o ciclo completo dos novos campos de persistência. */
+    private static void checkMonolithAndDefeatedEnemiesSave()
+            throws Exception {
+        Path file = Files.createTempFile(
+                "alem-equilibrio-monolith-", ".txt");
+        try {
+            SaveManager manager = new SaveManager(file);
+            ChapterProgress original = new ChapterProgress();
+            check(original.activateMonolithCheckpoint(),
+                    "A primeira ativação deve registrar checkpoint.");
+            check(!original.activateMonolithCheckpoint(),
+                    "A segunda ativação não pode dar outra cura.");
+            original.markEnemyDefeated(201);
+            original.markEnemyDefeated(204);
+            Hero hero = new Hero(0, 0, 200);
+            hero.takeDamage(15.0f);
+            manager.save(original, hero);
+
+            ChapterProgress loaded = new ChapterProgress();
+            Hero loadedHero = new Hero(0, 0, 200);
+            manager.load(loaded, loadedHero);
+            check(loaded.isMonolithActivated(),
+                    "A ativação do monólito deve persistir.");
+            check(loaded.getCheckpoint() == ExplorationZone.INSULATOR_TRAIL,
+                    "O último checkpoint deve ser o monólito.");
+            check(loaded.getDefeatedEnemyIds().containsAll(
+                    java.util.Set.of(201, 204)),
+                    "Os inimigos derrotados devem persistir.");
+            check(loadedHero.getHealth() == 85.0f,
+                    "A vida salva deve ser restaurada.");
+        } finally {
+            Files.deleteIfExists(file);
+        }
     }
 
     private static void

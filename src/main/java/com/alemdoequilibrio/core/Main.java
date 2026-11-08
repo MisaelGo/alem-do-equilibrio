@@ -9,6 +9,11 @@ import javafx.stage.Stage;
  * A classe Main é responsável apenas por iniciar o JavaFX
  * e entregar a janela principal ao GameController.
  * A lógica do jogo não deve ser implementada nesta classe.
+ *
+ * POO 9 - Pacotes: o projeto declara EXATAMENTE dois pacotes próprios:
+ * com.alemdoequilibrio.core (orquestração, I/O) e
+ * com.alemdoequilibrio.game (personagens, combate, exploração).
+ * Os imports Java/JavaFX não constituem pacotes criados pelo projeto.
  */
 public class Main extends Application {
     

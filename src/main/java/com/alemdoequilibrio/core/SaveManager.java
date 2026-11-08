@@ -28,6 +28,11 @@ import com.alemdoequilibrio.game.KnowledgeTopic;
  *
  * Grava e recupera o progresso essencial
  * do Capitulo 1 em um arquivo texto versionado.
+ *
+ * POO 13 - Manipulação de arquivos: save() escreve o estado
+ * de Hero e ChapterProgress em UTF-8; load() lê os campos,
+ * valida-os e os utiliza para reconstruir a partida.
+ * O formato é necessário para continuar de um checkpoint.
  */
 public class SaveManager {
 

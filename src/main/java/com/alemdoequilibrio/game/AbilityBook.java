@@ -9,8 +9,9 @@ import java.util.List;
 public class AbilityBook {
 
     /*
-     * POO - ArrayList:
-     * a quantidade de habilidades aprendidas pode crescer durante o jogo.
+     * POO 1.4 - Atributo ArrayList:
+     * o Hero aprende habilidades durante a aventura e precisa de uma
+     * coleção dinâmica, privada e com ordem de aprendizado preservada.
      */
     private final ArrayList<Ability>
             abilities;
