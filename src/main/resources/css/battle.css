@@ -1,305 +1,328 @@
 /* ==========================================================================
-   ALÉM DO EQUILÍBRIO — HUD DE BATALHA (ESTILO FEAR & HUNGER)
-   Paleta: Tons escuros austeros, vinheta pesada, alto contraste.
-   Cores de Física III:
-     - Próton: #B4473D (coral/vermelho com símbolo "+")
-     - Elétron: #356D9A (azul/ciano com símbolo "−")
-     - Nêutron: #607D72 (verde acinzentado com símbolo "0")
-     - Instabilidade/Ruptura: #735A8D (violeta magenta)
-     - Conhecimento/Ouro: #D9A441
+   ALÉM DO EQUILÍBRIO — Folha de Estilos de Combate (2D Pixel Art Texturizado)
+   Paleta e molduras alinhadas a hero_life_hud.png, press_E_hud.png e
+   conceito_registrado.png. As texturas pixeladas de fundo são geradas via
+   WritableImage em BattleView.
    ========================================================================== */
 
 .battle-root {
-    -fx-background-color: radial-gradient(center 50% 40%, radius 75%, #181820, #09090c 70%, #030305 100%);
+    -fx-background-color: #091724;
+    -fx-font-family: "Consolas", "Courier New", monospace;
 }
 
-/* CAIXA DE TELEGRAFIA / NARRATIVA SUPERIOR */
-.telegraph-box {
-    -fx-background-color: rgba(16, 16, 22, 0.92);
-    -fx-border-color: #4a4556 #262430 #262430 #4a4556;
-    -fx-border-width: 2px;
-    -fx-border-radius: 2px;
-    -fx-background-radius: 2px;
-    -fx-padding: 12px 20px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 10, 0.3, 0, 4);
-}
-
-.telegraph-title {
-    -fx-text-fill: #D9A441;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-letter-spacing: 2px;
-}
-
-.telegraph-text {
-    -fx-text-fill: #E2DDD5;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 17px;
-    -fx-font-style: italic;
-    -fx-line-spacing: 4px;
-}
-
-/* ÁREA CENTRAL DO INIMIGO */
-.enemy-name {
-    -fx-text-fill: #F0ECE1;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 6, 0.5, 0, 2);
-}
-
-/* BADGES DE POLARIDADE (Acessibilidade: Símbolo + Forma + Cor) */
-.polarity-badge {
-    -fx-font-family: "Arial", "Consolas", sans-serif;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-padding: 4px 12px;
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-}
-
-.polarity-positive {
-    -fx-background-color: #B4473D;
-    -fx-border-color: #E27B72;
-    -fx-text-fill: #FFFFFF;
-}
-
-.polarity-negative {
-    -fx-background-color: #356D9A;
-    -fx-border-color: #6EA3D1;
-    -fx-text-fill: #FFFFFF;
-}
-
-.polarity-neutral {
-    -fx-background-color: #607D72;
-    -fx-border-color: #92B0A5;
-    -fx-text-fill: #FFFFFF;
-}
-
-.polarity-rupture {
-    -fx-background-color: #735A8D;
-    -fx-border-color: #A488C2;
-    -fx-text-fill: #FFFFFF;
-}
-
-/* SELETOR DE CARGA DO HERÓI (COMBOBOX) */
-.charge-combo {
-    -fx-background-color: #191820;
-    -fx-border-color: #443f50;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 4px;
-    -fx-background-radius: 4px;
-    -fx-padding: 1px 6px;
-    -fx-font-family: "Consolas", "Arial", sans-serif;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-cursor: hand;
-}
-
-.charge-combo:hover {
-    -fx-border-color: #D9A441;
-    -fx-background-color: #24222e;
-}
-
-.charge-combo .list-cell {
+.battle-map-overlay {
     -fx-background-color: transparent;
-    -fx-text-fill: #EAE4D8;
-    -fx-padding: 2px 6px;
-}
-
-.charge-combo-popup .list-view {
-    -fx-background-color: #14131a;
-    -fx-border-color: #D9A441;
-    -fx-border-width: 1.5px;
-}
-
-.charge-combo-popup .list-view .list-cell {
-    -fx-background-color: #14131a;
-    -fx-text-fill: #DDD7CE;
-    -fx-padding: 6px 10px;
-}
-
-.charge-combo-popup .list-view .list-cell:hover,
-.charge-combo-popup .list-view .list-cell:filled:selected {
-    -fx-background-color: #2c2838;
-    -fx-text-fill: #D9A441;
-}
-
-/* BARRAS DE VIDA (HP) */
-.hp-track {
-    -fx-background-color: #1a1920;
-    -fx-border-color: #3d394a;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 2px;
-    -fx-background-radius: 2px;
-}
-
-.hp-fill-enemy {
-    -fx-background-color: linear-gradient(to right, #8a2020, #c43838);
-    -fx-background-radius: 1px;
-}
-
-.hp-fill-hero {
-    -fx-background-color: linear-gradient(to right, #246d43, #3fad6d);
-    -fx-background-radius: 1px;
-}
-
-.hp-text {
-    -fx-text-fill: #EDE7DC;
     -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
 }
 
-/* NÚMEROS DE DANO FLUTUANTES */
-.damage-number-hero,
-.damage-number-enemy {
-    -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 24px;
-    -fx-font-weight: bold;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 5, 0.5, 0, 2);
-}
+/* ==========================================================================
+   1. PLACAS SUPERIORES DE STATUS (Padrão hero_life_hud.png)
+   ========================================================================== */
 
-.damage-number-hero {
-    -fx-text-fill: #E05353;
-}
-
-.damage-number-enemy {
-    -fx-text-fill: #D9A441;
-}
-
-/* PAINÉIS INFERIORES (COMANDOS & STATUS) */
-.panel-box {
-    -fx-background-color: rgba(14, 14, 18, 0.94);
-    -fx-border-color: #443f50 #211f29 #211f29 #443f50;
-    -fx-border-width: 2px;
-    -fx-border-radius: 2px;
-    -fx-background-radius: 2px;
+.pixel-box {
     -fx-padding: 12px 16px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.8), 12, 0.4, 0, 4);
+    -fx-effect: dropshadow(one-pass-box, rgba(4, 10, 16, 0.92), 0, 0, 4, 4);
+}
+
+.pixel-portrait-frame {
+    -fx-padding: 4px;
+}
+
+/* ==========================================================================
+   2. PAINÉIS INFERIORES DE MENSAGEM E AÇÕES (Padrão press_E_hud.png)
+   ========================================================================== */
+
+.panel-box {
+    -fx-padding: 14px 18px;
+    -fx-effect: dropshadow(one-pass-box, rgba(4, 8, 14, 0.94), 0, 0, 4, 4);
 }
 
 .panel-header {
-    -fx-text-fill: #9d9585;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
+    -fx-text-fill: #F6C83E;
+    -fx-font-family: "Consolas", "Courier New", monospace;
     -fx-font-size: 13px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 2px;
-    -fx-border-color: transparent transparent #2e2b38 transparent;
-    -fx-border-width: 0 0 1px 0;
-    -fx-padding: 0 0 6px 0;
+    -fx-padding: 0 0 5px 0;
+    -fx-border-color: transparent transparent #234E6D transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-effect: dropshadow(one-pass-box, #080D12, 0, 0, 1, 1);
 }
 
-/* BOTÕES DE COMANDO (ESTILO FEAR & HUNGER) */
-.command-btn {
-    -fx-background-color: #191820;
-    -fx-border-color: #363342;
-    -fx-border-width: 1.5px;
-    -fx-border-radius: 2px;
-    -fx-background-radius: 2px;
-    -fx-text-fill: #DDD7CE;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
+/* ==========================================================================
+   3. TIPOGRAFIA E INDICADORES DE CARGA (FÍSICA)
+   ========================================================================== */
+
+.hero-name,
+.enemy-name {
+    -fx-text-fill: #FFF8E7;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 2, 2);
+}
+
+.polarity-badge {
+    -fx-padding: 2px 8px;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-border-width: 2px;
+}
+
+.polarity-positive {
+    -fx-background-color: #3E1618;
+    -fx-border-color: #FF6B6B;
+    -fx-text-fill: #FFD6D6;
+}
+
+.polarity-negative {
+    -fx-background-color: #102A42;
+    -fx-border-color: #5CA6AE;
+    -fx-text-fill: #D6F0FF;
+}
+
+.polarity-neutral {
+    -fx-background-color: #17324D;
+    -fx-border-color: #5CA6AE;
+    -fx-text-fill: #DCEEF2;
+}
+
+.polarity-rupture {
+    -fx-background-color: #2B193D;
+    -fx-border-color: #F0B429;
+    -fx-text-fill: #FFE599;
+}
+
+/* ==========================================================================
+   4. BARRAS DE VIDA PIXELADAS (Padrão hero_life_hud.png)
+   ========================================================================== */
+
+.hp-prefix-label {
+    -fx-text-fill: #FF6B6B;
+    -fx-font-family: "Consolas", "Courier New", monospace;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
-    -fx-padding: 7px 14px;
-    -fx-alignment: CENTER_LEFT;
+    -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 1, 1);
+}
+
+.hp-track {
+    -fx-fill: #07131D;
+    -fx-stroke: #2A586F;
+    -fx-stroke-width: 2px;
+    -fx-arc-width: 0;
+    -fx-arc-height: 0;
+}
+
+.hp-fill-hero {
+    -fx-fill: #46B866;
+    -fx-stroke: #9CE8B2;
+    -fx-stroke-width: 1px;
+    -fx-arc-width: 0;
+    -fx-arc-height: 0;
+}
+
+.hp-fill-enemy {
+    -fx-fill: #E05252;
+    -fx-stroke: #FFA8A8;
+    -fx-stroke-width: 1px;
+    -fx-arc-width: 0;
+    -fx-arc-height: 0;
+}
+
+.hp-text {
+    -fx-text-fill: #FFF8E7;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 1, 1);
+}
+
+/* ==========================================================================
+   5. BOTÕES DE SELEÇÃO DE CARGA DO HERÓI (- , 0 , +)
+   ========================================================================== */
+
+.charge-pixel-btn {
+    -fx-background-color: #06121C, #2A586F, #102B3F;
+    -fx-background-insets: 0, 1, 3;
+    -fx-background-radius: 0;
+    -fx-text-fill: #B8D4E3;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 8px;
     -fx-cursor: hand;
 }
 
-.command-btn:hover,
-.command-btn:focused {
-    -fx-background-color: #272533;
-    -fx-border-color: #D9A441;
-    -fx-text-fill: #FFF7EB;
-    -fx-effect: dropshadow(gaussian, rgba(217, 164, 65, 0.25), 6, 0.3, 0, 0);
+.charge-pixel-btn:hover {
+    -fx-background-color: #06121C, #F0B429, #183C56;
+    -fx-background-insets: 0, 1, 3;
+    -fx-text-fill: #FFF8E7;
 }
 
-.command-btn:pressed {
-    -fx-background-color: #383448;
-    -fx-border-color: #f0bd5a;
+.charge-pixel-btn-active-neg {
+    -fx-background-color: #06121C, #5CA6AE, #163C5C;
+    -fx-background-insets: 0, 1, 3;
     -fx-text-fill: #FFFFFF;
 }
 
-.command-btn:disabled {
-    -fx-opacity: 0.45;
-    -fx-cursor: default;
+.charge-pixel-btn-active-neu {
+    -fx-background-color: #06121C, #F0B429, #24465F;
+    -fx-background-insets: 0, 1, 3;
+    -fx-text-fill: #FFF8E7;
 }
 
-.command-btn-synergy {
-    -fx-border-color: #D9A441;
-    -fx-background-color: #211e29;
-    -fx-text-fill: #F5E6C8;
+.charge-pixel-btn-active-pos {
+    -fx-background-color: #06121C, #FF6B6B, #521D22;
+    -fx-background-insets: 0, 1, 3;
+    -fx-text-fill: #FFFFFF;
+}
+
+/* ==========================================================================
+   6. TEXTO DE COMBATE E POSTURA
+   ========================================================================== */
+
+.telegraph-title {
+    -fx-text-fill: #F6C83E;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(one-pass-box, #080D12, 0, 0, 1, 1);
+}
+
+.telegraph-text {
+    -fx-text-fill: #FFF8E7;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-line-spacing: 2px;
+    -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 1, 1);
 }
 
 .command-hint-text {
-    -fx-text-fill: #B5ADA0;
+    -fx-text-fill: #8CC4D0;
     -fx-font-family: "Consolas", "Courier New", monospace;
-    -fx-font-size: 12px;
-    -fx-padding: 2px 0 0 0;
-}
-
-/* STATUS DO HERÓI */
-.hero-name {
-    -fx-text-fill: #EAE4D8;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 20px;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
 .hero-condition-text {
-    -fx-text-fill: #A0988A;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 14px;
-    -fx-font-style: italic;
+    -fx-text-fill: #A9D6E5;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
 }
 
 .hero-condition-shield {
-    -fx-text-fill: #66D18F;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 14px;
+    -fx-text-fill: #6EE787;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
 .hero-condition-unstable {
-    -fx-text-fill: #E27B72;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 14px;
+    -fx-text-fill: #FF7B72;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 11px;
     -fx-font-weight: bold;
 }
 
-/* OVERLAYS DE VITÓRIA E DERROTA */
-.end-banner-victory {
-    -fx-background-color: rgba(18, 28, 20, 0.94);
-    -fx-border-color: #41855a;
-    -fx-border-width: 2px;
-    -fx-padding: 24px 36px;
-    -fx-background-radius: 4px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 16, 0.5, 0, 6);
+/* ==========================================================================
+   7. BOTÕES DE COMANDO 2x2 COM ÍCONE DE TECLA DOURADA (Padrão press_E_hud.png)
+   ========================================================================== */
+
+.command-btn {
+    -fx-text-fill: #FFF8E7;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 10px;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
 }
 
-.end-banner-defeat {
-    -fx-background-color: rgba(32, 14, 14, 0.94);
-    -fx-border-color: #8c3232;
+.command-btn:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* Quadradinho dourado de tecla idêntico ao [E] de press_E_hud.png */
+.key-badge {
+    -fx-background-color: #1A0D04, #B87814, #FFF099, #F6C83E;
+    -fx-background-insets: 0, 1, 2, 3;
+    -fx-background-radius: 0;
+    -fx-text-fill: #0B1926;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 1px 6px;
+    -fx-min-width: 22px;
+    -fx-alignment: center;
+}
+
+/* ==========================================================================
+   8. NÚMEROS DE DANO FLUTUANTES
+   ========================================================================== */
+
+.damage-number-enemy {
+    -fx-text-fill: #F6C83E;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-background-color: #081520;
+    -fx-border-color: #F0B429;
     -fx-border-width: 2px;
-    -fx-padding: 24px 36px;
-    -fx-background-radius: 4px;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.9), 16, 0.5, 0, 6);
+    -fx-padding: 1px 6px;
+}
+
+.damage-number-hero {
+    -fx-text-fill: #FF6B6B;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-background-color: #1E0B0E;
+    -fx-border-color: #FF6B6B;
+    -fx-border-width: 2px;
+    -fx-padding: 1px 6px;
+}
+
+/* ==========================================================================
+   9. TELAS DE VITÓRIA E DERROTA (Padrão do Menu / conceito_registrado.png)
+   ========================================================================== */
+
+.end-banner-victory,
+.end-banner-defeat {
+    -fx-padding: 20px 28px;
+    -fx-effect: dropshadow(one-pass-box, rgba(4, 8, 14, 0.96), 0, 0, 6, 6);
 }
 
 .end-title-victory {
-    -fx-text-fill: #D9A441;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 32px;
+    -fx-text-fill: #F6C83E;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 3px;
+    -fx-effect: dropshadow(one-pass-box, #080D12, 0, 0, 2, 2);
 }
 
 .end-title-defeat {
-    -fx-text-fill: #E05353;
-    -fx-font-family: "Georgia", "Times New Roman", serif;
-    -fx-font-size: 32px;
+    -fx-text-fill: #FF6B6B;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 3px;
+    -fx-effect: dropshadow(one-pass-box, #080D12, 0, 0, 2, 2);
+}
+
+.end-stat-row {
+    -fx-padding: 8px 14px;
+}
+
+.end-footer-badge {
+    -fx-background-color: #1A0D04, #F0B429, #16334A;
+    -fx-background-insets: 0, 1, 3;
+    -fx-background-radius: 0;
+    -fx-text-fill: #FFF8E7;
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 12px;
 }
