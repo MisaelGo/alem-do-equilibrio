@@ -1,0 +1,238 @@
+@startuml
+title Além do Equilíbrio - Diagrama de Classes (22 requisitos de POO)
+left to right direction
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam shadowing false
+skinparam BackgroundColor white
+skinparam class {
+  BackgroundColor #F4F7FB
+  BorderColor #465C71
+  ArrowColor #465C71
+}
+hide empty members
+
+package "com.alemdoequilibrio.core" {
+class ElectricPhysics
+class GameController {
+  - confirmRestartWithJOptionPane() : boolean
+}
+enum GameState
+class Main
+class MainMenuController
+class ResourceManager
+class SaveFormatException
+class SaveManager {
+  + save(progress, hero)
+  + load(progress, hero)
+}
+class SceneRouter
+}
+
+package "com.alemdoequilibrio.game" {
+abstract class Ability {
+  {abstract} # execute(battle : BattleController)
+}
+class AbilityBook {
+  - abilities : ArrayList<Ability>
+}
+class AbilityRegistry {
+  {static} - REGISTRY : GameRegistry<Ability>
+}
+class BattleController
+class BattleView
+class BossEnemy
+class CameraTestOverlay
+class ChapterCompleteView
+class ChapterProgress {
+  {static} + CERAMIC_BRIDGE_PLATES : int = 9
+}
+enum ChargeType
+class ChargedEnemy
+class CollisionManager
+class CorruptedDipole
+interface Damageable
+class DebugGridRenderer
+class DialogueController
+class DialogueLine
+class DialogueRepository
+class Enemy {
+  - name : String
+  - level : int
+  - health : float
+  - enemyId : int {final}
+  + getEnemyId() : int
+}
+class EquipotentialShield
+class ExplorationController
+enum ExplorationZone
+class FieldImpulse
+abstract class GameCharacter {
+  {abstract} + updateState()
+}
+class GameRegistry
+class HUD
+class Hero {
+  - health : float
+  - chargeType : ChargeType
+  - abilityBook : AbilityBook
+  + restoreHealth()
+  + restoreHealth(points : double)
+}
+class HeroView
+class InsulatorTrailLayout
+interface Interactable
+enum KnowledgeTopic
+class MapEnemySpawner {
+  - resourceManager : ResourceManager
+  - bridgeSpark : WanderingSpark
+  - spawnEnemy(enemy : Enemy, x, y)
+}
+class Merchant {
+  - requiredTopics : KnowledgeTopic[]
+  {static} - normalizePrerequisites(topic, topics...)
+}
+interface Movable
+class NPC
+class PhysicsQuestion
+class PrologueController
+class QuestionBank
+class QuizController
+interface QuizProvider
+class RepulsionPulse
+class SceneryInteractable
+class TileMapRenderer
+class UncontrolledCharge
+class UnstableConductor
+class WanderingSpark
+class WorldObject
+class ZoneManager
+class CombatScenarioChecks
+class PersistenceScenarioChecks
+class PooRubricChecks
+
+' Tipos declarados dentro de outras classes
+enum "BattleController.BattleResult" as BattleResult
+enum "BattleController.BattleTurn" as BattleTurn
+enum "BattleView.PixelIconType" as PixelIconType
+enum "BossEnemy.Phase" as BossPhase
+enum "BossEnemy.FieldDirection" as FieldDirection
+enum "HeroView.Direction" as Direction
+class "MapEnemySpawner.MapEnemyNode" as MapEnemyNode
+class "TileMapRenderer.ZoneTheme" as ZoneTheme
+}
+
+' Herança entre classes
+GameCharacter <|-- Hero
+GameCharacter <|-- Enemy
+GameCharacter <|-- NPC
+Enemy <|-- WanderingSpark
+Enemy <|-- ChargedEnemy
+Enemy <|-- UnstableConductor
+Enemy <|-- BossEnemy
+ChargedEnemy <|-- UncontrolledCharge
+ChargedEnemy <|-- CorruptedDipole
+NPC <|-- Merchant
+Ability <|-- RepulsionPulse
+Ability <|-- FieldImpulse
+Ability <|-- EquipotentialShield
+
+' Implementação de interfaces
+Damageable <|.. Hero
+Movable <|.. Hero
+Damageable <|.. Enemy
+Interactable <|.. NPC
+Interactable <|.. WorldObject
+Interactable <|.. SceneryInteractable
+QuizProvider <|.. Merchant
+
+' Relações importantes de associação, dependência e composição
+Hero "1" *-- "1" AbilityBook : POO 4 - composição
+MapEnemySpawner o-- ResourceManager : POO 5 - agregação
+Main ..> GameController
+GameController ..> SceneRouter
+GameController ..> MainMenuController
+GameController ..> PrologueController
+GameController ..> ChapterProgress
+GameController ..> SaveManager
+GameController ..> ResourceManager
+GameController ..> ExplorationController
+GameController ..> BattleController
+GameController ..> BattleView
+ExplorationController ..> Hero
+ExplorationController ..> HeroView
+ExplorationController ..> ZoneManager
+ExplorationController ..> CollisionManager
+ExplorationController ..> MapEnemySpawner
+ExplorationController ..> DialogueController
+ExplorationController ..> QuizController
+ExplorationController ..> HUD
+AbilityRegistry ..> GameRegistry
+Merchant ..> QuestionBank
+QuestionBank ..> PhysicsQuestion
+DialogueController ..> DialogueRepository
+DialogueRepository ..> DialogueLine
+BattleView ..> BattleController
+BattleController ..> Enemy
+BattleController ..> Hero
+ZoneManager ..> NPC
+ZoneManager ..> SceneryInteractable
+ZoneManager ..> Merchant
+SaveManager ..> ChapterProgress
+SaveManager ..> Hero
+TileMapRenderer ..> InsulatorTrailLayout
+MapEnemySpawner --> WanderingSpark : POO 6.2
+
+' Marcação dos itens obrigatórios exigidos pelo professor
+note right of Enemy
+  1.1 — Encapsulamento: atributos private
+  1.2 — String, int e float na mesma classe
+  3 — Construtor concreto
+  6.1 — enemyId final na superclasse concreta
+end note
+note right of Hero
+  1.3 — Atributo do enum ChargeType
+  4 — Composição com AbilityBook
+  7.1 — Sobrecarga de restoreHealth
+  7.2 — Casting explícito: health = (float) recoveredHealth
+  8 — Implementa Damageable e Movable
+end note
+note right of AbilityBook
+  1.4 — Atributo ArrayList<Ability>
+end note
+note right of ChapterProgress
+  1.5 — Constante primitiva usada em outras classes
+end note
+note right of Merchant
+  2.1 — Varargs e for usados nos pré-requisitos
+  2.2 — Método estático necessário
+end note
+note right of MapEnemySpawner
+  5 — Agregação com ResourceManager
+  6.2 — Atributo concreto WanderingSpark e getEnemyId herdado
+  7.3 — Parâmetro Enemy aceita subclasses concretas
+end note
+note right of AbilityRegistry
+  7.4 — GameRegistry<Ability> com tipo explícito
+end note
+note right of GameCharacter
+  10 — Abstrata: updateState()
+end note
+note right of Ability
+  10 — Abstrata: execute()
+end note
+note right of SaveFormatException
+  11 — Exceção criada, lançada e tratada
+end note
+note right of GameController
+  12 — Entrada via JOptionPane.showInputDialog
+end note
+note right of SaveManager
+  13 — Grava e recupera o progresso em arquivo
+end note
+note right of Main
+  9 — Exatamente dois pacotes; único main
+end note
+
+@enduml
