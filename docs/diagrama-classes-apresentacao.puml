@@ -1,0 +1,174 @@
+@startuml
+' Além do Equilíbrio - diagrama completo PARA APRESENTACAO
+' Somente as classes principais têm atributos e métodos: exigência do slide.
+' Todas as classes do projeto constam do diagrama; sem classes nativas.
+left to right direction
+hide empty members
+skinparam shadowing false
+skinparam linetype polyline
+skinparam packageStyle rectangle
+skinparam classAttributeIconSize 0
+skinparam nodesep 15
+skinparam ranksep 28
+skinparam defaultFontName Arial
+skinparam defaultFontSize 10
+skinparam BackgroundColor white
+skinparam ArrowColor #687887
+skinparam classBorderColor #526476
+skinparam classBackgroundColor #F1F4F7
+skinparam packageBorderColor #8796A5
+skinparam packageBackgroundColor #FBFCFE
+title Além do Equilíbrio | Diagrama completo e focos dos 22 itens POO
+
+legend top
+|= Cor |= Significado |
+|<#FFE3A3> | Classe escolhida para demonstrar um requisito |
+|<#F1F4F7> | Outras classes do projeto (sem destaque) |
+endlegend
+
+package "com.alemdoequilibrio.core (POO 9)" {
+class "ElectricPhysics" as ElectricPhysics
+class "GameController\nPOO 12" as GameController #FFE3A3 {
+  - confirmRestartWithJOptionPane() : boolean
+}
+enum "GameState" as GameState
+class "Main" as Main
+class "MainMenuController" as MainMenuController
+class "ResourceManager" as ResourceManager
+class "SaveFormatException\nPOO 11" as SaveFormatException #FFE3A3
+class "SaveManager\nPOO 13" as SaveManager #FFE3A3 {
+  + save(progress, hero)
+  + load(progress, hero)
+}
+class "SceneRouter" as SceneRouter
+}
+
+package "com.alemdoequilibrio.game (POO 9)" {
+abstract class "Ability\nPOO 10" as Ability #FFE3A3 {
+  # {abstract} execute(battle : BattleController) : void
+}
+class "AbilityBook\nPOO 1.4" as AbilityBook #FFE3A3 {
+  - abilities : ArrayList<Ability>
+}
+class "AbilityRegistry\nPOO 7.4" as AbilityRegistry #FFE3A3 {
+  - {static} REGISTRY : GameRegistry<Ability>
+}
+class "BattleController" as BattleController
+class "BattleView" as BattleView
+class "BossEnemy" as BossEnemy
+class "CameraTestOverlay" as CameraTestOverlay
+class "ChapterCompleteView" as ChapterCompleteView
+class "ChapterProgress\nPOO 1.5" as ChapterProgress #FFE3A3 {
+  + {static} CERAMIC_BRIDGE_PLATES : int = 9
+}
+enum "ChargeType" as ChargeType
+class "ChargedEnemy" as ChargedEnemy
+class "CollisionManager" as CollisionManager
+class "CorruptedDipole" as CorruptedDipole
+interface "Damageable" as Damageable
+class "DebugGridRenderer" as DebugGridRenderer
+class "DialogueController" as DialogueController
+class "DialogueLine" as DialogueLine
+class "DialogueRepository" as DialogueRepository
+class "Enemy\nPOO 1.1, 1.2, 3, 6.1" as Enemy #FFE3A3 {
+  - name : String
+  - level : int
+  - health : float
+  - enemyId : int {final}
+  + Enemy(id, nome, nivel, vida)
+  + getEnemyId() : int
+}
+class "EquipotentialShield" as EquipotentialShield
+class "ExplorationController" as ExplorationController
+enum "ExplorationZone" as ExplorationZone
+class "FieldImpulse" as FieldImpulse
+abstract class "GameCharacter\nPOO 10" as GameCharacter #FFE3A3 {
+  + {abstract} updateState() : void
+}
+class "GameRegistry" as GameRegistry
+class "HUD" as HUD
+class "Hero\nPOO 1.3, 4, 7.1, 7.2, 8" as Hero #FFE3A3 {
+  - chargeType : ChargeType
+  - abilityBook : AbilityBook
+  - health : float
+  + restoreHealth()
+  + restoreHealth(points : double)
+}
+class "HeroView" as HeroView
+class "InsulatorTrailLayout" as InsulatorTrailLayout
+interface "Interactable" as Interactable
+enum "KnowledgeTopic" as KnowledgeTopic
+class "MapEnemySpawner\nPOO 5, 6.2, 7.3" as MapEnemySpawner #FFE3A3 {
+  - resourceManager : ResourceManager
+  - bridgeSpark : WanderingSpark
+  - spawnEnemy(enemy : Enemy, x : double, y : double)
+}
+class "Merchant\nPOO 2.1, 2.2" as Merchant #FFE3A3 {
+  - {static} normalizePrerequisites(topic, topics...)
+}
+interface "Movable" as Movable
+class "NPC" as NPC
+class "PhysicsQuestion" as PhysicsQuestion
+class "PrologueController" as PrologueController
+class "QuestionBank" as QuestionBank
+class "QuizController" as QuizController
+interface "QuizProvider" as QuizProvider
+class "RepulsionPulse" as RepulsionPulse
+class "SceneryInteractable" as SceneryInteractable
+class "TileMapRenderer" as TileMapRenderer
+class "UncontrolledCharge" as UncontrolledCharge
+class "UnstableConductor" as UnstableConductor
+class "WanderingSpark" as WanderingSpark
+class "WorldObject" as WorldObject
+class "ZoneManager" as ZoneManager
+class "CombatScenarioChecks" as CombatScenarioChecks #E7EBF1
+class "PersistenceScenarioChecks" as PersistenceScenarioChecks #E7EBF1
+class "PooRubricChecks" as PooRubricChecks #E7EBF1
+enum "BattleController.BattleResult" as BC_Result
+enum "BattleController.BattleTurn" as BC_Turn
+enum "BattleView.PixelIconType" as BV_PixelIcon
+enum "BossEnemy.Phase" as Boss_Phase
+enum "BossEnemy.FieldDirection" as Boss_Direction
+enum "HeroView.Direction" as HV_Direction
+class "MapEnemySpawner.MapEnemyNode" as MEN_Node
+class "TileMapRenderer.ZoneTheme" as TMR_Theme
+}
+
+' Mostrar herança (seta triangular contínua)
+GameCharacter <|-- Hero
+GameCharacter <|-- Enemy
+GameCharacter <|-- NPC
+Enemy <|-- WanderingSpark
+Enemy <|-- ChargedEnemy
+Enemy <|-- UnstableConductor
+Enemy <|-- BossEnemy
+ChargedEnemy <|-- UncontrolledCharge
+ChargedEnemy <|-- CorruptedDipole
+NPC <|-- Merchant
+Ability <|-- RepulsionPulse
+Ability <|-- FieldImpulse
+Ability <|-- EquipotentialShield
+
+' Interfaces usadas pelas classes concretas (POO 8)
+Damageable <|.. Hero
+Movable <|.. Hero
+Damageable <|.. Enemy
+Interactable <|.. NPC
+Interactable <|.. WorldObject
+Interactable <|.. SceneryInteractable
+QuizProvider <|.. Merchant
+
+' Somente associações imprescindíveis para EXPLICAR requisitos
+Hero *-- AbilityBook : 4 Composição
+MapEnemySpawner o-- ResourceManager : 5 Agregação
+MapEnemySpawner --> WanderingSpark : 6.2 getEnemyId herdado
+MapEnemySpawner ..> Enemy : 7.3 spawnEnemy(Enemy)
+AbilityRegistry ..> GameRegistry : 7.4 Tipo explícito
+SaveManager ..> SaveFormatException : 11 Validação do save
+GameController ..> SaveManager : 13 Persistência
+GameController ..> ExplorationController
+Main ..> GameController
+
+' Outros itens sem necessidade de seta (1.1-3, 6.1, 7.1-7.2, 9-10, 12)
+' estão marcados diretamente na classe onde serão demonstrados.
+@enduml
