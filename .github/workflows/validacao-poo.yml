@@ -28,3 +28,10 @@ jobs:
           test -s dist/Equipe_Teste.zip
           unzip -l dist/Equipe_Teste.zip | grep -q 'documentacao/diagrama-classes.pdf'
           unzip -l dist/Equipe_Teste.zip | grep -q 'docs/indice-22-itens-poo.md'
+      - name: Disponibilizar ZIP completo do código para entrega
+        uses: actions/upload-artifact@v4
+        with:
+          name: codigo-completo-poo
+          path: dist/Equipe_Teste.zip
+          if-no-files-found: error
+          retention-days: 7
