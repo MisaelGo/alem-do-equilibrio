@@ -163,6 +163,31 @@ public class SaveManager {
                 + progress.hasSeenNeutralBorderIntro()
         );
 
+        lines.add(
+                "insulatorTrailIntroSeen="
+                + progress.hasSeenInsulatorTrailIntro()
+        );
+
+        lines.add(
+                "ceramicBridgePlatesPlaced="
+                + progress.getBridgePlatesPlaced()
+        );
+
+        lines.add(
+                "carryingCeramicPlate="
+                + progress.isCarryingCeramicPlate()
+        );
+
+        lines.add(
+                "monolithActivated="
+                + progress.isMonolithActivated()
+        );
+
+        lines.add(
+                "defeatedEnemyIds="
+                + joinEnemyIds(progress.getDefeatedEnemyIds())
+        );
+
         Path absolutePath =
                 savePath
                         .toAbsolutePath();
@@ -338,6 +363,40 @@ public class SaveManager {
                 ? parseBoolean(introValue, "neutralBorderIntroSeen")
                 : false;
 
+        // Em saves antigos, quem já aprendeu com Élia não vê
+        // novamente o aviso automático da entrada da trilha.
+        String trailIntroValue = values.get("insulatorTrailIntroSeen");
+        boolean insulatorTrailIntroSeen = trailIntroValue != null
+                ? parseBoolean(trailIntroValue, "insulatorTrailIntroSeen")
+                : learnedTopics.contains(KnowledgeTopic.KNOW_ELECTRIZATION);
+
+        // Ausentes em versões anteriores do save: nenhuma placa instalada.
+        String placedValue = values.get("ceramicBridgePlatesPlaced");
+        int ceramicBridgePlatesPlaced = placedValue == null
+                ? 0 : parseInteger(placedValue, "ceramicBridgePlatesPlaced");
+
+        String carryingValue = values.get("carryingCeramicPlate");
+        boolean carryingCeramicPlate = carryingValue != null
+                && parseBoolean(carryingValue, "carryingCeramicPlate");
+
+        if (ceramicBridgePlatesPlaced < 0
+                || ceramicBridgePlatesPlaced > ChapterProgress.CERAMIC_BRIDGE_PLATES
+                || ceramicBridgePlatesPlaced + (carryingCeramicPlate ? 1 : 0)
+                        > ChapterProgress.CERAMIC_BRIDGE_PLATES) {
+            throw new SaveFormatException(
+                    "Quantidade de placas de cerâmica inválida no save."
+            );
+        }
+
+        // Campos opcionais para manter saves anteriores compatíveis.
+        String monolithValue = values.get("monolithActivated");
+        boolean monolithActivated = monolithValue != null
+                && parseBoolean(monolithValue, "monolithActivated");
+
+        Set<Integer> defeatedEnemyIds = parseEnemyIds(
+                values.getOrDefault("defeatedEnemyIds", "")
+        );
+
         if (fragmentObtained
                 && !bossDefeated) {
 
@@ -358,7 +417,12 @@ public class SaveManager {
                 bossDefeated,
                 fragmentObtained,
                 neutralIonMet,
-                neutralBorderIntroSeen
+                neutralBorderIntroSeen,
+                insulatorTrailIntroSeen,
+                ceramicBridgePlatesPlaced,
+                carryingCeramicPlate,
+                monolithActivated,
+                defeatedEnemyIds
         );
 
         hero.clearAbilities();
@@ -688,6 +752,30 @@ public class SaveManager {
                 + ": "
                 + value
         );
+    }
+
+    private Set<Integer> parseEnemyIds(String value)
+            throws SaveFormatException {
+        Set<Integer> ids = new HashSet<>();
+        if (value.isBlank()) {
+            return ids;
+        }
+        for (String part : value.split(",")) {
+            int id = parseInteger(part.trim(), "defeatedEnemyIds");
+            if (id <= 0 || !ids.add(id)) {
+                throw new SaveFormatException(
+                        "ID duplicado ou inválido em defeatedEnemyIds: " + id);
+            }
+        }
+        return ids;
+    }
+
+    private String joinEnemyIds(Set<Integer> ids) {
+        StringJoiner joiner = new StringJoiner(",");
+        for (Integer id : new java.util.TreeSet<>(ids)) {
+            joiner.add(Integer.toString(id));
+        }
+        return joiner.toString();
     }
 
     private String joinTopics(

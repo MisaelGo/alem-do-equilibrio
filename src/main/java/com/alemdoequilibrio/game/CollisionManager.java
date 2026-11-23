@@ -31,6 +31,17 @@ public class CollisionManager {
             ExplorationZone zone,
             List<Interactable> interactables) {
 
+        loadZone(zone, interactables,
+                ChapterProgress.CERAMIC_BRIDGE_PLATES, 0);
+    }
+
+    /** Reconstrói colisões para o estoque e as etapas atuais da ponte. */
+    public void loadZone(
+            ExplorationZone zone,
+            List<Interactable> interactables,
+            int remainingPlates,
+            int installedPlates) {
+
         Objects.requireNonNull(
                 zone
         );
@@ -47,6 +58,15 @@ public class CollisionManager {
          */
         for (Interactable interactable
                 : interactables) {
+
+            // Áreas de pegar/instalar são marcadores, não objetos sólidos.
+            if (zone == ExplorationZone.INSULATOR_TRAIL
+                    && (InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                                .equals(interactable.getDialogueId())
+                        || InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                                .equals(interactable.getDialogueId()))) {
+                continue;
+            }
 
             addObstacle(
                     interactable.getX(),
@@ -70,19 +90,67 @@ public class CollisionManager {
                 addNeutralBushCollisions();
             }
 
-            case INSULATOR_TRAIL ->
+            case INSULATOR_TRAIL -> {
+                addInsulatorTrailWallCollisions();
+                // O metal fica transitável, mas causa dano enquanto descoberto.
+                // As áreas já cobertas por cerâmica passam a ser seguras.
                 addObstacle(
-                        1100,
-                        1500,
-                        70,
-                        70
+                        InsulatorTrailLayout.HOUSE_X,
+                        InsulatorTrailLayout.HOUSE_Y,
+                        InsulatorTrailLayout.HOUSE_WIDTH,
+                        InsulatorTrailLayout.HOUSE_HEIGHT
                 );
+                // Colisão em cada uma das placas: o herói pode
+                // chegar até o contorno real da pilha.
+                List<Rectangle2D> plates =
+                        InsulatorTrailLayout.getCeramicPilePlates();
+                for (int i = 0; i < Math.min(remainingPlates, plates.size()); i++) {
+                    Rectangle2D plate = plates.get(i);
+                    addObstacle(
+                            plate.getMinX(),
+                            plate.getMinY(),
+                            plate.getWidth(),
+                            plate.getHeight()
+                    );
+                }
+                addObstacle(
+                        InsulatorTrailLayout.MONOLITH_X,
+                        InsulatorTrailLayout.MONOLITH_Y,
+                        InsulatorTrailLayout.MONOLITH_WIDTH,
+                        InsulatorTrailLayout.MONOLITH_HEIGHT
+                );
+            }
 
             case FACTION_CROSSROADS,
                  COULOMB_VALLEY,
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
+            }
+        }
+    }
+
+    /**
+     * Colisões idênticas às paredes desenhadas pelo TileMapRenderer.
+     * Evita permitir que o herói atravesse as divisórias escuras.
+     */
+    private void addInsulatorTrailWallCollisions() {
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / InsulatorTrailLayout.TILE_SIZE);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                if (InsulatorTrailLayout.isWallTile(col, row,
+                        columns, rows)) {
+                    addObstacle(
+                            col * InsulatorTrailLayout.TILE_SIZE,
+                            row * InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE,
+                            InsulatorTrailLayout.TILE_SIZE
+                    );
+                }
             }
         }
     }

@@ -10,9 +10,11 @@ import javafx.animation.AnimationTimer;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.NumberBinding;
 import javafx.scene.Scene;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.image.ImageView;
 import javafx.scene.media.AudioClip;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.shape.Rectangle;
@@ -31,6 +33,14 @@ public class ExplorationController {
     private static final double
             INTERACTION_RANGE = 30;
 
+    /** Dano ambiental não é aplicado em todos os frames. */
+    private static final long ENVIRONMENTAL_DAMAGE_INTERVAL_NANOS =
+            900_000_000L;
+
+    private static final float WET_WOOD_DAMAGE = 12.0f;
+
+    private static final float EXPOSED_METAL_DAMAGE = 25.0f;
+
     private static final double
             ENEMY_RANGE = 70;
 
@@ -48,9 +58,19 @@ public class ExplorationController {
             NEUTRAL_ELECTRIC_SFX =
                     "/audio/electric_shock.mp3";
 
+    private static final String
+            INSULATOR_TRAIL_MUSIC =
+                    "/audio/trilha_isolantes_trilha.mp3";
+
+    private static final String
+            CERAMIC_SFX =
+                    "/audio/ceramics_sound.mp3";
+
     private final Hero hero;
 
     private final HeroView heroView;
+
+    private final ImageView carriedCeramicView;
 
     private final Pane worldLayer;
 
@@ -90,8 +110,14 @@ public class ExplorationController {
     private final MediaPlayer
             neutralBorderMusicPlayer;
 
+    private final MediaPlayer
+            insulatorTrailMusicPlayer;
+
     private final AudioClip
             neutralElectricShock;
+
+    private final AudioClip
+            ceramicSound;
 
     private final Runnable
             onDialogueStarted;
@@ -112,6 +138,8 @@ public class ExplorationController {
             onProgressChanged;
 
     private long lastTime;
+
+    private long lastEnvironmentalDamageTime;
 
     private double cameraX;
 
@@ -184,6 +212,15 @@ public class ExplorationController {
             HERO_START_Y
         );
 
+        carriedCeramicView = new ImageView(
+                resourceManager.getImage("/images/tile_insulator_ceramic.png")
+        );
+        carriedCeramicView.setFitWidth(28);
+        carriedCeramicView.setFitHeight(28);
+        carriedCeramicView.setSmooth(false);
+        carriedCeramicView.setMouseTransparent(true);
+        carriedCeramicView.setVisible(false);
+
         worldLayer =
                 new Pane();
 
@@ -204,7 +241,8 @@ public class ExplorationController {
                 new ZoneManager(
                         worldLayer,
                         resourceManager,
-                        questionBank
+                        questionBank,
+                        chapterProgress
                 );
 
         mapEnemySpawner =
@@ -266,6 +304,15 @@ public class ExplorationController {
         neutralBorderMusicPlayer.setVolume(
                 0.35
         );
+
+        insulatorTrailMusicPlayer = new MediaPlayer(
+                resourceManager.getMedia(INSULATOR_TRAIL_MUSIC)
+        );
+        insulatorTrailMusicPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        insulatorTrailMusicPlayer.setVolume(0.32);
+
+        ceramicSound = resourceManager.getAudioClip(CERAMIC_SFX);
+        ceramicSound.setVolume(0.65);
 
         neutralElectricShock =
                 resourceManager.getAudioClip(
@@ -383,16 +430,17 @@ public class ExplorationController {
 
             mapEnemySpawner
                     .spawnForZone(
-                            zone
+                            zone,
+                            chapterProgress.getDefeatedEnemyIds()
                     );
         }
 
-        collisionManager
-                .loadZone(
-                        zone,
-                        zoneManager
-                                .getInteractables()
-                );
+        collisionManager.loadZone(
+                zone,
+                zoneManager.getInteractables(),
+                chapterProgress.getRemainingCeramicPlates(),
+                chapterProgress.getBridgePlatesPlaced()
+        );
 
         positionHeroAtZoneStart(
             zone
@@ -409,6 +457,11 @@ public class ExplorationController {
                         heroView.getNode()
                 );
 
+        worldLayer.getChildren().add(carriedCeramicView);
+        updateCarriedCeramicView();
+        updateCeramicHud();
+
+        lastEnvironmentalDamageTime = 0L;
         resetKeys();
 
         neutralElectricShock.stop();
@@ -419,16 +472,34 @@ public class ExplorationController {
     private void updateZoneMusic(
             ExplorationZone zone) {
 
-        if (zone
-                == ExplorationZone
-                        .NEUTRAL_BORDER) {
-
+        if (zone == ExplorationZone.NEUTRAL_BORDER) {
+            insulatorTrailMusicPlayer.stop();
             neutralBorderMusicPlayer.play();
-
             return;
         }
 
         neutralBorderMusicPlayer.stop();
+
+        if (zone == ExplorationZone.INSULATOR_TRAIL) {
+            insulatorTrailMusicPlayer.play();
+        } else {
+            insulatorTrailMusicPlayer.stop();
+        }
+    }
+
+    /**
+     * Evita misturar música de exploração com a música própria da batalha.
+     * O próximo start() retoma a faixa pausada.
+     */
+    public void pauseZoneMusic() {
+        if (neutralBorderMusicPlayer.getStatus()
+                == MediaPlayer.Status.PLAYING) {
+            neutralBorderMusicPlayer.pause();
+        }
+        if (insulatorTrailMusicPlayer.getStatus()
+                == MediaPlayer.Status.PLAYING) {
+            insulatorTrailMusicPlayer.pause();
+        }
     }
 
     private void positionHeroAtZoneStart(
@@ -443,9 +514,11 @@ public class ExplorationController {
                 );
 
             case INSULATOR_TRAIL ->
+                // Entrada oeste: aparece junto à borda, sobre a cerâmica.
+                // A passagem de retorno só dispara ao caminhar para a esquerda.
                 hero.setPosition(
-                        100,
-                        1700
+                        10,
+                        1520
                 );
 
             case FACTION_CROSSROADS ->
@@ -604,6 +677,10 @@ public class ExplorationController {
             return;
         }
 
+        if (handleCeramicInteraction(interactable)) {
+            return;
+        }
+
         startInteractionDialogue(
                 interactable
         );
@@ -615,6 +692,114 @@ public class ExplorationController {
 
             onDialogueStarted
                     .run();
+        }
+    }
+
+    /**
+     * Ações imediatas na pilha e na entrada da ponte, sem abrir diálogo.
+     * Retorna true quando a tecla E foi consumida pela construção.
+     */
+    private boolean handleCeramicInteraction(Interactable interactable) {
+        if (zoneManager.getCurrentZone() != ExplorationZone.INSULATOR_TRAIL
+                || !(interactable instanceof SceneryInteractable)) {
+            return false;
+        }
+
+        String id = interactable.getDialogueId();
+        boolean isPile = InsulatorTrailLayout.CERAMIC_PILE_INTERACTION.equals(id);
+        boolean isBridge = InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION.equals(id);
+        if (!isPile && !isBridge) {
+            return false;
+        }
+
+        if (chapterProgress.isCeramicBridgeComplete()) {
+            // Nenhum dos dois objetos oferece ação após o reparo completo.
+            return true;
+        }
+
+        if (!chapterProgress.hasLearned(KnowledgeTopic.KNOW_ELECTRIZATION)) {
+            hud.showCeramicAction("Converse com Élia antes de mexer nas placas.");
+            return true;
+        }
+
+        if (isPile) {
+            if (chapterProgress.isCarryingCeramicPlate()) {
+                hud.showCeramicAction(
+                        "Você já carrega uma placa. Leve-a até a passarela."
+                );
+            } else if (chapterProgress.pickUpCeramicPlate()) {
+                refreshCeramicConstruction();
+                ceramicSound.play();
+                onProgressChanged.run();
+                hud.showCeramicAction(
+                        "Placa coletada! Vá ao ponto de instalação da passarela."
+                );
+            } else {
+                hud.showCeramicAction("A pilha está vazia. A passarela já foi reparada.");
+            }
+            return true;
+        }
+
+        if (chapterProgress.isCeramicBridgeComplete()) {
+            hud.showCeramicAction("A passarela está protegida. Travessia liberada!");
+        } else if (!chapterProgress.isCarryingCeramicPlate()) {
+            hud.showCeramicAction(
+                    "Você precisa pegar uma placa na pilha antes de instalá-la."
+            );
+        } else if (chapterProgress.installCeramicPlate()) {
+            refreshCeramicConstruction();
+            ceramicSound.play();
+            onProgressChanged.run();
+
+            if (chapterProgress.isCeramicBridgeComplete()) {
+                hud.playCompletionSound();
+            }
+
+            int count = chapterProgress.getBridgePlatesPlaced();
+            hud.showCeramicAction(
+                    chapterProgress.isCeramicBridgeComplete()
+                            ? "Última placa instalada! A passarela está protegida."
+                            : "Placa " + count + "/"
+                                + ChapterProgress.CERAMIC_BRIDGE_PLATES
+                                + " instalada! Volte à pilha buscar outra."
+            );
+        }
+        return true;
+    }
+
+    private void refreshCeramicConstruction() {
+        zoneManager.refreshCeramicConstruction();
+        collisionManager.loadZone(
+                zoneManager.getCurrentZone(),
+                zoneManager.getInteractables(),
+                chapterProgress.getRemainingCeramicPlates(),
+                chapterProgress.getBridgePlatesPlaced()
+        );
+        updateCarriedCeramicView();
+        updateCeramicHud();
+        updateInteractionPrompt();
+    }
+
+    private void updateCarriedCeramicView() {
+        boolean show = zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && chapterProgress.isCarryingCeramicPlate();
+        carriedCeramicView.setVisible(show);
+        if (show) {
+            carriedCeramicView.relocate(hero.getX() + 6, hero.getY() - 24);
+        }
+    }
+
+    private void updateCeramicHud() {
+        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.isCeramicBridgeComplete()) {
+            hud.showCeramicProgress(
+                    chapterProgress.getBridgePlatesPlaced(),
+                    ChapterProgress.CERAMIC_BRIDGE_PLATES,
+                    chapterProgress.isCarryingCeramicPlate()
+            );
+        } else {
+            hud.hideCeramicProgress();
         }
     }
 
@@ -634,6 +819,37 @@ public class ExplorationController {
 
                 // A interação continua mesmo se o áudio estiver indisponível.
             }
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof SceneryInteractable
+                && "INSULATOR_MONOLITH_INTERACTION".equals(
+                        interactable.getDialogueId()
+                )
+                && chapterProgress.isMonolithActivated()) {
+
+            // Mantém o objeto associado ao diálogo para salvar novamente
+            // somente quando o jogador concluir suas falas.
+            dialogueController.startDialogue(new SceneryInteractable(
+                    interactable.getInteractionName(),
+                    "INSULATOR_MONOLITH_REPEAT",
+                    interactable.getX(), interactable.getY(),
+                    interactable.getWidth(), interactable.getHeight()
+            ));
+            return;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof NPC npc
+                && "Élia".equalsIgnoreCase(npc.getName())
+                && chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                )) {
+
+            dialogueController.startDialogue("ELIA_REPEAT");
+            return;
         }
 
         if (zoneManager.getCurrentZone()
@@ -723,6 +939,8 @@ public class ExplorationController {
                 );
 
         if (success) {
+            // Recompensa de habilidade nova: check apenas na aprovação.
+            hud.playCompletionSound();
 
             onProgressChanged
                     .run();
@@ -802,6 +1020,47 @@ public class ExplorationController {
                 hero.getY()
                 + TILE_SIZE / 2.0;
 
+        if (zoneManager.getCurrentZone() == ExplorationZone.INSULATOR_TRAIL
+                && interactable instanceof SceneryInteractable scenery) {
+            String dialogueId = scenery.getDialogueId();
+            if (InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                    .equals(dialogueId)) {
+                // Sem indicação distante e sem "pegar" enquanto carrega.
+                if (chapterProgress.isCeramicBridgeComplete()
+                        || chapterProgress.isCarryingCeramicPlate()) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                int count = chapterProgress.getRemainingCeramicPlates();
+                List<Rectangle2D> plates =
+                        InsulatorTrailLayout.getCeramicPilePlates();
+                double nearest = Double.POSITIVE_INFINITY;
+                for (int i = 0; i < Math.min(count, plates.size()); i++) {
+                    nearest = Math.min(nearest,
+                            distanceToBounds(heroCenterX, heroCenterY,
+                                    plates.get(i)));
+                }
+                return nearest;
+            }
+
+            if (InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                    .equals(dialogueId)) {
+                // A indicação acompanha o próximo ferro exposto, em vez
+                // de surgir numa região fixa e grande da passarela.
+                if (chapterProgress.isCeramicBridgeComplete()
+                        || !chapterProgress.isCarryingCeramicPlate()) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                double nearest = Double.POSITIVE_INFINITY;
+                for (Rectangle2D tile : InsulatorTrailLayout
+                        .getBridgeSectionTiles(
+                                chapterProgress.getBridgePlatesPlaced())) {
+                    nearest = Math.min(nearest,
+                            distanceToBounds(heroCenterX, heroCenterY, tile));
+                }
+                return nearest;
+            }
+        }
+
         double targetLeft =
                 interactable.getX();
 
@@ -843,8 +1102,50 @@ public class ExplorationController {
         );
     }
 
+    /**
+     * Menor distância entre o centro do herói e o bloco físico.
+     * O aviso de E só aparece dentro do alcance normal (30 px).
+     */
+    private static double distanceToBounds(
+            double centerX, double centerY, Rectangle2D bounds) {
+        double nearestX = Math.max(bounds.getMinX(),
+                Math.min(centerX, bounds.getMaxX()));
+        double nearestY = Math.max(bounds.getMinY(),
+                Math.min(centerY, bounds.getMaxY()));
+        return Math.hypot(centerX - nearestX, centerY - nearestY);
+    }
+
     private void completeInteraction(
             Interactable interactable) {
+
+        if (interactable instanceof SceneryInteractable scenery
+                && zoneManager.getCurrentZone()
+                        == ExplorationZone.INSULATOR_TRAIL
+                && ("INSULATOR_MONOLITH_INTERACTION".equals(
+                        scenery.getDialogueId())
+                    || "INSULATOR_MONOLITH_REPEAT".equals(
+                        scenery.getDialogueId()))) {
+
+            if (chapterProgress.activateMonolithCheckpoint()) {
+                float before = hero.getHealth();
+                hero.setHealth(Math.min(hero.getMaxHealth(), before + 20.0f));
+                hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
+                hud.playCompletionSound();
+
+                int healed = Math.round(hero.getHealth() - before);
+                hud.showCeramicAction(
+                        "Monólito ativado! +" + healed
+                        + " HP. Checkpoint e progresso salvos."
+                );
+            } else {
+                hud.showCeramicAction("Monólito: progresso salvo.");
+            }
+
+            // A cada interação terminada o progresso é gravado,
+            // mas a cura e o check só acontecem na primeira vez.
+            onProgressChanged.run();
+            return;
+        }
 
         if (interactable
                 instanceof Merchant merchant) {
@@ -876,6 +1177,7 @@ public class ExplorationController {
             chapterProgress
                     .markNeutralIonMet();
 
+            // Conhecer Íon não concede habilidade; não tocar check.
             onProgressChanged
                     .run();
         }
@@ -970,6 +1272,15 @@ public class ExplorationController {
                         hero.getX(),
                         hero.getY()
                 );
+
+                updateCarriedCeramicView();
+
+                // Madeira encharcada e metal sem isolamento retiram vida.
+                // Ao morrer o herói reaparece no checkpoint, então o
+                // frame atual termina para não processar a zona antiga.
+                if (handleEnvironmentalDamage(now)) {
+                    return;
+                }
 
                 updateInteractionPrompt();
 
@@ -1096,6 +1407,78 @@ public class ExplorationController {
         }
     }
 
+    /**
+     * Usa a posição dos pés, evitando dano quando o sprite do herói
+     * apenas se sobrepõe visualmente à madeira ou à passarela.
+     * Ferro já coberto por cerâmica e trilha cerâmica não causam dano.
+     *
+     * @return true quando ocorreu morte/reaparecimento neste frame.
+     */
+    private boolean handleEnvironmentalDamage(long now) {
+        if (zoneManager.getCurrentZone() != ExplorationZone.INSULATOR_TRAIL) {
+            return false;
+        }
+
+        int col = (int) Math.floor((hero.getX() + TILE_SIZE / 2.0)
+                / InsulatorTrailLayout.TILE_SIZE);
+        int row = (int) Math.floor((hero.getY() + TILE_SIZE - 6.0)
+                / InsulatorTrailLayout.TILE_SIZE);
+
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / InsulatorTrailLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / InsulatorTrailLayout.TILE_SIZE);
+        if (InsulatorTrailLayout.isWallTile(col, row, columns, rows)) {
+            return false;
+        }
+
+        int section = InsulatorTrailLayout.getBridgeSectionForTile(col, row);
+        boolean exposedMetal = section >= 0
+                && section >= chapterProgress.getBridgePlatesPlaced();
+        boolean wetWood = section < 0
+                && !InsulatorTrailLayout.isCeramicTile(col, row);
+
+        if (!exposedMetal && !wetWood) {
+            return false;
+        }
+
+        if (lastEnvironmentalDamageTime != 0L
+                && now - lastEnvironmentalDamageTime
+                        < ENVIRONMENTAL_DAMAGE_INTERVAL_NANOS) {
+            return false;
+        }
+
+        lastEnvironmentalDamageTime = now;
+        float damage = exposedMetal ? EXPOSED_METAL_DAMAGE : WET_WOOD_DAMAGE;
+
+        // O mesmo choque já presente nos objetos da Fronteira Neutra.
+        // Evita sobrepor múltiplas descargas quando o som ainda toca.
+        if (!neutralElectricShock.isPlaying()) {
+            neutralElectricShock.play();
+        }
+
+        hero.takeDamage(damage);
+        hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
+
+        if (!hero.isAlive()) {
+            // Mesmo fluxo de restauração usado após perder uma batalha.
+            respawnAtCheckpoint();
+            onProgressChanged.run();
+            hud.showCeramicAction(
+                    "Descarga elétrica! Você voltou ao último checkpoint."
+            );
+            return true;
+        }
+
+        hud.showCeramicAction(
+                exposedMetal
+                        ? "Ferro energizado! -" + (int) damage + " HP"
+                        : "Madeira encharcada! -" + (int) damage + " HP"
+        );
+        onProgressChanged.run();
+        return false;
+    }
+
     private boolean
             handleEnemyEncounter() {
 
@@ -1141,6 +1524,7 @@ public class ExplorationController {
                         zone
                 )) {
 
+            hud.playCompletionSound();
             hero.restoreHealth();
 
             hud.updateHealth(
@@ -1161,6 +1545,26 @@ public class ExplorationController {
     private boolean
             handleZoneTransition() {
 
+        // Retorno pela abertura oeste da Trilha, preservando o progresso.
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && zoneManager.intersectsReturn(
+                        hero.getX(), hero.getY(),
+                        TILE_SIZE, TILE_SIZE
+                )) {
+
+            loadZone(ExplorationZone.NEUTRAL_BORDER);
+
+            // Reaparece junto à borda leste, sem acionar a saída
+            // até que o jogador avance novamente para a direita.
+            hero.setPosition(1550, 680);
+            heroView.setPosition(hero.getX(), hero.getY());
+            updateCamera();
+
+            updateZoneMusic(ExplorationZone.NEUTRAL_BORDER);
+            return true;
+        }
+
         if (!zoneManager
                 .intersectsExit(
                         hero.getX(),
@@ -1170,6 +1574,14 @@ public class ExplorationController {
                 )) {
 
             return false;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                )) {
+            return blockInsulatorTrailExit();
         }
 
         if (zoneManager.getCurrentZone()
@@ -1212,6 +1624,27 @@ public class ExplorationController {
                 nextZone
         );
 
+        // A primeira entrada na Trilha dos Isolantes dispara o aviso
+        // de Élia imediatamente, antes de liberar novos movimentos.
+        if (shouldStartInsulatorTrailIntro()) {
+            startInsulatorTrailIntro();
+        }
+
+        return true;
+    }
+
+    /** A passagem exige Élia, mas não exige monólito ou ponte concluída. */
+    private boolean blockInsulatorTrailExit() {
+        // Impede a repetição do diálogo a cada frame no gatilho leste.
+        hero.setPosition(3135, hero.getY());
+        heroView.setPosition(hero.getX(), hero.getY());
+        updateCamera();
+        hud.hideInteractionPrompt();
+
+        dialogueController.startDialogue("INSULATOR_EXIT_NEED_ELIA");
+        if (dialogueController.isOpen()) {
+            onDialogueStarted.run();
+        }
         return true;
     }
 
@@ -1317,7 +1750,31 @@ public class ExplorationController {
 
         if (nearest != null) {
 
-            if (nearest
+            if (nearest instanceof SceneryInteractable
+                    && zoneManager.getCurrentZone()
+                            == ExplorationZone.INSULATOR_TRAIL
+                    && InsulatorTrailLayout.CERAMIC_PILE_INTERACTION
+                            .equals(nearest.getDialogueId())) {
+
+                hud.showInteractionPrompt(
+                        chapterProgress.isCarryingCeramicPlate()
+                                ? "Verificar" : "Pegar",
+                        nearest.getInteractionName()
+                );
+
+            } else if (nearest instanceof SceneryInteractable
+                    && zoneManager.getCurrentZone()
+                            == ExplorationZone.INSULATOR_TRAIL
+                    && InsulatorTrailLayout.CERAMIC_BRIDGE_INTERACTION
+                            .equals(nearest.getDialogueId())) {
+
+                hud.showInteractionPrompt(
+                        chapterProgress.isCeramicBridgeComplete()
+                                ? "Examinar" : "Reparar",
+                        nearest.getInteractionName()
+                );
+
+            } else if (nearest
                     instanceof SceneryInteractable) {
 
                 hud.showInteractionPrompt(
@@ -1380,6 +1837,29 @@ public class ExplorationController {
         }
     }
 
+    private boolean shouldStartInsulatorTrailIntro() {
+        return zoneManager.getCurrentZone()
+                == ExplorationZone.INSULATOR_TRAIL
+                && !chapterProgress.hasSeenInsulatorTrailIntro()
+                && !chapterProgress.hasLearned(
+                        KnowledgeTopic.KNOW_ELECTRIZATION
+                );
+    }
+
+    private void startInsulatorTrailIntro() {
+        // Marca antes da transição para DIALOGUE: ao concluir a fala,
+        // start() será chamado outra vez sem repetir a introdução.
+        chapterProgress.markInsulatorTrailIntroSeen();
+        onProgressChanged.run();
+
+        dialogueController.startDialogue("INTRO_INSULATOR_TRAIL");
+
+        if (dialogueController.isOpen()) {
+            hud.hideInteractionPrompt();
+            onDialogueStarted.run();
+        }
+    }
+
     public void start() {
 
         resetKeys();
@@ -1404,8 +1884,16 @@ public class ExplorationController {
         * o movimento do jogador.
         */
         if (shouldStartNeutralBorderIntro()) {
-        
+
             startNeutralBorderIntro();
+
+            return;
+        }
+
+        // Também cobre carregamentos de save e reaparições na zona.
+        if (shouldStartInsulatorTrailIntro()) {
+
+            startInsulatorTrailIntro();
 
             return;
         }
@@ -1439,10 +1927,27 @@ public class ExplorationController {
     public void removeDefeatedEnemy(
             Enemy enemy) {
 
-        mapEnemySpawner
-                .removeEnemy(
-                        enemy
-                );
+        if (enemy == null) {
+            return;
+        }
+
+        // GameController salva o resultado após cada vitória.
+        chapterProgress.markEnemyDefeated(enemy.getEnemyId());
+        mapEnemySpawner.removeEnemy(enemy);
+    }
+
+    /** Reaparece ao lado do monólito, não no início da Trilha. */
+    private void positionHeroAtCheckpoint() {
+        if (chapterProgress.getCheckpoint() == ExplorationZone.INSULATOR_TRAIL
+                && chapterProgress.isMonolithActivated()) {
+            hero.setPosition(
+                    InsulatorTrailLayout.MONOLITH_CHECKPOINT_X,
+                    InsulatorTrailLayout.MONOLITH_CHECKPOINT_Y
+            );
+            heroView.setPosition(hero.getX(), hero.getY());
+            updateCarriedCeramicView();
+            updateCamera();
+        }
     }
 
     public void respawnAtCheckpoint() {
@@ -1453,6 +1958,7 @@ public class ExplorationController {
                 chapterProgress
                         .getCheckpoint()
         );
+        positionHeroAtCheckpoint();
 
         hud.updateHealth(
                 hero.getHealth(),
@@ -1469,6 +1975,7 @@ public class ExplorationController {
                 chapterProgress
                         .getCheckpoint()
         );
+        positionHeroAtCheckpoint();
 
         hud.updateHealth(
                 hero.getHealth(),

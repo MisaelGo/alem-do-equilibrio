@@ -3,6 +3,7 @@ package com.alemdoequilibrio.game;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import com.alemdoequilibrio.core.ResourceManager;
 
@@ -40,6 +41,10 @@ public class MapEnemySpawner {
     private final ResourceManager resourceManager;
     private final List<MapEnemyNode> activeEnemies;
 
+    private ExplorationZone currentZone;
+
+    private Set<Integer> defeatedEnemyIds = Set.of();
+
     /**
      * Construtor padrão para compatibilidade com inicializações sem ResourceManager.
      */
@@ -57,7 +62,16 @@ public class MapEnemySpawner {
     }
 
     public void spawnForZone(ExplorationZone zone) {
+        spawnForZone(zone, Set.of());
+    }
+
+    /** Ignora IDs registrados como derrotados, inclusive após carregar save. */
+    public void spawnForZone(
+            ExplorationZone zone, Set<Integer> defeatedEnemyIds) {
         clear();
+        currentZone = Objects.requireNonNull(zone);
+        this.defeatedEnemyIds =
+                Set.copyOf(Objects.requireNonNull(defeatedEnemyIds));
 
         switch (zone) {
             /*
@@ -68,19 +82,37 @@ public class MapEnemySpawner {
             }
 
             /*
-             * Primeiros inimigos simples na Trilha dos Isolantes.
+             * Quatro encontros distribuídos pela Trilha dos Isolantes:
+             * ponte metálica, caminho central, entrada do depósito e
+             * saída superior direita para a Encruzilhada das Facções.
              */
             case INSULATOR_TRAIL -> {
+                // Centro da passarela metálica (centro do sprite: 1100, 1400).
                 spawnEnemy(
                         new WanderingSpark(201),
-                        1250,
-                        1400
+                        1080,
+                        1380
                 );
 
+                // Centro do caminho de cerâmica, após a passarela.
                 spawnEnemy(
                         new UncontrolledCharge(202, ChargeType.NEGATIVE),
-                        2200,
-                        1050
+                        2180,
+                        1140
+                );
+
+                // Próximo à porta do depósito de isolantes.
+                spawnEnemy(
+                        new WanderingSpark(203),
+                        520,
+                        500
+                );
+
+                // Último encontro antes da saída superior direita.
+                spawnEnemy(
+                        new UncontrolledCharge(204, ChargeType.POSITIVE),
+                        3020,
+                        420
                 );
             }
 
@@ -166,6 +198,10 @@ public class MapEnemySpawner {
     }
 
     private MapEnemyNode spawnEnemy(Enemy enemy, double x, double y) {
+        if (defeatedEnemyIds.contains(enemy.getEnemyId())) {
+            return null;
+        }
+
         double width = getEnemyWidth(enemy);
         double height = getEnemyHeight(enemy);
 
@@ -211,7 +247,10 @@ public class MapEnemySpawner {
         name.setAlignment(Pos.CENTER);
         name.relocate((width - 120) / 2.0, -22);
 
-        Pane visual = new Pane(visualBody, name);
+        // Na Trilha dos Isolantes não há nomes sobre os inimigos.
+        Pane visual = currentZone == ExplorationZone.INSULATOR_TRAIL
+                ? new Pane(visualBody)
+                : new Pane(visualBody, name);
         visual.setPrefSize(width, height);
         visual.relocate(x, y);
 

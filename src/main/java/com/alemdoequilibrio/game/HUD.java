@@ -7,12 +7,16 @@ import com.alemdoequilibrio.core.ResourceManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.geometry.Rectangle2D;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 /**
@@ -27,8 +31,8 @@ public class HUD {
     private static final String HUD_CSS_PATH =
             "/css/hud.css";
 
-    private static final String HERO_LIFE_HUD_IMAGE =
-            "/images/hero_life_hud.png";
+    private static final String HERO_PORTRAIT_IMAGE =
+            "/images/hero_dialogue.png";
 
     private static final String PRESS_E_HUD_IMAGE =
             "/images/press_E_hud.png";
@@ -36,8 +40,14 @@ public class HUD {
     private static final String CONCEPT_IMAGE =
             "/images/conceito_registrado.png";
 
+    private static final String CHECK_SOUND =
+            "/audio/check.mp3";
+
     private static final double LOGICAL_WIDTH =
             1280.0;
+
+    private static final double HP_BAR_MAX_WIDTH =
+            190.0;
 
     private final Pane hudLayer;
 
@@ -46,7 +56,7 @@ public class HUD {
 
     private final Pane statusCard;
 
-    private final ProgressBar hpBar;
+    private final Rectangle hpBar;
 
     private final Label hpValueLabel;
 
@@ -57,6 +67,12 @@ public class HUD {
     private final Pane conceptBanner;
 
     private final Label conceptTitleLabel;
+
+    private final Label ceramicProgressLabel;
+
+    private final Label ceramicActionLabel;
+
+    private PauseTransition ceramicActionTimer;
 
     private SequentialTransition
             conceptAnimation;
@@ -96,59 +112,142 @@ public class HUD {
         }
 
         /*
-         * HUD de vida.
-         *
-         * A arte já contém "Herói Neutro" e "HP".
-         * A barra e o valor permanecem componentes reais para
-         * acompanhar dinamicamente a vida do personagem.
+         * HUD de vida no mapa com a mesma arte e textura pixelada
+         * da placa do Herói no menu de combate (BattleView).
          */
-        Image statusImage =
-                resourceManager.getImage(
-                        HERO_LIFE_HUD_IMAGE
-                );
+        ImageView heroPortraitView =
+                new ImageView();
 
-        double statusWidth =
-                310;
-
-        double statusHeight =
-                statusWidth
-                * statusImage.getHeight()
-                / statusImage.getWidth();
-
-        ImageView statusBackground =
-                new ImageView(
-                        statusImage
-                );
-
-        statusBackground.setFitWidth(
-                statusWidth
+        heroPortraitView.setFitWidth(
+                48
         );
 
-        statusBackground.setPreserveRatio(
+        heroPortraitView.setFitHeight(
+                48
+        );
+
+        heroPortraitView.setPreserveRatio(
                 true
         );
 
-        statusBackground.setSmooth(
+        heroPortraitView.setSmooth(
                 false
         );
 
+        try {
+            heroPortraitView.setImage(
+                    resourceManager.getImage(
+                            HERO_PORTRAIT_IMAGE
+                    )
+            );
+        } catch (Exception e) {
+            try {
+                heroPortraitView.setImage(
+                        resourceManager.getImage(
+                                "/images/hero_idle_right.png"
+                        )
+                );
+            } catch (Exception ignored) {
+            }
+        }
+
+        StackPane portraitFrame =
+                new StackPane(
+                        heroPortraitView
+                );
+
+        portraitFrame.setPrefSize(
+                56,
+                56
+        );
+
+        portraitFrame.setMinSize(
+                56,
+                56
+        );
+
+        portraitFrame.setMaxSize(
+                56,
+                56
+        );
+
+        portraitFrame.getStyleClass().add(
+                "hud-portrait-frame"
+        );
+
+        portraitFrame.setBackground(
+                BattleView.createDarkInsetTexture(
+                        56,
+                        56
+                )
+        );
+
+        Label heroTitleLabel =
+                new Label(
+                        "Herói"
+                );
+
+        heroTitleLabel.getStyleClass().add(
+                "hud-player-title"
+        );
+
+        Label polarityBadge =
+                new Label(
+                        "0 NEUTRO"
+                );
+
+        polarityBadge.getStyleClass().add(
+                "hud-polarity-badge"
+        );
+
+        HBox topRow =
+                new HBox(
+                        10,
+                        heroTitleLabel,
+                        polarityBadge
+                );
+
+        topRow.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        Label hpPrefix =
+                new Label(
+                        "HP"
+                );
+
+        hpPrefix.getStyleClass().add(
+                "hud-hp-label"
+        );
+
+        Rectangle hpTrack =
+                new Rectangle(
+                        HP_BAR_MAX_WIDTH + 4,
+                        14
+                );
+
+        hpTrack.getStyleClass().add(
+                "hud-hp-track"
+        );
+
         hpBar =
-                new ProgressBar(
-                        1.0
+                new Rectangle(
+                        HP_BAR_MAX_WIDTH,
+                        10
                 );
 
         hpBar.getStyleClass().add(
-                "hud-progress-bar"
+                "hud-hp-fill"
         );
 
-        hpBar.setPrefSize(
-                statusWidth * 0.50,
-                14
-        );
+        StackPane hpStack =
+                new StackPane(
+                        hpTrack,
+                        hpBar
+                );
 
-        hpBar.relocate(
-                statusWidth * 0.232,
-                statusHeight * 0.604
+        hpStack.setAlignment(
+                Pos.CENTER_LEFT
         );
 
         hpValueLabel =
@@ -160,26 +259,60 @@ public class HUD {
                 "hud-hp-value"
         );
 
-        hpValueLabel.relocate(
-                statusWidth * 0.765,
-                statusHeight * 0.583
-        );
-
-        statusCard =
-                new Pane(
-                        statusBackground,
-                        hpBar,
+        HBox hpRow =
+                new HBox(
+                        8,
+                        hpPrefix,
+                        hpStack,
                         hpValueLabel
                 );
 
-        statusCard.setPrefSize(
-                statusWidth,
-                statusHeight
+        hpRow.setAlignment(
+                Pos.CENTER_LEFT
         );
 
+        VBox infoCol =
+                new VBox(
+                        6,
+                        topRow,
+                        hpRow
+                );
+
+        infoCol.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        HBox cardBox =
+                new HBox(
+                        12,
+                        portraitFrame,
+                        infoCol
+                );
+
+        cardBox.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        cardBox.getStyleClass().add(
+                "hud-status-card"
+        );
+
+        cardBox.setPrefWidth(
+                406
+        );
+
+        cardBox.setBackground(
+                BattleView.createCyanHudTexture(
+                        406,
+                        80
+                )
+        );
+
+        statusCard = cardBox;
+
         statusCard.relocate(
-                40,
-                10
+                24,
+                14
         );
 
         /*
@@ -298,12 +431,37 @@ public class HUD {
         conceptBanner.relocate((LOGICAL_WIDTH - conceptWidth) / 2.0, 25);
         conceptBanner.setVisible(false);
 
+        ceramicProgressLabel = new Label();
+        ceramicProgressLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.90);"
+                + "-fx-text-fill: #F9E6AE;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 16px;"
+                + "-fx-font-weight: bold; -fx-padding: 9px 12px;");
+        // Alinhado ao topo do HUD de vida e próximo à borda direita.
+        ceramicProgressLabel.relocate(950, 10);
+        ceramicProgressLabel.setVisible(false);
+
+        ceramicActionLabel = new Label();
+        ceramicActionLabel.setStyle(
+                "-fx-background-color: rgba(24, 31, 40, 0.94);"
+                + "-fx-text-fill: white;"
+                + "-fx-border-color: #C4A76A; -fx-border-width: 2px;"
+                + "-fx-font-family: 'Consolas'; -fx-font-size: 19px;"
+                + "-fx-font-weight: bold; -fx-padding: 10px 14px;");
+        ceramicActionLabel.setWrapText(true);
+        ceramicActionLabel.setMaxWidth(580);
+        ceramicActionLabel.relocate(360, 115);
+        ceramicActionLabel.setVisible(false);
+
         this.hudLayer
                 .getChildren()
                 .addAll(
                         statusCard,
                         interactionPrompt,
-                        conceptBanner
+                        conceptBanner,
+                        ceramicProgressLabel,
+                        ceramicActionLabel
                 );
     }
 
@@ -332,8 +490,8 @@ public class HUD {
                 clamped
                 / (double) safeMax;
 
-        hpBar.setProgress(
-                progress
+        hpBar.setWidth(
+                HP_BAR_MAX_WIDTH * progress
         );
 
         hpValueLabel.setText(
@@ -394,6 +552,48 @@ public class HUD {
         );
     }
 
+    /** Indicador persistente das nove viagens de instalação. */
+    public void showCeramicProgress(int placed, int total, boolean carrying) {
+        ceramicProgressLabel.setText(
+                "CERÂMICA: faltam " + (total - placed)
+                + (carrying ? " | Com placa" : "")
+        );
+        ceramicProgressLabel.setVisible(true);
+    }
+
+    public void hideCeramicProgress() {
+        ceramicProgressLabel.setVisible(false);
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setVisible(false);
+    }
+
+    /** Mensagem curta de coleta, instalação ou tentativa inválida. */
+    public void showCeramicAction(String message) {
+        if (ceramicActionTimer != null) {
+            ceramicActionTimer.stop();
+        }
+        ceramicActionLabel.setText(message);
+        ceramicActionLabel.setVisible(true);
+        ceramicActionTimer = new PauseTransition(Duration.seconds(3.2));
+        ceramicActionTimer.setOnFinished(event ->
+                ceramicActionLabel.setVisible(false));
+        ceramicActionTimer.play();
+    }
+
+    /**
+     * Reproduz o efeito de conquista para conceitos, habilidades,
+     * checkpoints e a última placa da passarela.
+     */
+    public void playCompletionSound() {
+        try {
+            resourceManager.getAudioClip(CHECK_SOUND).play(0.70);
+        } catch (Exception exception) {
+            // A conquista continua mesmo se o áudio falhar.
+        }
+    }
+
     public void showConceptLearned(
             KnowledgeTopic topic) {
 
@@ -421,18 +621,8 @@ public class HUD {
                 true
         );
 
-        try {
-
-            resourceManager
-                    .getAudioClip(
-                            "/audio/sfx_quiz_correct.wav"
-                    )
-                    .play();
-
-        } catch (Exception e) {
-
-            // Se áudio estiver indisponível, a notificação segue normalmente.
-        }
+        // O conhecimento só é registrado uma vez; usa o check.
+        playCompletionSound();
 
         FadeTransition fadeIn =
                 new FadeTransition(

@@ -364,10 +364,14 @@ public class GameController {
 
     private void startExploration() {
 
-        sceneRouter.show(
-                explorationController
-                        .getScene()
-        );
+        if (stage.getScene()
+                != explorationController.getScene()) {
+
+            sceneRouter.show(
+                    explorationController
+                            .getScene()
+            );
+        }
 
         explorationController
                 .start();
@@ -382,6 +386,8 @@ public class GameController {
 
             return;
         }
+
+        explorationController.pauseZoneMusic();
 
         currentBattleController =
                 new BattleController(
@@ -398,7 +404,8 @@ public class GameController {
         currentBattleView =
                 new BattleView(
                         currentBattleController,
-                        resourceManager
+                        resourceManager,
+                        explorationController.getScene()
                 );
 
         changeState(
@@ -416,10 +423,14 @@ public class GameController {
             );
         }
 
-        sceneRouter.show(
-                currentBattleView
-                        .getScene()
-        );
+        if (stage.getScene()
+                != currentBattleView.getScene()) {
+
+            sceneRouter.show(
+                    currentBattleView
+                            .getScene()
+            );
+        }
     }
 
     private void finishBattle() {

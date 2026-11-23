@@ -4,22 +4,33 @@
    Capítulo 1 — A Terra das Cargas
    ========================================================================== */
 
-/* Cartão de Status do Jogador (Canto Superior Esquerdo) */
+/* Cartão de Status do Jogador no Mapa (Padrão Pixel Art igual ao Menu de Combate) */
 .hud-status-card {
-  -fx-background-color: rgba(23, 50, 77, 0.9);
-  -fx-background-radius: 8px;
-  -fx-border-color: #607d72;
-  -fx-border-width: 2px;
-  -fx-border-radius: 8px;
-  -fx-padding: 10px 16px;
-  -fx-spacing: 6px;
+  -fx-padding: 10px 14px;
+  -fx-effect: dropshadow(one-pass-box, rgba(4, 10, 16, 0.92), 0, 0, 4, 4);
+}
+
+.hud-portrait-frame {
+  -fx-padding: 4px;
 }
 
 .hud-player-title {
-  -fx-text-fill: #ffffff;
-  -fx-font-family: "Segoe UI", "DejaVu Sans", sans-serif;
-  -fx-font-size: 13px;
+  -fx-text-fill: #FFF8E7;
+  -fx-font-family: "Consolas", "Courier New", monospace;
+  -fx-font-size: 16px;
   -fx-font-weight: bold;
+  -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 2, 2);
+}
+
+.hud-polarity-badge {
+  -fx-padding: 2px 8px;
+  -fx-font-family: "Consolas", "Courier New", monospace;
+  -fx-font-size: 11px;
+  -fx-font-weight: bold;
+  -fx-background-color: #17324D;
+  -fx-border-color: #5CA6AE;
+  -fx-border-width: 2px;
+  -fx-text-fill: #DCEEF2;
 }
 
 .hud-hp-box {
@@ -28,10 +39,27 @@
 }
 
 .hud-hp-label {
-  -fx-text-fill: #e57373;
-  -fx-font-family: "Segoe UI", "DejaVu Sans", sans-serif;
-  -fx-font-size: 13px;
+  -fx-text-fill: #FF6B6B;
+  -fx-font-family: "Consolas", "Courier New", monospace;
+  -fx-font-size: 14px;
   -fx-font-weight: bold;
+  -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 1, 1);
+}
+
+.hud-hp-track {
+  -fx-fill: #07131D;
+  -fx-stroke: #2A586F;
+  -fx-stroke-width: 2px;
+  -fx-arc-width: 0;
+  -fx-arc-height: 0;
+}
+
+.hud-hp-fill {
+  -fx-fill: #46B866;
+  -fx-stroke: #9CE8B2;
+  -fx-stroke-width: 1px;
+  -fx-arc-width: 0;
+  -fx-arc-height: 0;
 }
 
 .hud-progress-bar {
@@ -40,25 +68,25 @@
 }
 
 .hud-progress-bar .track {
-  -fx-background-color: #1a1a1a;
-  -fx-background-radius: 4px;
-  -fx-border-color: #3b4252;
-  -fx-border-width: 1px;
-  -fx-border-radius: 4px;
+  -fx-background-color: #07131D;
+  -fx-background-radius: 0;
+  -fx-border-color: #2A586F;
+  -fx-border-width: 2px;
+  -fx-border-radius: 0;
 }
 
 .hud-progress-bar .bar {
-  -fx-background-color: linear-gradient(to bottom, #4caf50, #2e7d32);
-  -fx-background-radius: 4px;
+  -fx-background-color: #46B866;
+  -fx-background-radius: 0;
   -fx-padding: 1px;
 }
 
 .hud-hp-value {
-  -fx-text-fill: #ffffff;
+  -fx-text-fill: #FFF8E7;
   -fx-font-family: "Consolas", "Courier New", monospace;
   -fx-font-size: 12px;
   -fx-font-weight: bold;
-  -fx-effect: dropshadow(one-pass-box, rgba(0, 0, 0, 0.85), 1, 0, 1, 1);
+  -fx-effect: dropshadow(one-pass-box, #061018, 0, 0, 1, 1);
 }
 
 /* Prompt de Interação Dinâmico ([E] Interagir com ...) */
