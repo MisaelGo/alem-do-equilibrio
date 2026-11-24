@@ -517,38 +517,38 @@ public class ExplorationController {
                 // Entrada oeste: aparece junto à borda, sobre a cerâmica.
                 // A passagem de retorno só dispara ao caminhar para a esquerda.
                 hero.setPosition(
-                        10,
+                        20,
                         1520
                 );
 
             case FACTION_CROSSROADS ->
                 hero.setPosition(
-                        100,
-                        1700
+                        60,
+                        1560
                 );
 
             case COULOMB_VALLEY ->
                 hero.setPosition(
-                        100,
-                        1700
+                        60,
+                        1560
                 );
 
             case FIELD_PLATEAU ->
                 hero.setPosition(
-                        100,
-                        1700
+                        60,
+                        1560
                 );
 
             case EQUIPOTENTIAL_RUINS ->
                 hero.setPosition(
-                        100,
-                        1700
+                        60,
+                        1560
                 );
 
             case FRAGMENT_CHAMBER ->
                 hero.setPosition(
-                        100,
-                        1700
+                        60,
+                        1560
                 );
         }
     }
@@ -834,6 +834,23 @@ public class ExplorationController {
             dialogueController.startDialogue(new SceneryInteractable(
                     interactable.getInteractionName(),
                     "INSULATOR_MONOLITH_REPEAT",
+                    interactable.getX(), interactable.getY(),
+                    interactable.getWidth(), interactable.getHeight()
+            ));
+            return;
+        }
+
+        if (zoneManager.getCurrentZone()
+                == ExplorationZone.COULOMB_VALLEY
+                && interactable instanceof SceneryInteractable
+                && "COULOMB_MONOLITH_INTERACTION".equals(
+                        interactable.getDialogueId()
+                )
+                && chapterProgress.getCheckpoint() == ExplorationZone.COULOMB_VALLEY) {
+
+            dialogueController.startDialogue(new SceneryInteractable(
+                    interactable.getInteractionName(),
+                    "COULOMB_MONOLITH_REPEAT",
                     interactable.getX(), interactable.getY(),
                     interactable.getWidth(), interactable.getHeight()
             ));
@@ -1143,6 +1160,37 @@ public class ExplorationController {
 
             // A cada interação terminada o progresso é gravado,
             // mas a cura e o check só acontecem na primeira vez.
+            onProgressChanged.run();
+            return;
+        }
+
+        if (interactable instanceof SceneryInteractable scenery
+                && zoneManager.getCurrentZone()
+                        == ExplorationZone.COULOMB_VALLEY
+                && ("COULOMB_MONOLITH_INTERACTION".equals(
+                        scenery.getDialogueId())
+                    || "COULOMB_MONOLITH_REPEAT".equals(
+                        scenery.getDialogueId()))) {
+
+            boolean isNewCheckpoint = chapterProgress.getCheckpoint() != ExplorationZone.COULOMB_VALLEY;
+            chapterProgress.reachCheckpoint(ExplorationZone.COULOMB_VALLEY);
+            chapterProgress.learn(KnowledgeTopic.KNOW_COULOMB);
+
+            if (isNewCheckpoint) {
+                float before = hero.getHealth();
+                hero.setHealth(Math.min(hero.getMaxHealth(), before + 25.0f));
+                hud.updateHealth(hero.getHealth(), hero.getMaxHealth());
+                hud.playCompletionSound();
+
+                int healed = Math.round(hero.getHealth() - before);
+                hud.showCeramicAction(
+                        "Monólito de Coulomb ativado! +" + healed
+                        + " HP. Checkpoint e conceito de Coulomb salvos."
+                );
+            } else {
+                hud.showCeramicAction("Monólito de Coulomb: progresso salvo.");
+            }
+
             onProgressChanged.run();
             return;
         }
@@ -1542,27 +1590,56 @@ public class ExplorationController {
         }
     }
 
+    private void positionHeroAtReturnSpawn(
+            ExplorationZone prevZone) {
+
+        switch (prevZone) {
+
+            case NEUTRAL_BORDER ->
+                hero.setPosition(1550, 680);
+
+            case INSULATOR_TRAIL ->
+                hero.setPosition(3130, 420);
+
+            case FACTION_CROSSROADS ->
+                hero.setPosition(2940, 1560);
+
+            case COULOMB_VALLEY ->
+                hero.setPosition(2940, 1560);
+
+            case FIELD_PLATEAU ->
+                hero.setPosition(2940, 1560);
+
+            case EQUIPOTENTIAL_RUINS ->
+                hero.setPosition(2940, 1560);
+
+            default ->
+                hero.setPosition(100, 1700);
+        }
+
+        heroView.setPosition(hero.getX(), hero.getY());
+    }
+
     private boolean
             handleZoneTransition() {
 
-        // Retorno pela abertura oeste da Trilha, preservando o progresso.
-        if (zoneManager.getCurrentZone()
-                == ExplorationZone.INSULATOR_TRAIL
-                && zoneManager.intersectsReturn(
-                        hero.getX(), hero.getY(),
-                        TILE_SIZE, TILE_SIZE
-                )) {
+        // Retorno pela abertura oeste de qualquer mapa conectado
+        if (zoneManager.intersectsReturn(
+                hero.getX(), hero.getY(),
+                TILE_SIZE, TILE_SIZE
+        )) {
 
-            loadZone(ExplorationZone.NEUTRAL_BORDER);
+            ExplorationZone prevZone =
+                    zoneManager.getPreviousZone();
 
-            // Reaparece junto à borda leste, sem acionar a saída
-            // até que o jogador avance novamente para a direita.
-            hero.setPosition(1550, 680);
-            heroView.setPosition(hero.getX(), hero.getY());
-            updateCamera();
+            if (prevZone != null) {
 
-            updateZoneMusic(ExplorationZone.NEUTRAL_BORDER);
-            return true;
+                loadZone(prevZone);
+                positionHeroAtReturnSpawn(prevZone);
+                updateCamera();
+                updateZoneMusic(prevZone);
+                return true;
+            }
         }
 
         if (!zoneManager
@@ -1936,13 +2013,21 @@ public class ExplorationController {
         mapEnemySpawner.removeEnemy(enemy);
     }
 
-    /** Reaparece ao lado do monólito, não no início da Trilha. */
+    /** Reaparece ao lado do monólito ativado, não no início da zona. */
     private void positionHeroAtCheckpoint() {
         if (chapterProgress.getCheckpoint() == ExplorationZone.INSULATOR_TRAIL
                 && chapterProgress.isMonolithActivated()) {
             hero.setPosition(
                     InsulatorTrailLayout.MONOLITH_CHECKPOINT_X,
                     InsulatorTrailLayout.MONOLITH_CHECKPOINT_Y
+            );
+            heroView.setPosition(hero.getX(), hero.getY());
+            updateCarriedCeramicView();
+            updateCamera();
+        } else if (chapterProgress.getCheckpoint() == ExplorationZone.COULOMB_VALLEY) {
+            hero.setPosition(
+                    CoulombValleyLayout.MONOLITH_CHECKPOINT_X,
+                    CoulombValleyLayout.MONOLITH_CHECKPOINT_Y
             );
             heroView.setPosition(hero.getX(), hero.getY());
             updateCarriedCeramicView();

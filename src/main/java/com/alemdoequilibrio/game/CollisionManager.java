@@ -121,11 +121,15 @@ public class CollisionManager {
                 );
             }
 
+            case COULOMB_VALLEY -> {
+                addCoulombValleyWallCollisions();
+            }
+
             case FACTION_CROSSROADS,
-                 COULOMB_VALLEY,
                  FIELD_PLATEAU,
                  EQUIPOTENTIAL_RUINS,
                  FRAGMENT_CHAMBER -> {
+                addStandardZoneWallCollisions(zone);
             }
         }
     }
@@ -149,6 +153,52 @@ public class CollisionManager {
                             row * InsulatorTrailLayout.TILE_SIZE,
                             InsulatorTrailLayout.TILE_SIZE,
                             InsulatorTrailLayout.TILE_SIZE
+                    );
+                }
+            }
+        }
+    }
+
+    private void addCoulombValleyWallCollisions() {
+        int columns = (int) (ZoneManager.WORLD_WIDTH
+                / CoulombValleyLayout.TILE_SIZE);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT
+                / CoulombValleyLayout.TILE_SIZE);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                if (CoulombValleyLayout.isWallTile(col, row,
+                        columns, rows)) {
+                    addObstacle(
+                            col * CoulombValleyLayout.TILE_SIZE,
+                            row * CoulombValleyLayout.TILE_SIZE,
+                            CoulombValleyLayout.TILE_SIZE,
+                            CoulombValleyLayout.TILE_SIZE
+                    );
+                }
+            }
+        }
+    }
+
+    private void addStandardZoneWallCollisions(ExplorationZone zone) {
+        int columns = (int) (ZoneManager.WORLD_WIDTH / 40);
+        int rows = (int) (ZoneManager.WORLD_HEIGHT / 40);
+        boolean hasEastExit = (zone != ExplorationZone.FRAGMENT_CHAMBER);
+        boolean hasWestReturn = (zone != ExplorationZone.NEUTRAL_BORDER);
+
+        for (int row = 0; row < rows; row++) {
+            for (int col = 0; col < columns; col++) {
+                boolean isNorthWall = row <= 2;
+                boolean isSouthWall = row >= rows - 2;
+                boolean isEastWall = (col >= columns - 2) && (!hasEastExit || (row < 36 || row > 41));
+                boolean isWestWall = (col <= 1) && (!hasWestReturn || (row < 36 || row > 41));
+
+                if (isNorthWall || isSouthWall || isEastWall || isWestWall) {
+                    addObstacle(
+                            col * 40,
+                            row * 40,
+                            40,
+                            40
                     );
                 }
             }

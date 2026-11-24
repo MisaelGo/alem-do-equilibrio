@@ -278,3 +278,26 @@ POST_BOSS_ENDING;Élia;Mas a anomalia se foi. Você salvou Eletéria, viajante.
 POST_BOSS_ENDING;Herói;Salvei apenas a Fronteira. A luz que me trouxe aqui emanava essa mesma energia. Este é apenas o primeiro Fragmento do Núcleo do Equilíbrio.
 POST_BOSS_ENDING;Mara;Isso significa que há outros espalhados pelo mundo?
 POST_BOSS_ENDING;Herói;Provavelmente. E eu vou guardá-lo comigo até encontrar o próximo. Há muito mais a ser descoberto... e consertado, se eu quiser voltar para casa.
+
+COULOMB_MONOLITH_INTERACTION;Herói;Um monólito ancestral ressoando com energia eletrostática!
+COULOMB_MONOLITH_INTERACTION;Herói;As inscrições na pedra revelam a fórmula da Lei de Coulomb: F = k · (|q₁·q₂| / d²).
+COULOMB_MONOLITH_INTERACTION;Herói;A força é diretamente proporcional ao produto das cargas e inversamente proporcional ao quadrado da distância.
+COULOMB_MONOLITH_INTERACTION;Herói;Ao sintonizar o monólito, minhas forças são restauradas e este local é salvo como meu novo checkpoint!
+COULOMB_MONOLITH_REPEAT;Herói;O Monólito de Coulomb pulsa suavemente, mantendo o checkpoint do vale seguro.
+
+COULOMB_TORSION_BALANCE;Herói;Uma autêntica Balança de Torção de Coulomb!
+COULOMB_TORSION_BALANCE;Herói;O instrumento usa duas esferas metálicas suspensas por uma fibra de torção para medir forças elétricas minúsculas.
+COULOMB_TORSION_BALANCE;Herói;Foi com este dispositivo histórico que Charles-Augustin de Coulomb comprovou que a força elétrica decai com o quadrado da distância.
+
+COULOMB_MARKER_D;Herói;Estação de Medição d: Distância inicial de referência.
+COULOMB_MARKER_D;Herói;A força de interação entre as cargas aqui é máxima (F = F₀). A proximidade eleva a repulsão ou atração ao ápice!
+
+COULOMB_MARKER_2D;Herói;Estação de Medição 2d: O dobro da distância de referência.
+COULOMB_MARKER_2D;Herói;O mostrador registra F = F₀ / 4 (25%). Como a força cai com o quadrado da distância (2²), ela despenca para um quarto!
+
+COULOMB_MARKER_3D;Herói;Estação de Medição 3d: O triplo da distância de referência.
+COULOMB_MARKER_3D;Herói;O mostrador registra F = F₀ / 9 (~11%). Na distância tripla (3²), a força é reduzida em nove vezes.
+
+COULOMB_PYLON_POS;Herói;Um obelisco concentrador de carga positiva (+). O ar em volta chia com ozônio e repele cargas do mesmo sinal.
+
+COULOMB_PYLON_NEG;Herói;Um obelisco concentrador de carga negativa (−). As linhas de força convergem em direção à sua base.

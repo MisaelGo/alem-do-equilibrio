@@ -548,17 +548,25 @@ public class ZoneManager {
                 Color.GOLDENROD
         );
 
+        createReturnArea(
+                0,
+                1450,
+                15,
+                300
+        );
+
         createExitArea(
                 "Vale de Coulomb",
-                3000,
+                WORLD_WIDTH - 15,
                 1450,
-                140,
+                15,
                 300
         );
     }
 
     /*
      * C1-044 - Vale de Coulomb.
+     * Desfiladeiro monumental de testes da Lei de Coulomb.
      */
     private void buildCoulombValley() {
 
@@ -566,11 +574,12 @@ public class ZoneManager {
                 "VALE DE COULOMB"
         );
 
+        // 1. Acampamento de medição do sábio Vetor
         NPC vector =
                 new NPC(
                         "Vetor",
-                        600,
-                        1650,
+                        CoulombValleyLayout.VETOR_X,
+                        CoulombValleyLayout.VETOR_Y,
                         40,
                         50,
                         KnowledgeTopic
@@ -583,49 +592,284 @@ public class ZoneManager {
                 Color.LIGHTGREEN
         );
 
-        /*
-         * Marcos visuais de distância.
-         */
-        addDistanceMarker(
-                "d",
-                1200,
-                1300
+        // 2. Balança de Torção de Coulomb (instrumento histórico)
+        addCoulombTorsionBalance();
+
+        // 3. Obeliscos de Carga Gêmeos (+ e -)
+        addCoulombPylons();
+
+        // 4. Estações de Calibração de Distância (d, 2d, 3d)
+        addCoulombDistanceStations();
+
+        // 5. Monólito Eletrostático de Coulomb (Checkpoint e restauração)
+        addCoulombMonolith();
+
+        // 6. Retorno oeste para a Encruzilhada das Facções
+        createReturnArea(
+                0,
+                CoulombValleyLayout.WEST_GATE_FIRST_ROW
+                        * CoulombValleyLayout.TILE_SIZE,
+                15,
+                (CoulombValleyLayout.WEST_GATE_LAST_ROW
+                        - CoulombValleyLayout.WEST_GATE_FIRST_ROW + 1)
+                        * CoulombValleyLayout.TILE_SIZE
         );
 
-        addDistanceMarker(
-                "2d",
-                1700,
-                1300
-        );
-
-        addDistanceMarker(
-                "3d",
-                2400,
-                1300
-        );
-
-        Label hint =
-                new Label(
-                        "Compare as interações "
-                        + "nos diferentes marcos "
-                        + "de distância."
-                );
-
-        hint.relocate(
-                1050,
-                1100
-        );
-
-        worldLayer
-                .getChildren()
-                .add(hint);
-
+        // 7. Saída leste para o Planalto do Campo
         createExitArea(
                 "Planalto do Campo",
-                3000,
-                1450,
-                140,
-                300
+                WORLD_WIDTH - 15,
+                CoulombValleyLayout.EAST_GATE_FIRST_ROW
+                        * CoulombValleyLayout.TILE_SIZE,
+                15,
+                (CoulombValleyLayout.EAST_GATE_LAST_ROW
+                        - CoulombValleyLayout.EAST_GATE_FIRST_ROW + 1)
+                        * CoulombValleyLayout.TILE_SIZE
+        );
+    }
+
+    private void addCoulombTorsionBalance() {
+        double x = CoulombValleyLayout.TORSION_BALANCE_X;
+        double y = CoulombValleyLayout.TORSION_BALANCE_Y;
+        double w = CoulombValleyLayout.TORSION_BALANCE_WIDTH;
+        double h = CoulombValleyLayout.TORSION_BALANCE_HEIGHT;
+
+        Group balanceVisual = new Group();
+
+        // Pedestal de pedra
+        Rectangle base = new Rectangle(w, 25);
+        base.setFill(Color.web("#5C4033"));
+        base.setStroke(Color.web("#2A1A0E"));
+        base.setStrokeWidth(2);
+        base.relocate(0, h - 25);
+
+        // Cúpula cilíndrica de vidro
+        Rectangle glass = new Rectangle(w - 20, h - 30);
+        glass.setFill(Color.web("#7FE8F0", 0.25));
+        glass.setStroke(Color.web("#D9A441"));
+        glass.setStrokeWidth(2);
+        glass.setArcWidth(10);
+        glass.setArcHeight(10);
+        glass.relocate(10, 5);
+
+        // Fio de torção e haste
+        Line wire = new Line(w / 2.0, 5, w / 2.0, h - 35);
+        wire.setStroke(Color.SILVER);
+        wire.setStrokeWidth(1.5);
+
+        Line rod = new Line(15, h - 35, w - 15, h - 35);
+        rod.setStroke(Color.web("#D9A441"));
+        rod.setStrokeWidth(2);
+
+        // Esferas carregadas suspensas
+        Circle spherePos = new Circle(15, h - 35, 6);
+        spherePos.setFill(Color.web("#FF6B6B"));
+        spherePos.setStroke(Color.web("#B22222"));
+
+        Circle sphereNeg = new Circle(w - 15, h - 35, 6);
+        sphereNeg.setFill(Color.web("#4D96FF"));
+        sphereNeg.setStroke(Color.web("#1E3F66"));
+
+        Label label = new Label("Balança de Torção");
+        label.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 10px; -fx-text-fill: #E8D9B0; -fx-background-color: rgba(0,0,0,0.6); -fx-padding: 2px;");
+        label.relocate(0, h + 2);
+
+        balanceVisual.getChildren().addAll(base, glass, wire, rod, spherePos, sphereNeg, label);
+        balanceVisual.relocate(x, y);
+
+        worldLayer.getChildren().add(balanceVisual);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "a Balança de Torção de Coulomb",
+                        CoulombValleyLayout.TORSION_BALANCE_INTERACTION,
+                        x, y, w, h
+                )
+        );
+    }
+
+    private void addCoulombPylons() {
+        double posX = CoulombValleyLayout.PYLON_POS_X;
+        double posY = CoulombValleyLayout.PYLON_POS_Y;
+        double w = CoulombValleyLayout.PYLON_POS_WIDTH;
+        double h = CoulombValleyLayout.PYLON_POS_HEIGHT;
+
+        Group pylonPosVisual = new Group();
+        Rectangle colPos = new Rectangle(w - 20, h - 30);
+        colPos.setFill(Color.web("#8B4513"));
+        colPos.setStroke(Color.web("#D9A441"));
+        colPos.setStrokeWidth(2);
+        colPos.relocate(10, 30);
+
+        Circle orbPos = new Circle(w / 2.0, 20, 18);
+        orbPos.setFill(Color.web("#FF4D4D"));
+        orbPos.setStroke(Color.web("#FFD700"));
+        orbPos.setStrokeWidth(2);
+
+        Label labelPos = new Label("[ + ]");
+        labelPos.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: white;");
+        labelPos.relocate(w / 2.0 - 18, 10);
+
+        Label titlePos = new Label("Pilar Positivo (+)");
+        titlePos.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 10px; -fx-text-fill: #FF8888; -fx-background-color: rgba(0,0,0,0.6); -fx-padding: 2px;");
+        titlePos.relocate(-6, h + 2);
+
+        pylonPosVisual.getChildren().addAll(colPos, orbPos, labelPos, titlePos);
+        pylonPosVisual.relocate(posX, posY);
+        worldLayer.getChildren().add(pylonPosVisual);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o Obelisco de Carga Positiva (+)",
+                        CoulombValleyLayout.PYLON_POS_INTERACTION,
+                        posX, posY, w, h
+                )
+        );
+
+        double negX = CoulombValleyLayout.PYLON_NEG_X;
+        double negY = CoulombValleyLayout.PYLON_NEG_Y;
+
+        Group pylonNegVisual = new Group();
+        Rectangle colNeg = new Rectangle(w - 20, h - 30);
+        colNeg.setFill(Color.web("#8B4513"));
+        colNeg.setStroke(Color.web("#4D96FF"));
+        colNeg.setStrokeWidth(2);
+        colNeg.relocate(10, 30);
+
+        Circle orbNeg = new Circle(w / 2.0, 20, 18);
+        orbNeg.setFill(Color.web("#1E90FF"));
+        orbNeg.setStroke(Color.web("#00FFFF"));
+        orbNeg.setStrokeWidth(2);
+
+        Label labelNeg = new Label("[ − ]");
+        labelNeg.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: white;");
+        labelNeg.relocate(w / 2.0 - 18, 10);
+
+        Label titleNeg = new Label("Pilar Negativo (−)");
+        titleNeg.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 10px; -fx-text-fill: #7FE8F0; -fx-background-color: rgba(0,0,0,0.6); -fx-padding: 2px;");
+        titleNeg.relocate(-6, h + 2);
+
+        pylonNegVisual.getChildren().addAll(colNeg, orbNeg, labelNeg, titleNeg);
+        pylonNegVisual.relocate(negX, negY);
+        worldLayer.getChildren().add(pylonNegVisual);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o Obelisco de Carga Negativa (−)",
+                        CoulombValleyLayout.PYLON_NEG_INTERACTION,
+                        negX, negY, w, h
+                )
+        );
+
+        Line fieldLine = new Line(posX + w, posY + 20, negX, negY + 20);
+        fieldLine.setStroke(Color.web("#FFD700", 0.6));
+        fieldLine.setStrokeWidth(3);
+        fieldLine.getStrokeDashArray().addAll(8.0, 4.0);
+        worldLayer.getChildren().add(fieldLine);
+    }
+
+    private void addCoulombDistanceStations() {
+        addDistanceStation(
+                CoulombValleyLayout.MARKER_D_X,
+                CoulombValleyLayout.MARKER_D_Y,
+                "Marco d (F = F₀)",
+                "Intensidade: 100%",
+                CoulombValleyLayout.MARKER_D_INTERACTION,
+                Color.web("#FF4D4D")
+        );
+
+        addDistanceStation(
+                CoulombValleyLayout.MARKER_2D_X,
+                CoulombValleyLayout.MARKER_2D_Y,
+                "Marco 2d (F = F₀/4)",
+                "Intensidade: 25%",
+                CoulombValleyLayout.MARKER_2D_INTERACTION,
+                Color.web("#FFD700")
+        );
+
+        addDistanceStation(
+                CoulombValleyLayout.MARKER_3D_X,
+                CoulombValleyLayout.MARKER_3D_Y,
+                "Marco 3d (F = F₀/9)",
+                "Intensidade: ~11%",
+                CoulombValleyLayout.MARKER_3D_INTERACTION,
+                Color.web("#4D96FF")
+        );
+    }
+
+    private void addDistanceStation(
+            double x,
+            double y,
+            String title,
+            String sub,
+            String interactionId,
+            Color glowColor) {
+
+        double w = CoulombValleyLayout.MARKER_WIDTH;
+        double h = CoulombValleyLayout.MARKER_HEIGHT;
+
+        Group station = new Group();
+
+        Rectangle pillar = new Rectangle(w - 20, h - 25);
+        pillar.setFill(Color.web("#5C4033"));
+        pillar.setStroke(glowColor);
+        pillar.setStrokeWidth(2);
+        pillar.relocate(10, 15);
+
+        Circle crystal = new Circle(w / 2.0, 15, 12);
+        crystal.setFill(glowColor);
+        crystal.setStroke(Color.WHITE);
+        crystal.setStrokeWidth(1.5);
+
+        Label label = new Label(title + "\n" + sub);
+        label.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-size: 10px; -fx-text-fill: #E8D9B0; -fx-background-color: rgba(0,0,0,0.7); -fx-padding: 3px; -fx-alignment: center;");
+        label.relocate(-20, h + 2);
+
+        station.getChildren().addAll(pillar, crystal, label);
+        station.relocate(x, y);
+        worldLayer.getChildren().add(station);
+
+        interactables.add(
+                new SceneryInteractable(
+                        title,
+                        interactionId,
+                        x, y, w, h
+                )
+        );
+    }
+
+    private void addCoulombMonolith() {
+        double x = CoulombValleyLayout.MONOLITH_X;
+        double y = CoulombValleyLayout.MONOLITH_Y;
+        double w = CoulombValleyLayout.MONOLITH_WIDTH;
+        double h = CoulombValleyLayout.MONOLITH_HEIGHT;
+
+        Circle aura = new Circle(x + w / 2.0, y + h - 20, 60);
+        aura.setFill(Color.web("#D9A441", 0.25));
+        aura.setStroke(Color.web("#F8D878", 0.7));
+        aura.setStrokeWidth(2);
+        worldLayer.getChildren().add(aura);
+
+        Image image = resourceManager.getImage("/images/monolito_isolante.png");
+        ImageView monolith = new ImageView(image);
+        monolith.setFitWidth(w);
+        monolith.setFitHeight(h);
+        monolith.setPreserveRatio(true);
+        monolith.setSmooth(false);
+        monolith.relocate(x, y);
+        worldLayer.getChildren().add(monolith);
+
+        Label label = new Label("Monólito de Coulomb");
+        label.setStyle("-fx-font-family: 'Consolas', monospace; -fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: #FFD700; -fx-background-color: rgba(0,0,0,0.7); -fx-padding: 3px;");
+        label.relocate(x + 5, y + h + 2);
+        worldLayer.getChildren().add(label);
+
+        interactables.add(
+                new SceneryInteractable(
+                        "o Monólito de Coulomb",
+                        CoulombValleyLayout.MONOLITH_INTERACTION,
+                        x, y, w, h
+                )
         );
     }
 
@@ -714,11 +958,18 @@ public class ZoneManager {
                 80
         );
 
+        createReturnArea(
+                0,
+                1450,
+                15,
+                300
+        );
+
         createExitArea(
                 "Ruínas Equipotenciais",
-                3000,
+                WORLD_WIDTH - 15,
                 1450,
-                140,
+                15,
                 300
         );
     }
@@ -812,11 +1063,18 @@ public class ZoneManager {
                 220
         );
 
+        createReturnArea(
+                0,
+                1450,
+                15,
+                300
+        );
+
         createExitArea(
                 "Câmara do Fragmento",
-                3000,
+                WORLD_WIDTH - 15,
                 1450,
-                140,
+                15,
                 300
         );
     }
@@ -825,6 +1083,13 @@ public class ZoneManager {
 
         addZoneTitle(
                 "CÂMARA DO FRAGMENTO"
+        );
+
+        createReturnArea(
+                0,
+                1450,
+                15,
+                300
         );
 
         Label label =
@@ -1508,6 +1773,11 @@ public class ZoneManager {
     public ExplorationZone getNextZone() {
 
         return currentZone.next();
+    }
+
+    public ExplorationZone getPreviousZone() {
+
+        return currentZone.previous();
     }
 
     public ExplorationZone getCurrentZone() {
