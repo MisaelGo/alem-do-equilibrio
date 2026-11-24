@@ -36,4 +36,31 @@ public enum ExplorationZone {
                 null;
         };
     }
+
+    public ExplorationZone previous() {
+
+        return switch (this) {
+
+            case NEUTRAL_BORDER ->
+                null;
+
+            case INSULATOR_TRAIL ->
+                NEUTRAL_BORDER;
+
+            case FACTION_CROSSROADS ->
+                INSULATOR_TRAIL;
+
+            case COULOMB_VALLEY ->
+                FACTION_CROSSROADS;
+
+            case FIELD_PLATEAU ->
+                COULOMB_VALLEY;
+
+            case EQUIPOTENTIAL_RUINS ->
+                FIELD_PLATEAU;
+
+            case FRAGMENT_CHAMBER ->
+                EQUIPOTENTIAL_RUINS;
+        };
+    }
 }

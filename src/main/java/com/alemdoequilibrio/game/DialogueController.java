@@ -35,6 +35,12 @@ public class DialogueController {
     private static final String ELIA_PORTRAIT =
             "/images/elia_dialogue.png";
 
+    private static final String VETOR_PORTRAIT =
+            "/images/vetor_dialogue.png";
+
+    private static final String MARA_PORTRAIT =
+            "/images/mara_dialogue.png";
+
     private final Label speakerLabel;
 
     private final Label dialogueLabel;
@@ -491,6 +497,12 @@ public class DialogueController {
             case "élia",
                  "elia" ->
                     ELIA_PORTRAIT;
+
+            case "vetor" ->
+                    VETOR_PORTRAIT;
+
+            case "mara" ->
+                    MARA_PORTRAIT;
 
             default ->
                     null;

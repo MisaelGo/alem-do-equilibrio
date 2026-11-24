@@ -101,17 +101,21 @@ public final class TileMapRenderer {
                 double x = col * tileSize;
                 double y = row * tileSize;
 
-                // 1. Limites do cenário
-                boolean isNorthWall = row <= 2;
-                boolean isSouthWall = row >= rows - 2;
-                boolean isWestWall = col == 0;
-                // Saída no leste apenas para zonas 1 a 6; Câmara do Fragmento (7) é arena fechada
-                boolean hasEastExit = (zone != ExplorationZone.FRAGMENT_CHAMBER);
-                boolean isEastWall = (col >= columns - 2) && (!hasEastExit || (row < 35 || row > 42));
-
-                boolean isWall = zone == ExplorationZone.INSULATOR_TRAIL
-                        ? InsulatorTrailLayout.isWallTile(col, row, columns, rows)
-                        : isNorthWall || isSouthWall || isWestWall || isEastWall;
+                // 1. Limites e obstáculos do cenário
+                boolean isWall;
+                if (zone == ExplorationZone.INSULATOR_TRAIL) {
+                    isWall = InsulatorTrailLayout.isWallTile(col, row, columns, rows);
+                } else if (zone == ExplorationZone.COULOMB_VALLEY) {
+                    isWall = CoulombValleyLayout.isWallTile(col, row, columns, rows);
+                } else {
+                    boolean isNorthWall = row <= 2;
+                    boolean isSouthWall = row >= rows - 2;
+                    boolean hasEastExit = (zone != ExplorationZone.FRAGMENT_CHAMBER);
+                    boolean isEastWall = (col >= columns - 2) && (!hasEastExit || (row < 36 || row > 41));
+                    boolean hasWestReturn = (zone != ExplorationZone.NEUTRAL_BORDER);
+                    boolean isWestWall = (col <= 1) && (!hasWestReturn || (row < 36 || row > 41));
+                    isWall = isNorthWall || isSouthWall || isWestWall || isEastWall;
+                }
                 if (isWall) {
                     gc.drawImage(theme.wall, x, y, tileSize, tileSize);
                     continue;
@@ -236,10 +240,7 @@ public final class TileMapRenderer {
                 || (col >= 38 && col <= 42 && row >= 4 && row <= 42);
 
             case COULOMB_VALLEY ->
-                // Desfiladeiro de Coulomb: caminho passando pelos marcos d (x=1200), 2d (x=1700), 3d (x=2400)
-                (row >= 31 && row <= 34 && col >= 25 && col <= 65)
-                || (col >= 2 && col <= 30 && row >= 38 && row <= 41)
-                || (col >= 60 && col <= 77 && row >= 35 && row <= 39);
+                CoulombValleyLayout.isPathTile(col, row);
 
             case FIELD_PLATEAU ->
                 // Planalto do Campo: pista elevada acompanhando os vetores de campo
